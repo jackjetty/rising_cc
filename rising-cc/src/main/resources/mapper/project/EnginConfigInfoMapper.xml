@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.rising.cc.dao.project.EnginConfigInfoDao">
+	
+	<resultMap type="EnginConfigInfo" id="enginConfigInfoMap">
+		<result property="id" column="id"/>
+		<result property="engin.id" column="enginId"/>
+		<result property="engin.engineeringName" column="engineeringName"/>
+		<result property="engin.engineeringCode" column="engineeringCode"/>
+		<result property="envType" column="envType"/>
+		<result property="enginConfigType.id" column="configTypeId"/>
+		<result property="enginConfigType.configName" column="configName"/>
+		<result property="enginConfigType.fileName" column="fileName"/>
+		<result property="data" column="data"/>
+	</resultMap>
+	
+	<sql id="columnEnginConfigInfoByAll">
+		c.id,
+		c.enginId,
+		e.engineeringName,
+		e.engineeringCode,
+		c.envType,
+		c.configTypeId,
+		t.configName,
+		t.fileName,
+		c.data
+	</sql>
+	
+	<select id="findEnginConfigInfoListByQo" parameterType="BaseQo" resultMap="enginConfigInfoMap">
+		select
+				<include refid="columnEnginConfigInfoByAll"/>
+			from
+					t_engin_config_type t
+			left join t_engin_config_info c on t.id = c.configTypeId
+			left join t_engineering e on e.id = c.enginId 
+		<where>
+			<if test="enginId != null">
+				and e.id = #{enginId,jdbcType=INTEGER}
+			</if>
+			<if test="configTypeId != null">
+				and t.id = #{configTypeId,jdbcType=INTEGER}
+			</if>
+			<if test=" envType != null">
+				and c.envType = #{ envType,jdbcType=INTEGER}
+			</if>
+		</where>
+		
+	</select>
+	
+	<select id="findEnginConfigInfoListByPropQo" parameterType="BaseQo" resultMap="enginConfigInfoMap">
+		select
+				<include refid="columnEnginConfigInfoByAll"/>
+			from
+					t_engin_config_info c
+			left join t_engin_config_type t on c.configTypeId = t.id 
+			left join t_engineering e on e.id = c.enginId 
+			left join t_project p on p.id = e.projectId 
+		<where>
+			<if test="projectCode != null and projectCode != '' ">
+				and p.projectCode = #{projectCode,jdbcType=VARCHAR}
+			</if>
+			<if test="enginCode != null and enginCode != '' ">
+				and e.engineeringCode = #{enginCode,jdbcType=VARCHAR}
+			</if>
+			<if test="envirCode != null and envirCode != '' ">
+				and c.envType = #{envirCode,jdbcType=VARCHAR}
+			</if>
+		</where>
+		
+	</select>
+	
+	<delete id="deleteEnginConfigInfoByEnginId" parameterType="int">
+		delete from t_engin_config_info where enginId = #{enginId,jdbcType=INTEGER}
+	</delete>
+	
+	<delete id="deleteBatchEnginConfigInfoByEnginIds" parameterType="List">
+		delete from t_engin_config_info where enginId in 
+		<foreach collection="list" item="enginId" open="(" separator="," close=")">
+			#{enginId,jdbcType=INTEGER}
+		</foreach>
+	</delete>
+	
+	<delete id="deleteEnginConfigInfoByProjectIds" parameterType="List">
+		delete from t_engin_config_info where enginId in (
+			select e.id from t_engineering e where e.projectId in 
+			<foreach collection="list" item="id" open="(" separator="," close=")">
+				#{id,jdbcType=INTEGER}
+			</foreach>
+		)
+	</delete>
+	
+	<insert id="insertBatchEnginConfigInfo" parameterType="List">
+		insert into t_engin_config_info (enginId,envType,configTypeId,data,createTime,createUser)  
+	    values  
+	    <foreach collection="list" item="item" index="index" open="" separator=","  close="">  
+	        (#{item.engin.id,jdbcType=INTEGER},
+	        #{item.envType,jdbcType=VARCHAR},
+	        #{item.enginConfigType.id,jdbcType=INTEGER},
+	        #{item.data,jdbcType=VARCHAR},
+	        #{item.createTime,jdbcType=TIMESTAMP},
+	        #{item.createUser,jdbcType=VARCHAR})
+	    </foreach>  
+	</insert>
+	
+	<select id="countEnginConfigTypeByEnginConfigTypeId" parameterType="List" resultType="int">
+		select count(1) from t_engin_config_info where configTypeId in 
+		<foreach collection="list" item="id" open="(" separator="," close=")">
+			#{id,jdbcType=INTEGER}
+		</foreach>
+	</select>
+	
+</mapper>

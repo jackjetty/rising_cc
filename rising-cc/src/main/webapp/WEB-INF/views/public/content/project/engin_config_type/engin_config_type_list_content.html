@@ -1,0 +1,59 @@
+<#assign contextPath=springMacroRequestContext.getContextPath() />
+<div class="breadcrumbs" id="breadcrumbs">
+	<script type="text/javascript">
+		try{ace.settings.check('breadcrumbs' , 'fixed')}catch(e){}
+	</script>
+	
+<!-- 传说中的面包屑，，自己修改成自己的   begin -->
+	<ul class="breadcrumb">
+		<li>
+			<i class="ace-icon fa fa-home home-icon"></i>
+			<a href="${contextPath}/index">首页</a>
+		</li>
+		<li class="active">工程配置类型管理</li>
+	</ul><!-- .breadcrumb -->
+<!-- 传说中的面包屑，，自己修改成自己的  end -->
+
+</div>
+
+<div class="page-content">
+						<div class="row">
+							<div class="col-xs-12">
+								<!-- PAGE CONTENT BEGINS -->
+
+								<table id="grid-table"></table>
+
+								<div id="grid-pager"></div>
+
+								<div id="modal-form" class="modal" tabindex="-1">
+										<div class="modal-dialog">
+											<div class="modal-content">
+												<div class="modal-header">
+													<button type="button" class="close" data-dismiss="modal">&times;</button>
+													<h4 class="blue bigger" >设置角色</h4>
+												</div>
+	
+												<div class="modal-body">
+												
+												
+												</div>
+	
+												<div class="modal-footer">
+													<button class="btn btn-sm" data-dismiss="modal">
+														<i class="ace-icon fa fa-times"></i>
+														取消
+													</button>
+	
+													<button class="btn btn-sm btn-primary" onclick="submitSelectedRole();" id="submit_btn">
+														<i class="ace-icon fa fa-check"></i>
+														保存
+													</button>
+												</div>
+											</div>
+										</div>
+									</div>
+
+								<!-- PAGE CONTENT ENDS -->
+							</div><!-- /.col -->
+						</div><!-- /.row -->
+					</div><!-- /.page-content -->

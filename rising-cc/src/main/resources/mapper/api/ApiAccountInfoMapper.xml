@@ -1,0 +1,169 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.rising.cc.dao.api.ApiAccountInfoDao">
+	
+	<resultMap type="ApiAccountInfo" id="apiAccountInfoMap">
+		<result property="id" column="id" />
+		<result property="unitTime" column="unitTime" />
+		<result property="callNumber" column="callNumber" />
+		<result property="timeOut" column="timeOut" />
+		<result property="createTime" column="createTime" />
+		<result property="createUser" column="createUser" />
+		
+		<result property="apiId" column="api_id" />
+		<result property="apiInfo.id" column="api_id" />
+		<result property="apiInfo.apiCode" column="api_apiCode" />
+		<result property="apiInfo.apiName" column="api_apiName" />
+		<result property="apiInfo.apiDesc" column="api_apiDesc" />
+		<result property="apiInfo.timeOut" column="api_timeOut" />
+		<result property="apiInfo.status" column="api_status" />
+		<result property="apiInfo.createTime" column="api_createTime" />
+		<result property="apiInfo.createUser" column="api_createUser" />
+		
+		<result property="accountId" column="acc_Id" />
+		<result property="account.id" column="acc_Id" />
+		<result property="account.account" column="acc_account" />
+		<result property="account.company" column="acc_company" />
+		<result property="account.description" column="acc_description" />
+		<result property="account.sendIp" column="acc_sendIp" />
+		<result property="account.secretKey" column="acc_secretKey" />
+		<result property="account.status" column="api_status" />
+		<result property="account.createTime" column="api_createTime" />
+		<result property="account.createUser" column="api_createUser" />
+		
+	</resultMap>
+	
+	<sql id="columnApiAccountInfoByAll">
+			ai.id,
+			ai.unitTime,
+			ai.callNumber,
+			ai.timeOut,
+			ai.createTime,
+			ai.createUser,
+
+			a.id as api_id,
+			a.apiCode as api_apiCode,
+			a.apiName as api_apiName,
+			a.apiDesc as api_apiDesc,
+			a.timeOut as api_timeOut,
+			a.status as api_status,
+			a.createTime as api_createTime,
+			a.createUser as api_createUser,
+			
+			c.id as acc_Id,
+			c.account as acc_account,
+			c.company as acc_company,
+			c.description as acc_description,
+			c.sendIp as acc_sendIp,
+			c.secretKey as acc_secretKey,
+			c.status as acc_status,
+			c.createTime as acc_createTime,
+			c.createUser as acc_createUser
+	</sql>
+	
+	<sql id="whereConditionPagination">
+		<if test="condition != null">
+		 	<if test="condition.accountId != null">
+		 		and ai.accountId = #{condition.accountId,jdbcType=INTEGER} 
+		 	</if>
+		 	<if test="condition.apiCode != null">
+		 		and a.apiCode = #{condition.apiCode,jdbcType=VARCHAR} 
+		 	</if>
+		 	<if test="condition.accStatus != null">
+		 		and c.status = #{condition.accStatus,jdbcType=INTEGER} 
+		 	</if>
+		 	<if test="condition.apiStatus != null">
+		 		and a.status = #{condition.apiStatus,jdbcType=INTEGER} 
+		 	</if>
+		</if>
+	</sql>
+	
+	<select id="findApiAccountInfoListByPagination" parameterType="Pagination" resultMap="apiAccountInfoMap">
+		select * from (
+			select 
+			<include refid="columnApiAccountInfoByAll"/>
+			 from t_api_info a inner join t_api_account_info ai on a.id = ai.apiId 
+			 inner join t_api_account c on c.id = ai.accountId 
+			 <include refid="common.whereConditionPagination"/>
+			 <include refid="whereConditionPagination"/>
+			 <include refid="common.sortConditionPagination"/>
+		)
+		 t limit 
+			<![CDATA[
+				#{startIndex} ,#{pageSize}
+			]]>
+	</select>
+	
+	<select id="countApiAccountInfoListByPagination" parameterType="Pagination" resultType="Integer">
+		select count(1)  from t_api_info a inner join t_api_account_info ai on a.id = ai.apiId 
+			 inner join t_api_account c on c.id = ai.accountId 
+			 <include refid="common.whereConditionPagination"/>
+			 <include refid="whereConditionPagination"/>
+	</select>
+	
+	<delete id="deleteApiAccountInfoByAccountId" parameterType="int">
+		delete from t_api_account_info where accountId = #{accountId,jdbcType=INTEGER}
+	</delete>
+	
+	<delete id="deleteApiAccountInfoByAccountIdApiId">
+		delete from t_api_account_info where accountId = #{accountId,jdbcType=INTEGER}
+		and apiId in 
+		<foreach collection="apiIds" item="id" open="(" separator="," close=")">
+			#{id,jdbcType=INTEGER}
+		</foreach>
+	</delete>
+	
+	<insert id="insertBatchApiAccountInfo" parameterType="List">
+		insert into t_api_account_info (accountId,apiId,createTime,createUser)   
+	    values  
+	    <foreach collection="list" item="item" index="index" open="" separator=","  close="">  
+	        (#{item.accountId,jdbcType=INTEGER},#{item.apiId,jdbcType=INTEGER},#{item.createTime,jdbcType=TIMESTAMP},#{item.createUser,jdbcType=VARCHAR})
+	    </foreach>  
+	</insert>
+	
+	<select id="findApiAccountInfoListByQo" parameterType="BaseQo" resultMap="apiAccountInfoMap">
+		select 
+			<include refid="columnApiAccountInfoByAll"/>
+			 from t_api_info a inner join t_api_account_info ai on a.id = ai.apiId 
+			 inner join t_api_account c on c.id = ai.accountId 
+			 <where>
+			 	<if test="accountId != null">
+			 		and ai.accountId = #{accountId,jdbcType=INTEGER} 
+			 	</if>
+			 	<if test="apiCode != null">
+			 		and a.apiCode = #{apiCode,jdbcType=VARCHAR} 
+			 	</if>
+			 	<if test="accStatus != null">
+			 		and c.status = #{accStatus,jdbcType=INTEGER} 
+			 	</if>
+			 	<if test="apiStatus != null">
+			 		and a.status = #{apiStatus,jdbcType=INTEGER} 
+			 	</if>
+			 	<if test="envirId != null">
+			 		and a.envirId = #{envirId,jdbcType=INTEGER} 
+			 	</if>
+				<if test="sidx != null and sidx != '' and sord != null and sord != '' ">
+					order by ${sidx} ${sord}
+				</if>
+			 </where> 
+	</select>
+	
+	<update id="updateApiAccountInfoById" parameterType="ApiAccountInfo" >
+		update t_api_account_info 
+		<set>
+			<if test="unitTime != null">
+				unitTime = #{unitTime,jdbcType=INTEGER},
+			</if>
+			<if test="callNumber != null">
+				callNumber = #{callNumber,jdbcType=INTEGER},
+			</if>
+			<if test="timeOut != null">
+				timeOut = #{timeOut,jdbcType=INTEGER},
+			</if>
+		</set>
+		where id = #{id,jdbcType=VARCHAR}
+	</update>
+	
+</mapper>

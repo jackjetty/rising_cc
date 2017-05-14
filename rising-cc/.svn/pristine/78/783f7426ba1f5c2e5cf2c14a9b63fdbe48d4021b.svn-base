@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.rising.cc.dao.intf.InterfMethodDao">
+	
+	<resultMap type="InterfMethod" id="InterfMethodMap">
+		<id property="id" column="id" />
+		<result property="method" column="method" />
+		<result property="methodName" column="methodName" />
+		<result property="namespace" column="namespace" />
+		<result property="dataType" column="dataType" />
+		<result property="useType" column="useType" />
+		<result property="encoding" column="encoding" />
+		<result property="isEnable" column="isEnable" />
+		<result property="specification" column="specification" />
+        <collection property="interfInfoList" ofType="InterfInfo">
+            <id property="id" column="interfInfoId" />
+            <result property="interfMethod.id" column="methodId" />
+            <result property="parentInterfInfo.id" column="parentId" />
+            <result property="node" column="node" />
+            <result property="nodeName" column="nodeName" />
+            <result property="nodeType" column="nodeType" />
+            <result property="nodeLength" column="nodeLength" />
+            <result property="isNull" column="isNull" />
+            <result property="remark" column="remark" />
+        </collection>
+	</resultMap>
+
+	<sql id="columnInterfMethodAndInfoByAll">
+		m.id id,
+		m.method,
+		m.methodName,
+		m.namespace,
+		m.dataType,
+		m.useType,
+		m.encoding,
+		m.isEnable,
+		m.specification,
+		i.id interfInfoId,
+		i.methodId,
+		i.parentId,
+		i.node,
+		i.nodeName,
+		i.nodeType,
+		i.nodeLength,
+		i.isNull,
+		i.remark
+	</sql>
+	<sql id="columnInterfMethodByAll">
+		m.id id,
+		m.method,
+		m.methodName,
+		m.namespace,
+		m.dataType,
+		m.useType,
+		m.encoding,
+		m.isEnable,
+		m.specification
+	</sql>
+    <sql id="whereLogDBPagination">
+        <where>
+            t.isEnable = 1
+            <if test="condition.envirId != null">
+                and t.envirId = #{condition.envirId}
+            </if>
+        </where>
+
+    </sql>
+
+
+
+    <select id="findInterfMethodAndInfoByQo" parameterType="com.rising.cc.pojo.qo.interf.InterfMethodQo" resultMap="InterfMethodMap">
+        select <include refid="columnInterfMethodAndInfoByAll"/>
+        from t_interface_method m
+        LEFT OUTER JOIN t_interface_info i on m.id = i.methodId
+    </select>
+    <select id="findInterfMethodByPagination" parameterType="Pagination" resultMap="InterfMethodMap">
+        select <include refid="columnInterfMethodByAll"/>
+        from t_interface_method m
+        limit
+        <![CDATA[
+				#{startIndex} ,#{pageSize}
+			]]>
+    </select>
+    <select id="countInterfMethodByPagination" parameterType="Pagination" resultType="Integer">
+        select count(1)
+        from t_interface_method m
+    </select>
+    <insert id="insertInterfMethod" parameterType="InterfMethod">
+        insert into t_interface_method(
+        method,
+		methodName,
+		namespace,
+		dataType,
+		useType,
+		encoding,
+		isEnable,
+		specification
+        )
+        values(#{method,jdbcType=VARCHAR},
+        #{methodName,jdbcType=VARCHAR},
+        #{namespace,jdbcType=VARCHAR},
+        #{dataType,jdbcType=INTEGER},
+        #{useType,jdbcType=INTEGER},
+        #{encoding,jdbcType=INTEGER},
+        #{isEnable,jdbcType=INTEGER},
+        #{specification,jdbcType=VARCHAR},
+        )
+    </insert>
+
+    <update id="removeInterfMethod" parameterType="InterfMethod">
+        update t_interface_method set isEnable = #{isEnable,jdbcType=INTEGER} where id = #{id,jdbcType=INTEGER}
+    </update>
+    <update id="updateInterfMethod" parameterType="InterfMethod">
+        update t_interface_method
+        <set>
+            <if test="method != null and method != ''">
+                method = #{method,jdbcType=VARCHAR},
+            </if>
+            <if test="methodName != null and methodName != ''">
+                methodName = #{methodName,jdbcType=VARCHAR},
+            </if>
+            <if test="namespace != null and namespace != ''">
+                namespace = #{namespace,jdbcType=VARCHAR},
+            </if>
+            <if test="dataType != null">
+                dataType = #{dataType,jdbcType=INTEGER},
+            </if>
+            <if test="useType != null">
+                useType = #{useType,jdbcType=INTEGER},
+            </if>
+            <if test="encoding != null">
+                encoding = #{encoding,jdbcType=INTEGER},
+            </if>
+            <if test="specification != null and specification != ''">
+                specification = #{specification,jdbcType=VARCHAR},
+            </if>
+        </set>
+        where id = #{id,jdbcType=INTEGER}
+    </update>
+</mapper>

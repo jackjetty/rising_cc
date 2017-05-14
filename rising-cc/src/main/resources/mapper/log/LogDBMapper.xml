@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.rising.cc.dao.log.LogDBDao">
+	
+	<resultMap type="com.rising.cc.model.log.LogDB" id="logDBMap">
+		<id property="id" column="id" />
+		<result property="dbName" column="dbName" />
+		<result property="name" column="name" />
+		<result property="isEnable" column="isEnable" />
+		<result property="envirId" column="envirId" />
+	</resultMap>
+
+	<sql id="columnLogDBByAll">
+		t.id id,
+		t.dbName,
+		t.name,
+		t.isEnable,
+		t.envirId
+	</sql>
+    <sql id="whereLogDBPagination">
+        <where>
+            t.isEnable = 1
+            <if test="condition.envirId != null">
+                and t.envirId = #{condition.envirId}
+            </if>
+        </where>
+
+    </sql>
+
+
+
+    <select id="findLogDBByPagination" parameterType="Pagination" resultMap="logDBMap">
+        select <include refid="columnLogDBByAll"/>
+        from t_log_db t
+        <include refid="whereLogDBPagination"/>
+        limit
+        <![CDATA[
+				#{startIndex} ,#{pageSize}
+			]]>
+    </select>
+    <select id="findLogDBByEnvirId" parameterType="int" resultMap="logDBMap">
+        select <include refid="columnLogDBByAll"/>
+        from t_log_db t
+        where  t.isEnable = 1 and t.envirId=#{envirId}
+    </select>
+    <select id="countLogDBByPagination" parameterType="Pagination" resultType="Integer">
+        select count(1)
+        from t_log_db t
+        <include refid="whereLogDBPagination"/>
+    </select>
+    <insert id="saveLogDB" parameterType="LogDB">
+        insert into t_log_db(name,
+        dbName,
+        isEnable,
+        envirId)
+        values(#{name,jdbcType=VARCHAR},
+        #{dbName,jdbcType=VARCHAR},
+        #{isEnable,jdbcType=INTEGER},
+        #{envirId,jdbcType=INTEGER})
+        <selectKey keyProperty="id" resultType="Integer" order="AFTER">
+            select LAST_INSERT_ID() as id
+        </selectKey>
+    </insert>
+
+    <update id="removeLogDB" parameterType="LogDB">
+        update t_log_db set isEnable = #{isEnable,jdbcType=INTEGER} where id = #{id,jdbcType=INTEGER}
+        <selectKey keyProperty="id" resultType="Integer" order="AFTER">
+            select LAST_INSERT_ID() as id
+        </selectKey>
+    </update>
+</mapper>

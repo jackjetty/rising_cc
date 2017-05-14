@@ -1,0 +1,83 @@
+<#assign contextPath=springMacroRequestContext.getContextPath() />
+<div class="breadcrumbs" id="breadcrumbs">
+	<script type="text/javascript">
+		try{ace.settings.check('breadcrumbs' , 'fixed')}catch(e){}
+	</script>
+	
+<!-- 传说中的面包屑，，自己修改成自己的   begin -->
+	<ul class="breadcrumb">
+		<li>
+			<i class="icon-home home-icon"></i>
+			<a href="${contextPath}/index">首页</a>
+		</li>
+		<li class="active">用户管理</li>
+	</ul><!-- .breadcrumb -->
+<!-- 传说中的面包屑，，自己修改成自己的  end -->
+
+</div>
+
+<div class="page-content">
+    <div class="tabbable">
+        <ul class="nav nav-tabs" id="myTab">
+            <#list envirTypeDtoList as envT>
+                <li class="<#if envT_index == 0>in active</#if>">
+                    <a data-toggle="tab" href="#${envT.envirCode!''}" onclick="getSelect(${envT.id})">
+                        <i class="<#if envT_index==0>yellow ace-icon fa fa-cogs bigger-120
+										<#elseif envT_index==1>green ace-icon fa fa-cog bigger-120
+										<#elseif envT_index==2>red ace-icon fa fa-bullhorn bigger-120
+										<#elseif envT_index==3>blue ace-icon fa fa-cogs bigger-120
+										<#elseif envT_index==4>green ace-icon fa fa-cogs bigger-120
+										<#else>yellow ace-icon fa fa-cogs bigger-120
+										</#if>"></i>${envT.envirName!''}
+                    </a>
+                </li>
+            </#list>
+        </ul>
+    </div><!-- tabable-->
+    <div class="tab-content" id="content_env_pro_div">
+        <#list envirTypeDtoList as envT>
+            <div id="${envT.envirCode!''}" class="tab-pane fade <#if envT_index == 0>in active</#if>">
+                <div class="tabbable tabs-left">
+                    <div class="tab-content">
+                        <table id="grid-table-${envT.id}"></table>
+                        <div id="grid-pager-${envT.id}"></div>
+                        <!-- PAGE CONTENT ENDS -->
+                    </div>
+                </div>
+            </div>
+        </#list>
+    </div>
+    <div id="envir_box" class="modal" tabindex="-1">
+        <div class="modal-dialog" style="width: 500px;height: 300px;">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                    <h3 class="smaller lighter blue no-margin">复制表至其它环境</h3>
+                </div>
+                <div class="modal-body">
+                    <label for="envir_select">环境</label>
+                    <select class="form-control" id="envir_select">
+                        <#list envirTypeDtoList as envT>
+                        <option value="${envT.id}">${envT.envirName}</option>
+                        </#list>
+                    </select>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-sm btn-success" onclick="copyTable();">
+                        <i class="ace-icon fa fa-exchange"></i>
+                        复制
+                    </button>
+                    &nbsp;
+                    <button class="btn btn-sm btn-danger pull-right" data-dismiss="modal">
+                        <i class="ace-icon fa fa-times"></i>
+                        取消
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div><!-- /.page-content -->
+
+<script type="text/javascript">
+    var $path_base = "/";
+</script>

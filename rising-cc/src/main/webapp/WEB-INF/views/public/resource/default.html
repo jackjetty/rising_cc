@@ -1,0 +1,96 @@
+<#assign contextPath=springMacroRequestContext.getContextPath() />
+<script type="text/javascript">
+
+/****
+	* 必须放在select控件加载后才能加载
+	**/
+	
+	/*************************************** 下拉框可搜索 js 支持  begin ************************************/
+	if(!ace.vars['touch']) {
+		$('.chosen-select').chosen({allow_single_deselect:true}); 
+		//resize the chosen on window resize
+
+		$(window)
+		.off('resize.chosen')
+		.on('resize.chosen', function() {
+			$('.chosen-select').each(function() {
+				 var $this = $(this);
+				 $this.next().css({'width': $this.parent().width()});
+			})
+		}).trigger('resize.chosen');
+		//resize chosen on sidebar collapse/expand
+		$(document).on('settings.ace.chosen', function(e, event_name, event_val) {
+			if(event_name != 'sidebar_collapsed') return;
+			$('.chosen-select').each(function() {
+				 var $this = $(this);
+				 $this.next().css({'width': $this.parent().width()});
+			})
+		});
+
+
+		$('#chosen-multiple-style .btn').on('click', function(e){
+			var target = $(this).find('input[type=radio]');
+			var which = parseInt(target.val());
+			if(which == 2) $('#form-field-select-4').addClass('tag-input-style');
+			 else $('#form-field-select-4').removeClass('tag-input-style');
+		});
+	}
+
+	/******************************** 下拉框可搜索 js 支持  end ******************************/
+	
+	
+	/************************************ 菜单选中 begin *************************************/
+	
+	function clickMenu(url){
+		$("#main-content-inner-id").showLoading();
+		
+		$("#main-content-inner-id").load(url,null,function(response,status,xhr){
+			window.setTimeout(function(){
+				$("#main-content-inner-id").hideLoading();
+			}, 500);
+		});
+	}
+	
+	
+	$(".menu-tag-children").click(function(){
+		clearMenuChildren();
+		clearMenuParent();
+	 	$(this).addClass("active");
+		
+		var parents = $(this).parents("li.menu-tag-parent"); 
+		
+		for (var i = 0; i < parents.length; i++) {
+			$(parents[i]).addClass("active");
+			$(parents[i]).addClass("open");
+			$(parents[i]).children("ul.submenu").addClass("nav-show"); 
+			$(parents[i]).children("ul.submenu").removeClass("nav-hide"); 
+			$(parents[i]).children("ul.submenu").show();
+		}
+		
+	});
+	
+ 	
+ 	function clearMenuChildren(){
+ 		var oldlis = $("ul.nav.nav-list").find("li.menu-tag-children");
+		for (var i = 0; i < oldlis.length; i++) {
+			$(oldlis[i]).removeClass("active");
+		}
+ 	}
+ 	
+ 	function clearMenuParent(){
+ 		var oldparents = $("ul.nav.nav-list").find("li.menu-tag-parent");
+		for (var i = 0; i < oldparents.length; i++) {
+			$(oldparents[i]).removeClass("active");
+			$(oldparents[i]).removeClass("open");
+			$(oldparents[i]).children("ul.submenu").addClass("nav-hide"); 
+			$(oldparents[i]).children("ul.submenu").removeClass("nav-show"); 
+			$(oldparents[i]).children("ul.submenu").hide();
+		}
+ 	}
+	
+	/************************************ 菜单选中 end *************************************/
+
+
+
+
+</script>

@@ -1,0 +1,181 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.rising.cc.dao.service.ServicesDao">
+    <resultMap id="ServicesMap" type="Services">
+        <result property="id" column="id"/>
+        <result property="serviceName" column="serviceName"/>
+        <result property="serverId" column="serverId"/>
+        <result property="envirId" column="envirId"/>
+        <result property="enginId" column="enginId"/>
+        <result property="status" column="status"/>
+        <result property="port" column="port"/>
+        <result property="address" column="address"/>
+        <result property="remark" column="remark"/>
+    </resultMap>
+    <resultMap id="ServicesAndServerMap" type="ServicesAndServer">
+        <result property="id" column="id"/>
+        <result property="serviceName" column="serviceName"/>
+        <result property="server.id" column="serviceId"/>
+        <result property="server.serverName" column="serverName"/>
+        <result property="server.ip" column="ip"/>
+        <result property="server.type" column="serverType"/>
+        <result property="server.status" column="serverStatus"/>
+        <result property="server.address" column="serverAddress"/>
+        <result property="envirId" column="envirId"/>
+        <result property="enginId" column="enginId"/>
+        <result property="status" column="status"/>
+        <result property="port" column="port"/>
+        <result property="address" column="address"/>
+        <result property="remark" column="remark"/>
+    </resultMap>
+    <sql id="whereServicesByQo">
+        where  r.isEnable = 1 and s.isEnable = 1
+        <if test="id != null">
+            and s.id = #{id}
+        </if>
+        <if test="port != null and prot != ''">
+            and s.port = #{port}
+        </if>
+        <if test="envirId != null">
+            and s.envirId = #{envirId}
+        </if>
+        <if test="serverId != null">
+            and s.serverId = #{serverId}
+        </if>
+        <if test="serverId != null">
+            and s.enginId = #{enginId}
+        </if>
+    </sql>
+
+    <select id="findServicesByPagination" parameterType="Pagination" resultMap="ServicesMap">
+        select
+        id,serviceName,serverId,envirId,enginId,status,port,address,remark
+        from t_service_services
+        <where>
+            <if test="condition != null">
+                <if test="condition.status != null and condition.status != ''">
+                    and status like '%'+#{condition.status}+'%'
+                </if>
+                <if test="condition.port != null">
+                    and port = #{condition.port}
+                </if>
+                <if test="condition.envirId != null">
+                    and envirId = #{condition.envirId}
+                </if>
+                <if test="condition.enginId != null">
+                    and enginId = #{condition.enginId}
+                </if>
+            </if>
+        </where>
+        limit
+        <![CDATA[
+				#{startIndex} ,#{pageSize}
+			]]>
+    </select>
+
+    <select id="findAllServicesAndServer" resultMap="ServicesAndServerMap">
+      select
+        s.id,s.serviceName,s.envirId,s.enginId,s.status,s.port,s.address,s.remark,
+        r.serverName,r.id serverId,r.ip,r.address serverAddress,r.type serverType,r.status serverStatus
+        FROM t_service_server r,t_service_services s
+        where r.id = s.serverId and r.isEnable = 1 and s.isEnable = 1
+    </select>
+    <select id="findServicesAndServerByQo" parameterType="com.rising.cc.pojo.qo.service.ServicesQo" resultMap="ServicesAndServerMap">
+      select
+        s.id,s.serviceName,s.envirId,s.enginId,s.status,s.port,s.address,s.remark,
+        r.serverName,r.id serverId,r.ip,r.address serverAddress,r.type serverType,r.status serverStatus
+        FROM t_service_server r
+        LEFT JOIN t_service_services s on r.id = s.serverId
+        <include refid="whereServicesByQo"/>
+    </select>
+
+    <select id="findServicesByQo" parameterType="com.rising.cc.pojo.qo.service.ServicesQo" resultMap="ServicesMap">
+        select
+        id,serviceName,serverId,status,port,address
+        from t_service_services
+        <where>
+
+                <if test="id != null">
+                    and id = #{id}
+                </if>
+                <if test="port != null">
+                    and port = #{port}
+                </if>
+                <if test="envirId != null">
+                    and envirId = #{envirId}
+                </if>
+        </where>
+    </select>
+    <select id="countServicesByPagination" parameterType="Pagination" resultType="Integer">
+        select
+        count(1)
+        from t_service_services
+        <where>
+            <if test="condition != null">
+                <if test="condition.status != null">
+                    and status like '%'+#{condition.status}+'%'
+                </if>
+                <if test="condition.port != null">
+                    and port = #{condition.port}
+                </if>
+                <if test="condition.envirId != null">
+                    and envirId = #{condition.envirId}
+                </if>
+            </if>
+        </where>
+    </select>
+
+    <insert id="saveServices" parameterType="Services">
+        insert into t_service_services(status,
+        serviceName,
+        envirId,
+        enginId,
+        serverId,
+        port,
+        address,
+        remark)
+        values(#{status,jdbcType=INTEGER},
+        #{serviceName,jdbcType=VARCHAR},
+        #{envirId,jdbcType=INTEGER},
+        #{enginId,jdbcType=INTEGER},
+        #{serverId,jdbcType=INTEGER},
+        #{port,jdbcType=INTEGER},
+        #{address,jdbcType=VARCHAR},
+        #{remark,jdbcType=VARCHAR})
+        <selectKey keyProperty="id" resultType="Integer" order="AFTER">
+            select LAST_INSERT_ID() as id
+        </selectKey>
+    </insert>
+    
+     <update id="updateServices" parameterType="Services">
+        update t_service_services
+        <set>
+            <if test="status != null and status !='' ">
+                status = #{services.status},
+            </if>
+            <if test="serviceName != null and serviceName !='' ">
+                serviceName = #{services.serviceName},
+            </if>
+            <if test="serverId != null and serverId !='' ">
+                serverId = #{services.serverId},
+            </if>
+            <if test="port != null">
+                port = #{services.port},
+            </if>
+            <if test="address != null and address != ''">
+                address = #{services.address},
+            </if>
+            <if test="remark != null and remark != ''">
+                remark = #{services.remark},
+            </if>
+        </set>
+          where id = #{services.id}
+    </update>
+
+    <update id="removeServices" parameterType="Integer">
+        update  t_service_services SET isEnable = 0 where id = #{id}
+    </update>
+
+</mapper>

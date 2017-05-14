@@ -1,0 +1,255 @@
+<#assign contextPath=springMacroRequestContext.getContextPath() />
+<script type="text/javascript">
+	var initWidth = $(".init_width_grid_div").width();
+	var envir_Id = ${envirTypeList[0].id};
+	
+	onSelectTab(envir_Id);
+	
+	function onSelectTab(envirId){
+		envir_Id = envirId;
+		
+	    var grid_selector = "#grid-table-"+envirId;
+	    var pager_selector = "#grid-pager-"+envirId;
+	    $(grid_selector).jqGrid("setGridParam",{postData:{envirId:envirId}});
+	    onloadGrid(grid_selector, pager_selector, envirId);
+	    onloadNav(grid_selector, pager_selector);
+	    $(grid_selector).jqGrid("setGridWidth", initWidth);
+	    
+	}
+	
+	function onloadGrid(grid_selector, pager_selector, envirId){
+		jQuery(grid_selector).jqGrid({
+			url: "${contextPath}/api/api_list",
+			datatype: "json",
+			//data:ss,
+			//datatype:"json",
+			mtype: "POST",
+			caption: "Api列表",
+			postData:{envirId:envirId},
+			autowidth: true,
+			altRows: true,
+			multiselect: true,
+			multiboxonly: true,
+			viewrecords : true,
+			height: 600 ,
+			colNames:["Api编码","Api名称","Api描述","默认超时时间/ms","Api创建时间","创建人","状态"],
+			colModel:[
+				{name:'apiCode',index:'apiCode', width:100,sorttype:"string",editable: true,editrules:{required:true}},
+				{name:'apiName',index:'apiName', width:100,sorttype:"string",editable: true,editrules:{required:true}},
+				{name:'apiDesc',index:'apiDesc', width:150,sorttype:"string",editable: true,editrules:{required:true}},
+				{name:'timeOut',index:'timeOut', width:70,sorttype:"int",editable: true,editrules:{required:true,number:true,minValue:0,maxValue:999999999}},
+				{name:'createTime',index:'a.createTime', width:70,formatter:"date",formatoptions:{srcformat: 'Y-m-d H:i:s',newformat: 'Y-m-d H:i:s'},editable: false,sorttype:"date",stype:"text",searchoptions:{dataInit:datePick,attr:{title:'选择日期'}}},
+				{name:'createUser',index:'a.createUser', width:70,sorttype:"string",editable: false},
+				{name:'status',index:'a.status', width:70, sorttype:"int",formatter: "select",edittype:"select",editrules:{required:true},editable: true,editoptions:{value:"0:禁用;1:启用"},stype:"select",searchoptions:{value:"0:待启用;1:启用"}}//状态：0：禁用；1：启用；
+			], 
+			jsonReader: {
+				root: "list",
+				total: "totalPage",//总页数
+				page: "pageNo",//当前页码
+				records: "totalCount",//总记录数
+				repeatitems: false
+			},
+			rowNum:10,
+			rowList:[10,20,30],
+			pager : pager_selector,
+		
+			loadComplete : function(data) {
+				var table = this;
+				setTimeout(function(){
+					styleCheckbox(table);
+					
+					updateActionIcons(table);
+					updatePagerIcons(table);
+					enableTooltips(table);
+				}, 0);
+			},
+			editurl:"${contextPath}/api/save_api?envirId="+envirId
+			
+		});
+	}
+	
+	function onloadNav(grid_selector, pager_selector){
+        $(".is-refresh-btn").parent().parent().remove();//先删除刷新按钮，然后后边会再加上
+        //navButtons
+    	jQuery(grid_selector).jqGrid('navGrid',pager_selector,
+    		{ 	//navbar options
+    			edit: true,
+    			editicon : 'ace-icon fa fa-pencil blue',
+    			add: true,
+    			addicon : 'ace-icon fa fa-plus-circle purple',
+    			del: true,
+    			delicon : 'ace-icon fa fa-trash-o red',
+    			search: true,
+    			searchicon : 'ace-icon fa fa-search orange',
+    			refresh: false,
+    			refreshicon : 'ace-icon fa fa-refresh green',
+    			view: true,
+    			viewicon : 'ace-icon fa fa-search-plus grey',
+    		},
+    		{
+    			//edit record form
+    			recreateForm: true,
+    			beforeShowForm : function(e) {
+    				var form = $(e[0]);
+    				form.closest('.ui-jqdialog').find('.ui-jqdialog-titlebar').wrapInner('<div class="widget-header" />');
+    				style_edit_form(form);
+    			},
+    			afterComplete : function(response){
+    				if(CheckAjaxResponseHandler.checkAjaxResponse(response.responseText)){
+    					if(response.responseText == "code_existing"){
+    						bootbox.alert({
+    				            buttons: {
+    				               ok: {  
+    				                    label: "确定",  
+    				                    className: "btn-info"  
+    				                }  
+    				            },  
+    				            message: "<h4>Api编码已经存在，不能添加重复！</h4>",  
+    				            callback: function() {  
+    				                //alert('关闭了alert');  
+    				            },
+    				            title: "提示信息",  
+    				        });
+    						
+    					}
+    				}
+    			},
+    			closeAfterEdit: true
+    		},
+    		{
+    			//new record form
+    			//width: 700,
+    			recreateForm: true,
+    			viewPagerButtons: false,
+    			beforeShowForm : function(e) {
+    				var form = $(e[0]);
+    				form.closest('.ui-jqdialog').find('.ui-jqdialog-titlebar')
+    				.wrapInner('<div class="widget-header" />');
+    				style_edit_form(form);
+    			},
+    			closeAfterAdd: true,
+    			afterComplete : function(response){
+    				if(CheckAjaxResponseHandler.checkAjaxResponse(response.responseText)){
+    					if(response.responseText == "code_existing"){
+    						bootbox.alert({
+    				            buttons: {
+    				               ok: {  
+    				                    label: "确定",  
+    				                    className: "btn-info"  
+    				                }  
+    				            },  
+    				            message: "<h4>Api编码已经存在，不能添加重复！</h4>",  
+    				            callback: function() {  
+    				                //alert('关闭了alert');  
+    				            },
+    				            title: "提示信息",  
+    				        });
+    						
+    					}
+    				}
+    			}
+    		},
+    		{
+    			//delete record form
+    			recreateForm: true,
+    			beforeShowForm : function(e) {
+    				var form = $(e[0]);
+    				if(form.data('styled')) return false;
+    				
+    				form.closest('.ui-jqdialog').find('.ui-jqdialog-titlebar').wrapInner('<div class="widget-header" />');
+    				style_delete_form(form);
+    				
+    				form.data('styled', true);
+    			},
+    			afterComplete : function(response){
+    				if(CheckAjaxResponseHandler.checkAjaxResponse(response.responseText)){
+    					if(response.responseText == "be_used"){
+    						bootbox.alert({
+    				            buttons: {  
+    				               ok: {  
+    				                    label: "确定",  
+    				                    className: "btn-info"  
+    				                }  
+    				            },  
+    				            message: "<h4>当前Api已被用户使用，不能删除！</h4>",  
+    				            callback: function() {  
+    				                //alert('关闭了alert');  
+    				            },  
+    				            title: "提示信息",  
+    				        });
+    						
+    					}
+    				}
+    			}
+    		},
+    		{
+    			//search form
+    			recreateForm: true,
+    			afterShowSearch: function(e){
+    				var form = $(e[0]);
+    				form.closest('.ui-jqdialog').find('.ui-jqdialog-title').wrap('<div class="widget-header" />');
+    				style_search_form(form);
+    			},
+    			afterRedraw: function(){
+    				style_search_filters($(this));
+    			}
+    			,
+    			multipleSearch: true,
+    			/**
+    			multipleGroup:true,
+    			showQuery: true
+    			*/
+    		},
+    		{
+    			//view record form
+    			recreateForm: true,
+    			beforeShowForm: function(e){
+    				var form = $(e[0]);
+    				form.closest('.ui-jqdialog').find('.ui-jqdialog-title').wrap('<div class="widget-header" />')
+    			}
+    		}
+    	).jqGrid('navButtonAdd',pager_selector,{//添加按钮
+            caption:"",
+            title:"刷新列表",
+            buttonicon:"ace-icon fa fa-refresh green is-refresh-btn",
+            onClickButton:function(){
+                $(this).trigger("reloadGrid");
+            }
+        });
+	}
+        
+
+	//获取选中行
+	//var selr = jQuery(grid_selector).jqGrid('getGridParam','selrow');
+	
+	$(document).one('ajaxloadstart.page', function(e) {
+		$("#grid-table-"+envir_Id).jqGrid('GridUnload');
+		$('.ui-jqdialog').remove();
+	});
+		
+ 	//打开
+/* 	$('#modal-form').on('show.bs.modal', function () {
+		
+ 	}) */
+ 	
+ 	//关闭modal
+ 	$('#modal-form').on('hide.bs.modal', function () {//关闭modal时，把checkbox至空
+ 		
+ 		
+	});
+
+ 	
+	function show_success(content){
+		$("#alert_success").show();
+		$("#alert_success_content").html(content);
+		$("#alert_error").hide();
+		window.setTimeout("$('#alert_success').hide();$('#alert_success_content').html('');", 2000);
+	}
+	
+	function show_error(content){
+		$("#alert_error").show();
+		$("#alert_error_content").html(content);
+		$("#alert_success").hide();
+		window.setTimeout("$('#alert_error').hide();$('#alert_error_content').html('');", 2000);
+	}
+ </script>

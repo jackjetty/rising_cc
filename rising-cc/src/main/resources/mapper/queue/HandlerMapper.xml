@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.rising.cc.dao.queue.HandlerDao">
+    <resultMap id="handlerMap" type="Handler">
+        <result property="id" column="id"/>
+        <result property="url" column="url"/>
+        <result property="failUrl" column="failUrl"/>
+        <result property="name" column="name"/>
+        <result property="type" column="type"/>
+        <result property="rate" column="rate"/>
+    </resultMap>
+
+    <select id="findHandlerByPagination" parameterType="Pagination" resultMap="handlerMap">
+        select
+        id,url,failUrl,name,type,rate,envirId
+        from t_queue_handler
+        <where>
+            <if test="condition != null">
+                <if test="condition.name != null and condition.name != ''">
+                    and name like '%'+#{condition.name}+'%'
+                </if>
+                <if test="condition.type != null">
+                    and type = #{condition.type}
+                </if>
+                <if test="condition.envirId != null">
+                    and envirId = #{condition.envirId}
+                </if>
+            </if>
+        </where>
+        limit
+        <![CDATA[
+				#{startIndex} ,#{pageSize}
+			]]>
+    </select>
+    <select id="findHandlerByQo" parameterType="com.rising.cc.pojo.qo.queue.HandlerQo" resultMap="handlerMap">
+        select
+        id,url,failUrl,name,type,rate,envirId
+        from t_queue_handler
+        <where>
+                <if test="id != null">
+                    and id = #{id}
+                </if>
+                <if test="name != null and name != ''">
+                    and name like '%'+#{name}+'%'
+                </if>
+                <if test="type != null">
+                    and type = #{type}
+                </if>
+                <if test="envirId != null">
+                    and envirId = #{envirId}
+                </if>
+        </where>
+    </select>
+    <select id="countHandlerByPagination" parameterType="Pagination" resultType="Integer">
+        select
+        count(1)
+        from t_queue_handler
+        <where>
+            <if test="condition != null">
+                <if test="condition.name != null">
+                    and name like '%'+#{condition.name}+'%'
+                </if>
+                <if test="condition.type != null">
+                    and type = #{condition.type}
+                </if>
+                <if test="condition.envirId != null">
+                    and envirId = #{condition.envirId}
+                </if>
+            </if>
+        </where>
+    </select>
+
+    <insert id="saveHandler" parameterType="Handler">
+        insert into t_queue_handler(name,
+        url,
+        failUrl,
+        type,
+        rate,
+        envirId)
+        values(#{name,jdbcType=VARCHAR},
+        #{url,jdbcType=VARCHAR},
+        #{failUrl,jdbcType=VARCHAR},
+        #{type,jdbcType=INTEGER},
+        #{rate,jdbcType=INTEGER},
+        #{envirId,jdbcType=INTEGER})
+        <selectKey keyProperty="id" resultType="Integer" order="AFTER">
+            select LAST_INSERT_ID() as id
+        </selectKey>
+    </insert>
+    
+     <update id="updateHandler" parameterType="Handler">
+        update t_queue_handler
+        <set>
+            <if test="name != null and name !='' ">
+                name = #{handler.name},
+            </if>
+            <if test="url != null and url !='' ">
+                url = #{handler.url},
+            </if>
+            <if test="failUrl != null and failUrl !='' ">
+                failUrl = #{handler.failUrl},
+            </if>
+            <if test="type != null">
+                type = #{handler.type},
+            </if>
+            <if test="rate != null">
+                rate = #{handler.rate},
+            </if>
+        </set>
+          where id = #{handler.id}
+    </update>
+
+    <delete id="deleteHandler" parameterType="Integer">
+        delete from t_queue_handler where id = #{id}
+    </delete>
+
+</mapper>

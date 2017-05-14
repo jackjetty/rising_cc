@@ -1,0 +1,199 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.rising.cc.dao.log.LogTableDao">
+	
+	<resultMap type="com.rising.cc.model.log.LogTable" id="logTableMap">
+		<id property="id" column="id" />
+		<result property="logDB.id" column="logDBId" />
+		<result property="tableName" column="tableName" />
+		<result property="name" column="name" />
+		<result property="isSync" column="isSync" />
+		<result property="isEnable" column="isEnable" />
+		<result property="envirId" column="envirId" />
+	</resultMap>
+	<resultMap type="com.rising.cc.model.log.LogTable" id="logTableAndFieldMap">
+		<id property="id" column="id" />
+		<result property="logDB.id" column="logDBId" />
+		<result property="logDB.name" column="db_name" />
+		<result property="logDB.dbName" column="dbName" />
+		<result property="tableName" column="tableName" />
+		<result property="name" column="name" />
+        <result property="isSync" column="isSync" />
+        <result property="isEnable" column="isEnable" />
+        <result property="envirId" column="envirId" />
+        <collection property="fieldList" ofType="com.rising.cc.model.log.LogField">
+            <id property="id" column="fieldId" />
+            <result property="name" column="field_name" />
+            <result property="type" column="type" />
+            <result property="fieldName" column="fieldName" />
+            <result property="tableId" column="tableId"/>
+        </collection>
+	</resultMap>
+	<resultMap type="com.rising.cc.model.log.LogField" id="logFieldMap">
+		<id property="id" column="id" />
+		<result property="fieldName" column="fieldName" />
+		<result property="type" column="type" />
+		<result property="name" column="name" />
+        <result property="tableId" column="tableId"/>
+	</resultMap>
+
+	<sql id="columnLogTableByAll">
+		t.id id,
+		t.logDBId,
+		t.tableName,
+		t.name,
+		t.isSync,
+		t.isEnable,
+		t.envirId
+	</sql>
+    <sql id="whereLogTablePagination">
+        <where>
+            t.isEnable = 1
+            <if test="condition.envirId != null">
+                and t.envirId = #{condition.envirId}
+            </if>
+        </where>
+
+    </sql>
+    <sql id="whereLogTableQo">
+        <where>
+            t.isEnable = 1
+            <if test="envirId != null">
+                and t.envirId = #{envirId}
+            </if>
+            <if test="tableName != null and tableName !=''">
+                and t.tableName = #{tableName}
+            </if>
+            <if test="dbName != null and dbName !=''">
+                and t.dbName = #{dbName}
+            </if>
+        </where>
+
+    </sql>
+
+	<select id="findAllLogTable" resultMap="logTableMap">
+		select 
+			<include refid="columnLogTableByAll"/>
+			from  t_log_table t where t.isEnable = 1
+	</select>
+
+	<select id="findLogTableField" parameterType="java.util.HashMap" resultMap="logFieldMap">
+		select f.name,f.field,f.type,f.id,f.tableId
+			from  t_log_field f where f.isEnable = 1 AND f.tableId = #{tableId}
+	</select>
+
+
+    <select id="findLogTableByPagination" parameterType="Pagination" resultMap="logTableMap">
+        select <include refid="columnLogTableByAll"/>
+        from t_log_table t
+        <include refid="whereLogTablePagination"/>
+        limit
+        <![CDATA[
+				#{startIndex} ,#{pageSize}
+			]]>
+    </select>
+    <select id="findlogTableByQo" parameterType="com.rising.cc.pojo.qo.log.LogTableQo" resultMap="logTableMap">
+        select <include refid="columnLogTableByAll"/>
+        from t_log_table t
+        <include refid="whereLogTableQo"/>
+    </select>
+    <select id="countLogTableByPagination" parameterType="Pagination" resultType="Integer">
+        select count(1)
+        from t_log_table t
+        <include refid="whereLogTablePagination"/>
+    </select>
+    <select id="findLogTableAndFieldById" parameterType="Integer" resultMap="logTableAndFieldMap">
+        select
+        d.id as logDBId,
+        d.name as db_name,
+        d.dbName as dbName,
+        t.id as id,
+        t.tableName as tableName,
+        t.name as name,
+        t.envirId as envirId,
+        t.isSync as isSync,
+        t.isEnable as isEnable,
+        f.id as fieldId,
+        f.name as field_name,
+        f.type as type,
+        f.fieldName as fieldName,
+        f.tableId as tableId
+        from t_log_table t
+        left outer join t_log_field f on t.id = f.tableId
+        left outer join t_log_db d on t.logDBId = d.id
+        where t.id=#{id} and t.isEnable = 1
+    </select>
+    <select id="findLogTableFieldByPagination" parameterType="Pagination" resultMap="logFieldMap">
+        select
+        f.id as id,
+        f.name as name,
+        f.type as type,
+        f.fieldName as fieldName,
+        f.tableId as tableId
+        from  t_log_field f
+        where f.tableId=#{condition.id} and f.isEnable = 1
+        limit
+        <![CDATA[
+				#{startIndex} ,#{pageSize}
+			]]>
+    </select>
+    <select id="countLogTableFieldByPagination" parameterType="Pagination" resultType="Integer">
+        select
+        count(1)
+        from  t_log_field f
+        where f.tableId=#{condition.id} and f.isEnable = 1
+    </select>
+    <insert id="saveLogTable" parameterType="LogTable">
+        insert into t_log_table(name,
+        logDBId,
+        tableName,
+        createDate,
+        isEnable,
+        isSync,
+        envirId)
+        values(#{name,jdbcType=VARCHAR},
+        #{logDB.id,jdbcType=VARCHAR},
+        #{tableName,jdbcType=VARCHAR},
+        #{createDate,jdbcType=TIMESTAMP},
+        #{isEnable,jdbcType=INTEGER},
+        #{isSync,jdbcType=INTEGER},
+        #{envirId,jdbcType=INTEGER})
+        <selectKey keyProperty="id" resultType="Integer" order="AFTER">
+            select LAST_INSERT_ID() as id
+        </selectKey>
+    </insert>
+
+    <update id="removeLogTable" parameterType="LogTable">
+        update t_log_table set isEnable = #{isEnable,jdbcType=INTEGER} where id = #{id,jdbcType=INTEGER}
+        <selectKey keyProperty="id" resultType="Integer" order="AFTER">
+            select LAST_INSERT_ID() as id
+        </selectKey>
+    </update>
+    <insert id="saveLogField" parameterType="LogField">
+        insert into t_log_field(name,
+        fieldName,
+        type,
+        tableId,
+        isEnable)
+        values(#{name,jdbcType=VARCHAR},
+        #{fieldName,jdbcType=VARCHAR},
+        #{type,jdbcType=VARCHAR},
+        #{tableId,jdbcType=INTEGER},
+        #{isEnable,jdbcType=INTEGER})
+        <selectKey keyProperty="id" resultType="Integer" order="AFTER">
+            select LAST_INSERT_ID() as id
+        </selectKey>
+    </insert>
+
+    <update id="removeLogField" parameterType="LogField">
+        update t_log_field set isEnable = #{isEnable,jdbcType=INTEGER} where id = #{id,jdbcType=INTEGER}
+        <selectKey keyProperty="id" resultType="Integer" order="AFTER">
+            select LAST_INSERT_ID() a-s id
+        </selectKey>
+    </update>
+    <update id="syncLogTable" parameterType="LogTable">
+        update t_log_table set isSync = #{isSync,jdbcType=INTEGER} where id = #{id,jdbcType=INTEGER}
+    </update>
+</mapper>

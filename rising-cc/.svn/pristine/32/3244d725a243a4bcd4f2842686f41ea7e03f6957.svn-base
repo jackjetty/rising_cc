@@ -1,0 +1,368 @@
+<#assign contextPath=springMacroRequestContext.getContextPath() />
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+		<base href="${contextPath}/" />
+		<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+		<meta charset="utf-8" />
+		<title>冉思科技-控制中心-${title!'后台管理系统'}</title>
+		<meta name="keywords" content="冉思科技-控制中心"/>
+		<meta name="description" content="冉思科技-控制中心"/>
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+
+		<link rel="shortcut icon" href="${contextPath}/resources/favicon.ico" type="image/x-icon"/>
+		<link rel="stylesheet"  href="${contextPath}/resources/assets/css/bootstrap.min.css"/>
+		<link rel="stylesheet" href="${contextPath}/resources/assets/css/font-awesome.min.css"/>
+		<link rel="stylesheet" href="${contextPath}/resources/assets/css/jquery-ui.min.css" />
+		<link rel="stylesheet" href="${contextPath}/resources/assets/css/jquery-ui.custom.min.css" />
+		<link rel="stylesheet" href="${contextPath}/resources/assets/css/chosen.min.css" />
+		<link rel="stylesheet" href="${contextPath}/resources/assets/css/jquery.gritter.min.css" />
+		<link rel="stylesheet" href="${contextPath}/resources/assets/css/bootstrap-timepicker.min.css" />
+		<link rel="stylesheet" href="${contextPath}/resources/assets/css/daterangepicker.min.css" />
+		<link rel="stylesheet" href="${contextPath}/resources/assets/css/bootstrap-datetimepicker.min.css" />
+		<link rel="stylesheet" href="${contextPath}/resources/assets/css/datepicker.min.css" />
+		<link rel="stylesheet" href="${contextPath}/resources/assets/css/ui.jqgrid.min.css" />
+		<link rel="stylesheet" href="${contextPath}/resources/assets/fonts/fonts.googleapis.com.css" />
+		<link rel="stylesheet" href="${contextPath}/resources/assets/css/ace.min.css" class="ace-main-stylesheet" id="main-ace-style" />
+		<link rel="stylesheet" href="${contextPath}/resources/dist/ladda-themeless.min.css">
+		<link rel="stylesheet" href="${contextPath}/resources/dist/sweetalert/sweetalert.css">
+		<link rel="stylesheet" href="${contextPath}/resources/css/pwd/xiniu.css">
+		<link rel="stylesheet" href="${contextPath}/resources/showloading/css/showLoading.css">
+
+        <script src="${contextPath}/resources/assets/js/ace-extra.min.js"></script>
+		<script>
+			var contextPath = "${contextPath}";
+		</script>
+        <!-- basic scripts -->
+        <script src="${contextPath}/resources/assets/js/jquery.2.1.1.min.js"></script>
+        <!--[if !IE]> -->
+		<script type="text/javascript">
+			window.jQuery || document.write("<script src='${contextPath}/resources/assets/js/jquery.min.js'>"+"<"+"/script>");
+		</script>
+  		<!--[if IE]>
+			<script type="text/javascript">
+			 window.jQuery || document.write("<script src='assets/js/jquery1x.min.js'>"+"<"+"/script>");
+			</script>
+			<![endif]-->
+		<script type="text/javascript">
+			if('ontouchstart' in document.documentElement) document.write("<script src='${contextPath}/resources/assets/js/jquery.mobile.custom.min.js'>"+"<"+"/script>");
+		</script>
+
+		<!--[if lte IE 8]>
+		  <script src="assets/js/excanvas.min.js"></script>
+		<![endif]-->
+
+		<!-- inline scripts related to this page -->
+		<script type="text/javascript">
+		
+			document.write("<script src='${contextPath}/resources/assets/js/bootstrap.min.js'>"+"<"+"/script>                   ");
+			document.write("<script src='${contextPath}/resources/assets/js/jquery-ui.custom.min.js'>"+"<"+"/script>            ");
+			document.write("<script src='${contextPath}/resources/assets/js/jquery.ui.touch-punch.min.js'>"+"<"+"/script>       ");
+			document.write("<script src='${contextPath}/resources/assets/js/chosen.jquery.min.js'>"+"<"+"/script>               ");
+			document.write("<script src='${contextPath}/resources/assets/js/bootbox.min.js'>"+"<"+"/script>                     ");
+			document.write("<script src='${contextPath}/resources/assets/js/bootstrap-datepicker.min.js'>"+"<"+"/script>        ");
+			document.write("<script src='${contextPath}/resources/assets/js/bootstrap-timepicker.min.js'>"+"<"+"/script>        ");
+			document.write("<script src='${contextPath}/resources/assets/js/moment.min.js'>"+"<"+"/script>                      ");
+			document.write("<script src='${contextPath}/resources/assets/js/daterangepicker.min.js'>"+"<"+"/script>             ");
+			document.write("<script src='${contextPath}/resources/assets/js/bootstrap-datetimepicker.min.js'>"+"<"+"/script>    ");
+			/* <!-- <script src='${contextPath}/resources/bootstrap/js/jquery.ui.core.js'>"+"<"+"/script> --> */
+			document.write("<script src='${contextPath}/resources/assets/js/jquery.jqGrid.min.js'>"+"<"+"/script>               ");
+			document.write("<script src='${contextPath}/resources/assets/js/grid.locale-en.js'>"+"<"+"/script>                  ");
+	
+			document.write("<script src='${contextPath}/resources/assets/js/fuelux.spinner.min.js'>"+"<"+"/script>              ");
+			document.write("<script src='${contextPath}/resources/assets/js/fuelux.tree.min.js'>"+"<"+"/script>                 ");
+			document.write("<script src='${contextPath}/resources/assets/js/fuelux.tree-sampledata.js'>"+"<"+"/script>          ");
+	
+			document.write("<script src='${contextPath}/resources/assets/js/jquery.nestable.min.js'>"+"<"+"/script>             ");
+	
+			document.write("<script src='${contextPath}/resources/assets/js/jquery.easypiechart.min.js'>"+"<"+"/script>         ");
+			document.write("<script src='${contextPath}/resources/assets/js/jquery.sparkline.min.js'>"+"<"+"/script>            ");
+			document.write("<script src='${contextPath}/resources/assets/js/jquery.flot.min.js'>"+"<"+"/script>                 ");
+			document.write("<script src='${contextPath}/resources/assets/js/jquery.flot.pie.min.js'>"+"<"+"/script>             ");
+			document.write("<script src='${contextPath}/resources/assets/js/jquery.flot.resize.min.js'>"+"<"+"/script>          ");
+	
+			/* <!-- ace scripts -->  */
+			document.write("<script src='${contextPath}/resources/assets/js/ace-elements.min.js'>"+"<"+"/script>                ");
+			document.write("<script src='${contextPath}/resources/assets/js/ace.min.js'>"+"<"+"/script>                         ");
+			document.write("<script src='${contextPath}/resources/js/encrypt/md5/md5-min.js'>"+"<"+"/script>                    ");
+			document.write("<script src='${contextPath}/resources/dist/spin.min.js'>"+"<"+"/script>                             ");
+			document.write("<script src='${contextPath}/resources/dist/ladda.min.js'>"+"<"+"/script>                            ");
+			document.write("<script src='${contextPath}/resources/dist/sweetalert/sweetalert.min.js'>"+"<"+"/script>            ");
+		document.write("<script src='${contextPath}/resources/showloading/js/jquery.showLoading.min.js'>"+"<"+"/script>     ");
+		
+			/****
+				* responseText 必须为文本，
+				* 成功为true
+				* 失败为false
+				**/
+			CheckAjaxResponseHandler={
+				checkAjaxResponse : function(data){
+					var responseText = JSON.stringify(data);
+					if(responseText=="true"){
+						bootbox.alert({
+				            buttons: {  
+				               ok: {  
+				                    label: "确定",  
+				                    className: "btn-info"  
+				                }  
+				            },  
+				            message: "<h4>操作成功！</h4>",  
+				            callback: function() {  
+				                //alert('关闭了alert');  
+				            },  
+				            title: "提示信息",  
+				        });
+						return false;
+					}else if(responseText=="false"){
+						bootbox.alert({
+				            buttons: {  
+				               ok: {  
+				                    label: "确定",  
+				                    className: "btn-info"  
+				                }  
+				            },  
+				            message: "<h4>抱歉，操作失败，请重新尝试！</h4>",  
+				            callback: function() {  
+				                //alert('关闭了alert');  
+				            },  
+				            title: "提示信息",  
+				        });
+						return false;
+					}
+					return true;
+				}
+					
+			};
+			
+			//全局的AJAX访问，处理AJAX请求时session失效或者没有权限
+			$.ajaxSetup({
+			    contentType:"application/x-www-form-urlencoded;charset=utf-8",
+			    complete:function(XMLHttpRequest,textStatus){
+			    	var responseText = JSON.stringify(XMLHttpRequest.responseText);
+					if(responseText.indexOf("2bbd2bb7d8e5733b43eafcf8d39b2123") != -1){//没有权限
+						bootbox.alert({
+				            buttons: {
+				               ok: {  
+				                    label: "确定",  
+				                    className: "btn-info"  
+				                }  
+				            },  
+				            message: "<h4>抱歉，您没有做此操作权限！</h4>",  
+				            callback: function() {  
+				                //alert('关闭了alert');  
+				            },  
+				            title: "提示信息",  
+				        });
+					
+						window.setTimeout(function(){
+							    bootbox.hideAll();
+							}, 1200);
+					}else if(responseText.indexOf("3c73b601a6ef00ce6546ed4a1c843716") != -1){//登录认证信息失效
+						 window.location.href="${contextPath}/login";
+					}
+					
+					
+			    }
+			});
+			
+			//全局的AJAX错误响应处理
+			$(document).ajaxError(function(event,xhr,options){
+				var path = "${contextPath}/error/500";
+				var tag = false;
+			     switch (xhr.status){
+			        case 404:
+			        	tag= true;
+			        	path = "${contextPath}/error/404";
+			        break;
+			        case 400:
+			        	tag= true;
+			        	path = "${contextPath}/error/400";
+			        break;
+			        case 500:
+			        	tag= true;
+			        	path = "${contextPath}/error/500";
+			        break;
+			        default:
+			        	path = "${contextPath}/error/500";
+			        break;
+			     }
+			     if(tag){
+				     $("#main-content-inner-id").load(path);
+			     }
+			});
+			
+			
+			$(window).triggerHandler('resize.jqGrid');//trigger window resize to make the grid get the correct size
+			
+			function aceSwitch( cellvalue, options, cell ) {
+				setTimeout(function(){
+					$(cell) .find('input[type=checkbox]')
+						.addClass('ace ace-switch ace-switch-5')
+						.after('<span class="lbl"></span>');
+				}, 0);
+			}
+			//enable datepicker
+			function pickDate( cellvalue, options, cell ) {
+				setTimeout(function(){
+					$(cell).find('input[type=text]')
+							.datepicker({format:'yyyy-mm-dd' , autoclose:true}); 
+				}, 0);
+			}
+			
+			function datePick(elem){
+				jQuery(elem).datetimepicker(
+						{//dd周  MM月 
+							format : "YYYY-MM-DD HH:mm:ss",
+							autoclose : true
+						}
+					);
+			}
+			
+			
+			function style_edit_form(form) {
+				//enable datepicker on "sdate" field and switches for "stock" field
+				form.find('input[name=sdate]').datepicker({format:'yyyy-mm-dd' , autoclose:true});
+				
+				form.find('input[name=stock]').addClass('ace ace-switch ace-switch-5').after('<span class="lbl"></span>');
+						   //don't wrap inside a label element, the checkbox value won't be submitted (POST'ed)
+						  //.addClass('ace ace-switch ace-switch-5').wrap('<label class="inline" />').after('<span class="lbl"></span>');
+			
+						
+				//update buttons classes
+				var buttons = form.next().find('.EditButton .fm-button');
+				buttons.addClass('btn btn-sm').find('[class*="-icon"]').hide();//ui-icon, s-icon
+				buttons.eq(0).addClass('btn-primary').prepend('<i class="ace-icon fa fa-check"></i>');
+				buttons.eq(1).prepend('<i class="ace-icon fa fa-times"></i>');
+				
+				buttons = form.next().find('.navButton a');
+				buttons.find('.ui-icon').hide();
+				buttons.eq(0).append('<i class="ace-icon fa fa-chevron-left"></i>');
+				buttons.eq(1).append('<i class="ace-icon fa fa-chevron-right"></i>');		
+			}
+			
+			function style_delete_form(form) {
+				var buttons = form.next().find('.EditButton .fm-button');
+				buttons.addClass('btn btn-sm btn-white btn-round').find('[class*="-icon"]').hide();//ui-icon, s-icon
+				buttons.eq(0).addClass('btn-danger').prepend('<i class="ace-icon fa fa-trash-o"></i>');
+				buttons.eq(1).addClass('btn-default').prepend('<i class="ace-icon fa fa-times"></i>')
+			}
+			
+			function style_search_filters(form) {
+				form.find('.delete-rule').val('X');
+				form.find('.add-rule').addClass('btn btn-xs btn-primary');
+				form.find('.add-group').addClass('btn btn-xs btn-success');
+				form.find('.delete-group').addClass('btn btn-xs btn-danger');
+			}
+			function style_search_form(form) {
+				var dialog = form.closest('.ui-jqdialog');
+				var buttons = dialog.find('.EditTable');
+				buttons.find('.EditButton a[id*="_reset"]').addClass('btn btn-sm btn-info').find('.ui-icon').attr('class', 'ace-icon fa fa-retweet');
+				buttons.find('.EditButton a[id*="_query"]').addClass('btn btn-sm btn-inverse').find('.ui-icon').attr('class', 'ace-icon fa fa-comment-o');
+				buttons.find('.EditButton a[id*="_search"]').addClass('btn btn-sm btn-purple').find('.ui-icon').attr('class', 'ace-icon fa fa-search');
+			}
+			
+			function beforeDeleteCallback(e) {
+				var form = $(e[0]);
+				if(form.data('styled')) return false;
+				
+				form.closest('.ui-jqdialog').find('.ui-jqdialog-titlebar').wrapInner('<div class="widget-header" />');
+				style_delete_form(form);
+				
+				form.data('styled', true);
+			}
+			
+			function beforeEditCallback(e) {
+				var form = $(e[0]);
+				form.closest('.ui-jqdialog').find('.ui-jqdialog-titlebar').wrapInner('<div class="widget-header" />');
+				style_edit_form(form);
+			}
+			
+			
+			
+			//it causes some flicker when reloading or navigating grid
+			//it may be possible to have some custom formatter to do this as the grid is being created to prevent this
+			//or go back to default browser checkbox styles for the grid
+			function styleCheckbox(table) {
+			/**
+				$(table).find('input:checkbox').addClass('ace')
+				.wrap('<label />')
+				.after('<span class="lbl align-top" />')
+			
+			
+				$('.ui-jqgrid-labels th[id*="_cb"]:first-child')
+				.find('input.cbox[type=checkbox]').addClass('ace')
+				.wrap('<label />').after('<span class="lbl align-top" />');
+			*/
+			}
+			
+			
+			//unlike navButtons icons, action icons in rows seem to be hard-coded
+			//you can change them like this in here if you want
+			function updateActionIcons(table) {
+				/**
+				var replacement = 
+				{
+					'ui-ace-icon fa fa-pencil' : 'ace-icon fa fa-pencil blue',
+					'ui-ace-icon fa fa-trash-o' : 'ace-icon fa fa-trash-o red',
+					'ui-icon-disk' : 'ace-icon fa fa-check green',
+					'ui-icon-cancel' : 'ace-icon fa fa-times red'
+				};
+				$(table).find('.ui-pg-div span.ui-icon').each(function(){
+					var icon = $(this);
+					var $class = $.trim(icon.attr('class').replace('ui-icon', ''));
+					if($class in replacement) icon.attr('class', 'ui-icon '+replacement[$class]);
+				})
+				*/
+			}
+
+			//replace icons with FontAwesome icons like above
+			function updatePagerIcons(table) {
+				var replacement = 
+				{
+					'ui-icon-seek-first' : 'ace-icon fa fa-angle-double-left bigger-140',
+					'ui-icon-seek-prev' : 'ace-icon fa fa-angle-left bigger-140',
+					'ui-icon-seek-next' : 'ace-icon fa fa-angle-right bigger-140',
+					'ui-icon-seek-end' : 'ace-icon fa fa-angle-double-right bigger-140'
+				};
+				$('.ui-pg-table:not(.navtable) > tbody > tr > .ui-pg-button > .ui-icon').each(function(){
+					var icon = $(this);
+					var $class = $.trim(icon.attr('class').replace('ui-icon', ''));
+					
+					if($class in replacement) icon.attr('class', 'ui-icon '+replacement[$class]);
+				})
+			}
+			
+			function enableTooltips(table) {
+				$('.navtable .ui-pg-button').tooltip({container:'body'});
+				$(table).find('.ui-pg-div').tooltip({container:'body'});
+			}
+			
+			function getCurrDate(){
+				var nowDate = new Date();
+				var month = nowDate.getMonth()+1;
+				var date = nowDate.getDate();
+				if(month< 10){
+					month = "0"+month;
+				}
+				if(date< 10){
+					date = "0"+date;
+				}
+				
+				return nowDate.getFullYear()+"-"+month+"-"+date;
+			}
+			
+			function getDateByDayCalc(days){
+				var nowDate = new Date();
+				var month = nowDate.getMonth()+1;
+				var date = parseInt(nowDate.getDate())+parseInt(days);
+				if(month< 10){
+					month = "0"+month;
+				}
+				if(date< 10){
+					date = "0"+date;
+				}
+				
+				return nowDate.getFullYear()+"-"+month+"-"+date;
+			}
+		</script>
+</head>

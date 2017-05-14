@@ -1,0 +1,54 @@
+<#assign contextPath=springMacroRequestContext.getContextPath() />
+<div class="breadcrumbs" id="breadcrumbs">
+	<script type="text/javascript">
+		try{ace.settings.check('breadcrumbs' , 'fixed')}catch(e){}
+	</script>
+	
+<!-- 传说中的面包屑，，自己修改成自己的   begin -->
+	<ul class="breadcrumb">
+		<li>
+			<i class="icon-home home-icon"></i>
+			<a href="${contextPath}/index">首页</a>
+		</li>
+		<li class="active">用户管理</li>
+	</ul><!-- .breadcrumb -->
+<!-- 传说中的面包屑，，自己修改成自己的  end -->
+
+</div>
+
+<div class="page-content">
+    <div class="tabbable">
+        <ul class="nav nav-tabs" id="myTab">
+            <#list envirTypeDtoList as envT>
+                <li class="<#if envT_index == 0>in active</#if>">
+                    <a data-toggle="tab" href="#${envT.envirCode!''}" onclick="getSelect(${envT.id})">
+                        <i class="<#if envT_index==0>yellow ace-icon fa fa-cogs bigger-120
+										<#elseif envT_index==1>green ace-icon fa fa-cog bigger-120
+										<#elseif envT_index==2>red ace-icon fa fa-bullhorn bigger-120
+										<#elseif envT_index==3>blue ace-icon fa fa-cogs bigger-120
+										<#elseif envT_index==4>green ace-icon fa fa-cogs bigger-120
+										<#else>yellow ace-icon fa fa-cogs bigger-120
+										</#if>"></i>${envT.envirName!''}
+                    </a>
+                </li>
+            </#list>
+        </ul>
+    </div><!-- tabable-->
+    <div class="tab-content" id="content_env_pro_div">
+        <#list envirTypeDtoList as envT>
+        <div id="${envT.envirCode!''}" class="tab-pane fade <#if envT_index == 0>in active</#if>">
+            <div class="tabbable tabs-left">
+                <div class="tab-content">
+                            <table id="grid-table-${envT.id}"></table>
+                            <div id="grid-pager-${envT.id}"></div>
+                            <!-- PAGE CONTENT ENDS -->
+                </div>
+            </div>
+        </div>
+        </#list>
+    </div>
+</div><!-- /.page-content -->
+
+<script type="text/javascript">
+    var $path_base = "/";
+</script>

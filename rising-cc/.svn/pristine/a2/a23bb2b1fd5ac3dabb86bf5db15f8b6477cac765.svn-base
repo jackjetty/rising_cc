@@ -1,0 +1,219 @@
+<#assign contextPath=springMacroRequestContext.getContextPath() />
+<div class="modal-header">
+	<button type="button" class="close" data-dismiss="modal">&times;</button>
+	<h4 class="blue bigger" ><#if oper?? && oper='edit'>设置<#else>查看</#if>个人用户信息</h4>
+</div>
+
+<div class="modal-body"  style="width: 700px">
+
+<div class="alert alert-danger" style="display: none;" id="alert_error">
+	<button type="button" class="close" data-dismiss="alert">
+		<i class="ace-icon fa fa-times"></i>
+	</button>
+
+	<strong>
+		<i class="ace-icon fa fa-times"></i>
+		错误！
+	</strong>
+		<span id="alert_error_content">保存失败！</span>
+	<br />
+</div>
+
+<div class="alert alert-block alert-success" style="display: none;" id="alert_success">
+	<button type="button" class="close" data-dismiss="alert">
+		<i class="ace-icon fa fa-times"></i>
+	</button>
+
+	<p>
+		<strong>
+			<i class="ace-icon fa fa-check"></i>
+			成功 ！
+		</strong>
+		<span id="alert_success_content">保存成功！</span>
+	</p>
+
+</div>
+	
+	
+	
+	
+	
+<div class="row">
+	<div class="col-xs-12">	
+		<form class="form-horizontal" id="sample-form">
+			
+		<!-- 	<div class="form-group has-error">
+				<label for="inputError" class="col-xs-12 col-sm-3 col-md-3 control-label no-padding-right">Input with error</label>
+	
+				<div class="col-xs-12 col-sm-5">
+					<span class="block input-icon input-icon-right">
+						<input type="text" id="inputError" class="width-100" />
+						<i class="ace-icon fa fa-times-circle"></i>
+					</span>
+				</div>
+				<div class="help-block col-xs-12 col-sm-reset inline"> Error tip help! </div>
+			</div>
+	
+			<div class="form-group has-success">
+				<label for="inputSuccess" class="col-xs-12 col-sm-3 control-label no-padding-right">Input with success</label>
+	
+				<div class="col-xs-12 col-sm-5">
+					<span class="block input-icon input-icon-right">
+						<input type="text" id="inputSuccess" class="width-100" />
+						<i class="ace-icon fa fa-check-circle"></i>
+					</span>
+				</div>
+				<div class="help-block col-xs-12 col-sm-reset inline"> Success tip help! </div>
+			</div> -->
+			<div class="form-group has-info">
+				<label for="inputInfo" class="col-xs-12 col-sm-3 control-label no-padding-right">用户名：</label>
+				<div class="col-xs-12 col-sm-5">
+					<span class="block input-icon input-icon-right">
+						<input type="text" id="userName" class="width-100" value="${dto.userName!''}" style="border: 0px" readonly="readonly"/>
+						<i class="ace-icon fa "></i>
+					</span>
+				</div>
+				<div class="help-block col-xs-12 col-sm-reset inline"></div>
+			</div>
+			
+			<div class="form-group has-info">
+				<label for="inputInfo" class="col-xs-12 col-sm-3 control-label no-padding-right">真实姓名：</label>
+				<div class="col-xs-12 col-sm-5">
+					<span class="block input-icon input-icon-right">
+						<input type="text" id="realName" class="width-100" value="${dto.realName!''}"  onblur="checkValue($(this));" <#if oper?? && oper='view'>style="border: 0px" readonly="readonly"</#if>/>
+						<i class="ace-icon fa "></i>
+					</span>
+				</div>
+				<div class="help-block col-xs-12 col-sm-reset inline"></div>
+			</div>
+			
+			<div class="form-group has-info">
+				<label for="inputInfo" class="col-xs-12 col-sm-3 control-label no-padding-right">邮箱：</label>
+				<div class="col-xs-12 col-sm-5">
+					<span class="block input-icon input-icon-right">
+						<input type="text" id="email" class="width-100" value="${dto.email!''}"  onblur="checkValue($(this));" <#if oper?? && oper='view'>style="border: 0px" readonly="readonly"</#if>/>
+						<i class="ace-icon fa "></i>
+					</span>
+				</div>
+				<div class="help-block col-xs-12 col-sm-reset inline"></div>
+			</div>
+			
+			<div class="form-group has-info">
+				<label for="inputInfo" class="col-xs-12 col-sm-3 control-label no-padding-right">手机号码：</label>
+				<div class="col-xs-12 col-sm-5">
+					<span class="block input-icon input-icon-right">
+						<input type="text" id="telphone" class="width-100" value="${dto.telphone!''}"  onblur="checkValue($(this));" <#if oper?? && oper='view'>style="border: 0px" readonly="readonly"</#if>/>
+						<i class="ace-icon fa "></i>
+					</span>
+				</div>
+				<div class="help-block col-xs-12 col-sm-reset inline"></div>
+			</div>
+			
+			<div class="form-group has-info">
+				<label for="inputInfo" class="col-xs-12 col-sm-3 control-label no-padding-right">备注：</label>
+				<div class="col-xs-12 col-sm-5">
+					<span class="block input-icon input-icon-right">
+						<input type="text" id="note" class="width-100" value="${dto.note!''}" <#if oper?? && oper='view'>style="border: 0px" readonly="readonly"</#if>/>
+						<i class="ace-icon fa "></i>
+					</span>
+				</div>
+				<div class="help-block col-xs-12 col-sm-reset inline"></div>
+			</div>
+			
+			<div class="form-group has-info">
+				<label for="inputInfo" class="col-xs-12 col-sm-3 control-label no-padding-right">状态：</label>
+				<div class="col-xs-12 col-sm-5">
+					<span class="block input-icon input-icon-right">
+						<input type="text" id="" class="width-100" value="<#if dto.status==1>启用<#else>禁用</#if>" style="border: 0px" readonly="readonly"/>
+						<i class="ace-icon fa "></i>
+					</span>
+				</div>
+				<div class="help-block col-xs-12 col-sm-reset inline"></div>
+			</div>
+			
+		</form>
+
+	</div>
+</div>
+	
+</div>
+
+<div class="modal-footer">
+	<button class="btn btn-sm btn-danger" data-dismiss="modal"><i class="ace-icon fa fa-times"></i>关闭</button>
+	<#if oper?? && oper='edit'>
+	<button class="btn btn-sm btn-primary ladda-button" onclick="submitUserInfo();" id="submit_btn" data-style="slide-down"><span class="ladda-label"><i class="ace-icon fa fa-check"></i>保存</span></button>
+	</#if>
+</div>
+<script type="text/javascript">
+///header头部 设置以及个人资料 模态框
+	$("#modal-form-header").on("hide.bs.modal", function () {
+			$(this).removeData("bs.modal");
+	});
+	
+	function submitUserInfo(){
+		var realName = $("#realName").val();
+		var email = $("#email").val();
+		var telphone = $("#telphone").val();
+		var note = $("#note").val();
+		
+		if(!checkValue($("#realName")) 
+				|| !checkValue($("#email")) 
+				|| !checkValue($("#telphone"))){
+			return;
+		}
+		
+		var ladda = Ladda.create(document.querySelector("#submit_btn"));
+		ladda.start();
+		
+		$.ajax({
+            url: "${contextPath}/user/update_user_basic_info",
+            type: "post",
+            data: {realName: realName, email: email, telphone: telphone, note: note},
+            dataType: "text",
+            success: function (data) {
+                if (data == "success") {
+                    show_success("保存成功！");
+                } else {
+                    show_error("保存失败！");
+                }
+                ladda.stop();
+            },
+            error: function () {
+                show_error("保存失败！");
+                ladda.stop();
+            }
+        });
+}
+	
+	function checkValue(object){
+		var value = object.val().trim();
+		if(value == null || value == ""){
+			object.next().addClass("fa-times-circle");
+			object.parent().parent().next().html("不可为空");
+			object.parent().parent().parent().addClass("has-error");
+			object.parent().parent().parent().removeClass("has-info");
+			return false;
+		}else{
+			object.next().removeClass("fa-times-circle");
+			object.parent().parent().next().html("");
+			object.parent().parent().parent().removeClass("has-error");
+			object.parent().parent().parent().addClass("has-info");
+			return true;
+		}
+	}
+	
+	function show_success(content){
+		$("#alert_success").show();
+		$("#alert_success_content").html(content);
+		$("#alert_error").hide();
+		window.setTimeout("$('#alert_success').hide();$('#alert_success_content').html('');", 2000);
+	}
+	
+	function show_error(content){
+		$("#alert_error").show();
+		$("#alert_error_content").html(content);
+		$("#alert_success").hide();
+		window.setTimeout("$('#alert_error').hide();$('#alert_error_content').html('');", 2000);
+	}
+	
+</script>

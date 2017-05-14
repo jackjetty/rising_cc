@@ -1,0 +1,154 @@
+<#assign contextPath=springMacroRequestContext.getContextPath() />
+<div class="breadcrumbs" id="breadcrumbs">
+	<script type="text/javascript">
+		try{ace.settings.check('breadcrumbs' , 'fixed')}catch(e){}
+	</script>
+	
+<!-- 传说中的面包屑，，自己修改成自己的   begin -->
+	<ul class="breadcrumb">
+		<li>
+			<i class="icon-home home-icon"></i>
+			<a href="${contextPath}/index">首页</a>
+		</li>
+		<li class="active">用户管理</li>
+	</ul><!-- .breadcrumb -->
+<!-- 传说中的面包屑，，自己修改成自己的  end -->
+
+</div>
+
+<div class="page-content">
+    <div class="row">
+    <div class="col-xs-12">
+        <!-- PAGE CONTENT BEGINS -->
+
+        <table id="grid-table"></table>
+
+        <div id="grid-pager"></div>
+
+        <div id="modal-form" class="modal" tabindex="-1">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                        <h4 class="blue bigger" >新增节点</h4>
+                    </div>
+
+                    <div class="alert alert-danger" style="display: none;" id="alert_error">
+                        <button type="button" class="close" data-dismiss="alert">
+                            <i class="ace-icon fa fa-times"></i>
+                        </button>
+
+                        <strong>
+                            <i class="ace-icon fa fa-times"></i>
+                            错误！
+                        </strong>
+                        保存失败！
+                        <br />
+                    </div>
+
+                    <div class="alert alert-block alert-success" style="display: none;" id="alert_success">
+                        <button type="button" class="close" data-dismiss="alert">
+                            <i class="ace-icon fa fa-times"></i>
+                        </button>
+
+                        <p>
+                            <strong>
+                                <i class="ace-icon fa fa-check"></i>
+                                成功 ！
+                            </strong>
+                            保存成功！
+                        </p>
+
+                    </div>
+                    <div class="modal-body" style="height: 500px;overflow:auto ;">
+                        <div class="row">
+                            <div class="col-xs-12 col-sm-1">
+                                <div class="space"></div>
+                            </div>
+                            <div class="col-xs-12 col-sm-11">
+                                <div class="form-group">
+                                    <div>
+                                        <label for="form-field-node">节点：</label>
+                                        <input type="text" id="form-field-node" placeholder="节点" value="" />
+                                        <div class="help-block col-xs-12 col-sm-reset inline"></div>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <div>
+                                        <label for="form-field-nodeName">节点名称：</label>
+                                        <input type="text" id="form-field-nodeName" placeholder="节点名称" value="" />
+                                        <div class="help-block col-xs-12 col-sm-reset inline"></div>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <div>
+                                        <label for="form-field-isEmpty">是否为空：</label>
+                                        <label>
+                                            <input name="switch-field-isNull" class="ace ace-switch ace-switch-5" type="checkbox"  id="form-field-isEmpty"/>
+                                            <span class="lbl"></span>
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <div>
+                                        <label for="form-field-nodeType">节点类型：</label>
+                                        <label>
+                                            <select class="form-control" id="form-field-nodeType">
+                                                <option value="0">String</option>
+                                                <option value="1">Date</option>
+                                                <option value="2">int</option>
+                                                <option value="3">double</option>
+                                                <option value="4">object</option>
+                                            </select>
+                                            <span class="lbl"></span>
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <div>
+                                        <label for="form-field-nodeLength">节点长度：</label>
+                                        <input type="text" id="form-field-nodeLength" placeholder="默认值" value="" />
+                                        <div class="help-block col-xs-12 col-sm-reset inline"></div>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <div>
+                                        <label for="form-field-default">默认值：</label>
+                                        <input type="text" id="form-field-default" placeholder="默认值" value="" />
+                                        <div class="help-block col-xs-12 col-sm-reset inline"></div>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <div>
+                                        <label for="form-field-remark">说明：</label>
+                                        <input type="text" id="form-field-remark" placeholder="说明" value="" />
+                                        <div class="help-block col-xs-12 col-sm-reset inline"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="modal-footer">
+                        <button class="btn btn-sm" data-dismiss="modal">
+                            <i class="ace-icon fa fa-times"></i>
+                            取消
+                        </button>
+
+                        <button class="btn btn-sm btn-primary ladda-button" data-style="slide-down" onclick="addInterfInfoSubmit();" id="submit_btn">
+														<span class="ladda-label"><i class="ace-icon fa fa-check"></i>
+														保存</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- PAGE CONTENT ENDS -->
+    </div><!-- /.col -->
+</div><!-- /.row -->
+</div><!-- /.page-content -->
+
+<script type="text/javascript">
+    var $path_base = "/";
+</script>

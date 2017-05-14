@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.rising.cc.dao.intf.InterfInfoDao">
+	
+	<resultMap type="InterfInfo" id="interfInfoMap">
+		<id property="id" column="id" />
+		<result property="interfMethod.id" column="methodId" />
+		<result property="parentInterfInfo.id" column="parentId" />
+		<result property="node" column="node" />
+		<result property="nodeName" column="nodeName" />
+		<result property="nodeType" column="nodeType" />
+		<result property="nodeLength" column="nodeLength" />
+		<result property="defaultValue" column="defaultValue" />
+		<result property="isEmpty" column="isEmpty" />
+		<result property="remark" column="remark" />
+	</resultMap>
+
+	<sql id="columnInterfInfoByAll">
+		t.id,
+		t.methodId,
+		t.parentId,
+		t.node,
+		t.nodeName,
+		t.nodeType,
+		t.nodeLength,
+		t.defaultValue,
+		t.isEmpty,
+		t.remark
+	</sql>
+
+
+
+    <select id="findInterfInfoByPagination" parameterType="Pagination" resultMap="interfInfoMap">
+        select <include refid="columnInterfInfoByAll"/>
+        from t_interface_info t where t.parentId = 0 and t.methodId = #{condition.methodId,jdbcType=INTEGER}
+    </select>
+    <select id="findChildInterfInfoByPagination" parameterType="Pagination" resultMap="interfInfoMap">
+        select <include refid="columnInterfInfoByAll"/>
+        from t_interface_info t where parentId = #{condition.parentId,jdbcType=INTEGER}
+    </select>
+    <select id="countInterfInfoByPagination" parameterType="Pagination" resultType="Integer">
+        select count(1)
+        from t_interface_info t
+    </select>
+    <insert id="insertInterfInfo" parameterType="InterfInfo">
+        insert into t_interface_info(methodId,
+        parentId,
+        node,
+        nodeName,
+        nodeType,
+        nodeLength,
+        defaultValue,
+        isEmpty,
+        remark)
+        values(#{interfMethod.id,jdbcType=INTEGER},
+        #{parentInterfInfo.id,jdbcType=INTEGER},
+        #{node,jdbcType=VARCHAR},
+        #{nodeName,jdbcType=VARCHAR},
+        #{nodeType,jdbcType=INTEGER},
+        #{nodeLength,jdbcType=INTEGER},
+        #{defaultValue,jdbcType=VARCHAR},
+        #{isEmpty,jdbcType=INTEGER},
+        #{remark,jdbcType=VARCHAR}
+        )
+    </insert>
+
+    <update id="updateInterfInfo" parameterType="InterfInfo">
+        update t_interface_info
+        <set>
+            <if test="node != null and node != ''">
+                node = #{node,jdbcType=VARCHAR},
+            </if>
+            <if test="nodeName != null and nodeName != ''">
+                nodeName = #{nodeName,jdbcType=VARCHAR},
+            </if>
+            <if test="nodeType != null">
+                nodeType = #{nodeType,jdbcType=INTEGER},
+            </if>
+            <if test="nodeLength != null">
+                nodeLength = #{nodeLength,jdbcType=INTEGER},
+            </if>
+            <if test="isEmpty != null">
+                isEmpty = #{isEmpty,jdbcType=INTEGER},
+            </if>
+            <if test="defaultValue != null and defaultValue != ''">
+                defaultValue = #{defaultValue,jdbcType=VARCHAR},
+            </if>
+            <if test="remark != null and remark != ''">
+                remark = #{remark,jdbcType=VARCHAR},
+            </if>
+        </set>
+        where id = #{id,jdbcType=INTEGER}
+    </update>
+
+    <delete id="deleteInterfInfo" parameterType="InterfInfo">
+        delete FROM t_interface_info  where id = #{id,jdbcType=INTEGER}
+    </delete>
+</mapper>

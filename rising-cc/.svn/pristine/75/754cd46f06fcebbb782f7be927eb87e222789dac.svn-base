@@ -1,0 +1,353 @@
+<#assign contextPath=springMacroRequestContext.getContextPath() />
+<script>
+    var grid_selector = "#grid-table-${envirTypeDtoList[0].id}";
+    var pager_selector = "#grid-pager-${envirTypeDtoList[0].id}";
+    var envirId = "${envirTypeDtoList[0].id}";
+    var width = $("#table").width()-50;
+    var fields = [];
+    var historyTable;
+    var count;
+    var colNames = [];
+    var colModel = [];
+    var page = 1;
+    function getSelect(id){
+        fields = [];
+        historyTable = "";
+        grid_selector = "#grid-table-"+id;
+        pager_selector = "#grid-pager-"+id;
+        $.ajax({
+            type: "POST",
+            url: "${contextPath}/log/find_table_list",
+            data: "envirId="+id ,
+            success: function (msg) {
+                $("#table-"+id).empty();
+                var json = eval(msg);
+                var tableList="";
+                for (var i = 0; i < json.length; i++) {
+                    tableList+= "<div class='radio'><label>"+
+                    "<input name='form-field-radio' type='radio' class='ace' value='"+json[i].id+"'/>"+
+                    "<span class='lbl'>"+json[i].name+"</span>"+
+                    "</label></div>"
+                }
+                $("#table-"+id).append(tableList);
+            },
+            error: function (e) {
+                alert("错误");
+            }
+        });
+        page = 1;
+    }
+
+    function selectCondition(envir) {
+        if(historyTable == $('input:radio:checked').val()){
+            return;
+        }
+        historyTable = $('input:radio:checked').val();
+        $.ajax({
+            type: "POST",
+            url: "${contextPath}/log/find_table_by_id",
+            data: "id=" + historyTable ,
+            success: function (msg) {
+                $("#search-div-"+envir).empty();
+                var json = eval(msg);
+                count = 0;
+                envirId = envir;
+                for (var i = 0; i < json.length; i++) {
+                    createSearchOptions(json[i]);
+                }
+            },
+            error: function (e) {
+                alert("请选择一张表");
+            }
+        });
+        page = 1;
+    }
+
+    function createSearchOptions(obj) {
+        fields[count] = obj.fieldName;
+        colNames[count] = obj.name;
+        colModel[count] = eval({
+            "name": obj.fieldName,
+            "width": "150"
+        });
+        count++;
+        var searchOption;
+        if (obj.type == "0") {
+            searchOption = "<div class='form-group'><div class='col-xs-9'><label class='col-sm-3 control-label no-padding-right'> " + obj.name + ":</label><div class='input-group col-xs-5'>" +
+            "<div class='input-group-btn'><button id='"+obj.fieldName+"-"+envirId+"-button' type='button'　 class='btn btn-sm dropdown-toggle' data-toggle='dropdown' value='0'>等于"+
+            "<span class='caret'></span></button>"+
+            "<ul class='dropdown-menu'> <li><a  onclick='$(\"#"+obj.fieldName+"-"+envirId+"-button\").text(\"等于\").append(\"<span class=caret></span>\").val(\"0\")'>等于</a></li>"+
+            "<li><a  onclick='$(\"#"+obj.fieldName+"-"+envirId+"-button\").text(\"模糊\").append(\"<span class=caret></span>\").val(\"1\")'>模糊</a></li>"+
+            "<li><a  onclick='$(\"#"+obj.fieldName+"-"+envirId+"-button\").text(\"不等于\").append(\"<span class=caret></span>\").val(\"2\")'>不等于</a></li>"+
+            "</ul></div><input  name='" + obj.fieldName + "' class='form-control String' type='text'/>"+
+            "</div></div></div>";
+        } else if (obj.type == "2") {
+            searchOption = "<div class='form-group'><div class='col-xs-9'><label class='col-sm-3 control-label no-padding-right'> " + obj.name + ":</label><div class='input-group col-xs-5'>" +
+            "<div class='input-group-btn'><button id='"+obj.fieldName+"-"+envirId+"-button' type='button'　 class='btn btn-sm dropdown-toggle' data-toggle='dropdown'value='3'>等于"+
+            "<span class='caret'></span></button>"+
+            "<ul class='dropdown-menu'> <li><a  onclick='$(\"#"+obj.fieldName+"-"+envirId+"-button\").text(\"等于\").append(\"<span class=caret></span>\").val(\"3\");$(\"#"+obj.fieldName+"-"+envirId+"-hidden\").addClass(\"hidden\");'>等于</a></li>"+
+            "<li><a  onclick='$(\"#"+obj.fieldName+"-"+envirId+"-button\").text(\"不等于\").append(\"<span class=caret></span>\").val(\"4\");$(\"#"+obj.fieldName+"-"+envirId+"-hidden\").addClass(\"hidden\");'>不等于</a></li>"+
+            "<li><a  onclick='$(\"#"+obj.fieldName+"-"+envirId+"-button\").text(\"大于等于\").append(\"<span class=caret></span>\").val(\"5\");$(\"#"+obj.fieldName+"-"+envirId+"-hidden\").addClass(\"hidden\");'>大于等于</a></li>"+
+            "<li><a  onclick='$(\"#"+obj.fieldName+"-"+envirId+"-button\").text(\"小于等于\").append(\"<span class=caret></span>\").val(\"6\");$(\"#"+obj.fieldName+"-"+envirId+"-hidden\").addClass(\"hidden\");'>小于等于</a></li>"+
+            "<li><a  onclick='$(\"#"+obj.fieldName+"-"+envirId+"-button\").text(\"范围\").append(\"<span class=caret></span>\").val(\"7\");$(\"#"+obj.fieldName+"-"+envirId+"-hidden\").removeClass(\"hidden\")'>范围</a></li>"+
+            "</ul></div><div class='col-xs-4'style='padding-left:0 '><input  name='" + obj.fieldName + "-1' class='form-control int' type='text'/>" +
+            "</div><input id = '" + obj.fieldName +"-"+envirId+ "-hidden'  name='" + obj.fieldName + "-2'  class='col-xs-4 hidden int' type='text'/></div></div></div>";
+        } else if (obj.type == "1") {
+            searchOption = "<div class='form-group'><div class='col-xs-9'><label class='col-sm-3 control-label no-padding-right'> " + obj.name + ":</label><div class='input-group col-xs-9'>" +
+            "<div class='input-group-btn'><button id='"+obj.fieldName+"-"+envirId+"-button' type='button'　 class='btn btn-sm dropdown-toggle' data-toggle='dropdown' value='8'>大于等于"+
+            "<span class='caret'></span></button>"+
+            "<ul class='dropdown-menu'> <li><a  onclick='$(\"#"+obj.fieldName+"-"+envirId+"-button\").text(\"大于等于\").append(\"<span class=caret></span>\").val(\"8\");$(\"#"+obj.fieldName+"-"+envirId+"-hidden\").addClass(\"hidden\");'>大于等于</a></li>"+
+            "<li><a  onclick='$(\"#"+obj.fieldName+"-"+envirId+"-button\").text(\"小于等于\").append(\"<span class=caret></span>\").val(\"9\");$(\"#"+obj.fieldName+"-"+envirId+"-hidden\").addClass(\"hidden\");'>小于等于</a></li>"+
+            "<li><a  onclick='$(\"#"+obj.fieldName+"-"+envirId+"-button\").text(\"范围\").append(\"<span class=caret></span>\").val(\"10\");$(\"#"+obj.fieldName+"-"+envirId+"-hidden\").removeClass(\"hidden\");'>范围</a></li>"+
+            "</ul></div><div class='col-xs-4'style='padding-left:0 '>" +
+            "<div class='input-group'>" +
+            "<input type='text' name='"+obj.fieldName+"-1' class='form-control Date'/>"+
+            "<span class='input-group-addon'>"+
+            "<i class='ace-icon fa fa-calendar'></i>"+
+            "</span></div>" +
+            "</div>"+
+            "<div id='"+obj.fieldName+"-"+envirId+"-hidden' class='col-xs-4 hidden'>"+
+            "<div class='input-group'>"+
+            "<input type='text' name='"+obj.fieldName+"-2' class='form-control Date'/>"+
+            "<span class='input-group-addon'>"+
+            "<i class='ace-icon fa fa-calendar'></i>"+
+            "</span></div>"+
+            "</div></div></div>";
+        }
+        $("#search-div-"+envirId).append(searchOption);
+        $('.Date').datetimepicker({
+                    format : "YYYY-MM-DD HH:mm:ss",
+                    autoclose : true
+                }
+        ).next().on(ace.click_event, function(){
+            $(this).prev().focus();
+        });
+    }
+
+    function sss(){
+        var data={};
+        var qos = [];
+        var type = "";
+        for(var i = 0;i<fields.length;i++){
+            var nodes = $("input[name|='"+fields[i]+"']");
+            type = $("#"+fields[i]+"-"+envirId+"-button").val();
+            var classes = nodes[0].className;
+            if(classes.indexOf("String")>0){
+                if(nodes.val() != ""){
+                    qos.push(type+"|"+nodes.val());
+                }else{
+                    qos.push("");
+                }
+            }else if(classes.indexOf("int")>0){
+                if(nodes.val() != ""){
+                    if(type == 7){
+                        qos.push(type+"|"+nodes.val()+"|"+nodes.eq(1).val());
+                    }else if(type == 6){
+                        qos.push(type+"||"+nodes.val());
+                    }else{
+                        qos.push(type+"|"+nodes.val()+"|");
+                    }
+                }else{
+                    qos.push("");
+                }
+            }else if(classes.indexOf("Date")>0){
+                if(nodes.val() != ""){
+                    if (type == 8) {
+                        qos.push(type + "|" + nodes.val() +  "|");
+                    } else if (type == 9) {
+                        qos.push(type + "||" + nodes.val());
+                    } else if (type == 10) {
+                        qos.push(type + "|" + nodes.val() + "|" + nodes.eq(1).val());
+                    }
+                }else{
+                    qos.push("");
+                }
+            }
+
+        }
+        var jsonstr =JSON.stringify(qos);
+        data.qos = jsonstr;
+        data.envirId = envirId;
+        data.tableId = historyTable;
+
+//        data+="&envirId="+envirId+"&tableId="+historyTable;
+        onloadGrid(data);
+
+    }
+    function onloadGrid(data){
+        var j=jQuery(grid_selector).getGridParam("caption");
+        if(j==null){
+            jQuery(grid_selector).jqGrid({
+            postData:data,
+            url: "${contextPath}/log/find_log",
+            datatype: "json",
+            mtype: "POST",
+            caption: "用户列表",
+            altRows: true,
+            multiboxonly: true,
+            viewrecords : true,
+            width:width,
+            height: 650,
+            colNames:colNames,
+            colModel:colModel,
+            jsonReader: {
+                root: "list",
+                total: "totalPage",//总页数
+                page: "pageNo",//当前页码
+                records: "totalCount"//总记录数
+            },
+            rowNum:20,
+            rowList:[20,50,100],
+            pager : pager_selector,
+
+            loadComplete : function(data) {
+                var table = this;
+                setTimeout(function(){
+                styleCheckbox(table);
+
+                updateActionIcons(table);
+                updatePagerIcons(table);
+                enableTooltips(table);
+                }, 0);
+            }
+        });
+        }else{
+            reloadjqgrid(data);
+        }
+    }
+
+
+
+    function reloadjqgrid(data){
+        $(grid_selector).jqGrid('setGridParam',{
+            datatype:'json',
+            page:1,
+            postData:data //发送数据
+        }).trigger("reloadGrid");
+    }
+    function style_edit_form(form) {
+        //enable datepicker on "sdate" field and switches for "stock" field
+        form.find('input[name=sdate]').datepicker({format:'yyyy-mm-dd' , autoclose:true});
+
+        form.find('input[name=stock]').addClass('ace ace-switch ace-switch-5').after('<span class="lbl"></span>');
+        //don't wrap inside a label element, the checkbox value won't be submitted (POST'ed)
+        //.addClass('ace ace-switch ace-switch-5').wrap('<label class="inline" />').after('<span class="lbl"></span>');
+
+
+        //update buttons classes
+        var buttons = form.next().find('.EditButton .fm-button');
+        buttons.addClass('btn btn-sm').find('[class*="-icon"]').hide();//ui-icon, s-icon
+        buttons.eq(0).addClass('btn-primary').prepend('<i class="ace-icon fa fa-check"></i>');
+        buttons.eq(1).prepend('<i class="ace-icon fa fa-times"></i>');
+
+        buttons = form.next().find('.navButton a');
+        buttons.find('.ui-icon').hide();
+        buttons.eq(0).append('<i class="ace-icon fa fa-chevron-left"></i>');
+        buttons.eq(1).append('<i class="ace-icon fa fa-chevron-right"></i>');
+    }
+
+    function style_delete_form(form) {
+        var buttons = form.next().find('.EditButton .fm-button');
+        buttons.addClass('btn btn-sm btn-white btn-round').find('[class*="-icon"]').hide();//ui-icon, s-icon
+        buttons.eq(0).addClass('btn-danger').prepend('<i class="ace-icon fa fa-trash-o"></i>');
+        buttons.eq(1).addClass('btn-default').prepend('<i class="ace-icon fa fa-times"></i>')
+    }
+
+    function style_search_filters(form) {
+        form.find('.delete-rule').val('X');
+        form.find('.add-rule').addClass('btn btn-xs btn-primary');
+        form.find('.add-group').addClass('btn btn-xs btn-success');
+        form.find('.delete-group').addClass('btn btn-xs btn-danger');
+    }
+    function style_search_form(form) {
+        var dialog = form.closest('.ui-jqdialog');
+        var buttons = dialog.find('.EditTable');
+        buttons.find('.EditButton a[id*="_reset"]').addClass('btn btn-sm btn-info').find('.ui-icon').attr('class', 'ace-icon fa fa-retweet');
+        buttons.find('.EditButton a[id*="_query"]').addClass('btn btn-sm btn-inverse').find('.ui-icon').attr('class', 'ace-icon fa fa-comment-o');
+        buttons.find('.EditButton a[id*="_search"]').addClass('btn btn-sm btn-purple').find('.ui-icon').attr('class', 'ace-icon fa fa-search');
+    }
+
+    function beforeDeleteCallback(e) {
+        var form = $(e[0]);
+        if(form.data('styled')) return false;
+
+        form.closest('.ui-jqdialog').find('.ui-jqdialog-titlebar').wrapInner('<div class="widget-header" />');
+        style_delete_form(form);
+
+        form.data('styled', true);
+    }
+
+    function beforeEditCallback(e) {
+        var form = $(e[0]);
+        form.closest('.ui-jqdialog').find('.ui-jqdialog-titlebar').wrapInner('<div class="widget-header" />');
+        style_edit_form(form);
+    }
+
+
+
+    //it causes some flicker when reloading or navigating grid
+    //it may be possible to have some custom formatter to do this as the grid is being created to prevent this
+    //or go back to default browser checkbox styles for the grid
+    function styleCheckbox(table) {
+        /**
+         $(table).find('input:checkbox').addClass('ace')
+         .wrap('<label />')
+         .after('<span class="lbl align-top" />')
+
+
+         $('.ui-jqgrid-labels th[id*="_cb"]:first-child')
+         .find('input.cbox[type=checkbox]').addClass('ace')
+         .wrap('<label />').after('<span class="lbl align-top" />');
+         */
+    }
+
+
+    //unlike navButtons icons, action icons in rows seem to be hard-coded
+    //you can change them like this in here if you want
+    function updateActionIcons(table) {
+        /**
+         var replacement =
+         {
+             'ui-ace-icon fa fa-pencil' : 'ace-icon fa fa-pencil blue',
+             'ui-ace-icon fa fa-trash-o' : 'ace-icon fa fa-trash-o red',
+             'ui-icon-disk' : 'ace-icon fa fa-check green',
+             'ui-icon-cancel' : 'ace-icon fa fa-times red'
+         };
+         $(table).find('.ui-pg-div span.ui-icon').each(function(){
+			var icon = $(this);
+			var $class = $.trim(icon.attr('class').replace('ui-icon', ''));
+			if($class in replacement) icon.attr('class', 'ui-icon '+replacement[$class]);
+		})
+         */
+    }
+
+    //replace icons with FontAwesome icons like above
+    function updatePagerIcons(table) {
+        var replacement =
+        {
+            'ui-icon-seek-first' : 'ace-icon fa fa-angle-double-left bigger-140',
+            'ui-icon-seek-prev' : 'ace-icon fa fa-angle-left bigger-140',
+            'ui-icon-seek-next' : 'ace-icon fa fa-angle-right bigger-140',
+            'ui-icon-seek-end' : 'ace-icon fa fa-angle-double-right bigger-140'
+        };
+        $('.ui-pg-table:not(.navtable) > tbody > tr > .ui-pg-button > .ui-icon').each(function(){
+            var icon = $(this);
+            var $class = $.trim(icon.attr('class').replace('ui-icon', ''));
+
+            if($class in replacement) icon.attr('class', 'ui-icon '+replacement[$class]);
+        })
+    }
+
+    function enableTooltips(table) {
+        $('.navtable .ui-pg-button').tooltip({container:'body'});
+        $(table).find('.ui-pg-div').tooltip({container:'body'});
+    }
+
+    //var selr = jQuery(grid_selector).jqGrid('getGridParam','selrow');
+
+    $(document).one('ajaxloadstart.page', function(e) {
+        $(grid_selector).jqGrid('GridUnload');
+        $('.ui-jqdialog').remove();
+    });
+
+</script>

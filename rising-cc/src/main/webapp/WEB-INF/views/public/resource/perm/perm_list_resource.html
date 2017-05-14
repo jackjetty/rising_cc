@@ -1,0 +1,301 @@
+<#assign contextPath=springMacroRequestContext.getContextPath() />
+<script type="text/javascript">
+
+	$(function(){
+		$.ajax({
+    		url:"${contextPath}/perm/perm_nestable_list",
+    		type:"post",
+    		data:{},
+    		dataType:"html",
+    		timeout:60000,
+    		async : false,
+    		success:function(data){
+				$("#nestable").html(data);
+    		},
+    		error:function(){
+    			$("#nestable").html("加载树错误！");
+    		}
+    	}); 
+		
+		/****此处让树可以动起来  begin  ****/
+		$('.dd').nestable();
+	
+		///点击a标签的时候让树不要拖动
+		$('.dd-handle a').on('mousedown', function(e){
+			e.stopPropagation();
+		});
+		
+		$('[data-rel="tooltip"]').tooltip();
+		
+		//让树收缩起来
+		$('.dd').nestable("collapseAll");
+		//$('.dd').nestable("expandAll");
+		/****此处让树可以动起来  end  ****/
+	});
+	
+	function loadNestableList(){
+		$("#main-content-inner-id").load("${contextPath}/perm/to_perm_list");
+		     	
+	}
+
+
+	
+	
+	$('#nestable').nestable().on('change', function(){
+                     var r = $('.dd').nestable('serialize'); 
+                     //$("#aaaa").html(JSON.stringify(r));    //改变排序之后的数据
+                     
+                 	$.ajax({
+                		url:"${contextPath}/perm/update_perm_position",
+                		type:"post",
+                		data:{jsonStr:JSON.stringify(r)},
+                		timeout:60000,
+                		async : false,
+                		success:function(data){
+           					//loadNestableList();//刷新树
+           					//window.setTimeout("$('#modal-form').modal('hide')", 0);
+                		},
+                		error:function(){
+                			
+                		}
+                	}); 
+                     
+                });
+	
+	function loadNodeData(permId){
+		$("#edit_title").html("编辑权限");
+		$("#submit_btn").attr("onclick","submitUpdate()");
+		$.ajax({
+    		url:"${contextPath}/perm/find_perm",
+    		type:"post",
+    		data:{id:permId},
+    		timeout:60000,
+    		async : false,
+    		success:function(data){
+				if(CheckAjaxResponseHandler.checkAjaxResponse(data)){
+	    			
+					$("#form-field-permId").val(data.id);
+					$("#form-field-permName").val(data.permName);
+					$("#form-field-permUrl").val(data.permUrl);
+					$("#form-field-permRel").val(data.permRel);
+					$("#form-field-isEnable").prop("checked",false);
+					$("#form-field-permType").val(data.permType);
+					if(data.isEnable == 1){
+						$("#form-field-isEnable").prop("checked",true);
+						
+					}
+					
+				}else{
+					window.setTimeout("$('#modal-form').modal('hide')", 0);
+
+				}
+
+				
+    		},
+    		error:function(){
+    			$("#form-field-permId").val("");
+				$("#form-field-permName").val("");
+				$("#form-field-permUrl").val("");
+				$("#form-field-permRel").val("");
+				$("#form-field-isEnable").attr("checked",true);
+				$("#form-field-permType").val(0);
+    		}
+    	}); 
+	}
+	
+	function submitUpdate(){
+ 		if(!checkPermValue()){
+ 			return;
+ 		}
+		var ladda = Ladda.create(document.querySelector("#submit_btn"));
+		ladda.start();
+		
+		
+		
+		var id = $("#form-field-permId").val();
+		var permName = $("#form-field-permName").val();
+		var permUrl = $("#form-field-permUrl").val();
+		var permRel = $("#form-field-permRel").val();
+		var permType = $("#form-field-permType").val();
+		var isEnable = 0;//是否启用，0：不启用；1：启用；
+		if($("#form-field-isEnable").prop("checked")){
+			isEnable = 1;
+		}
+		
+      	$.ajax({
+    		url:"${contextPath}/perm/update_perm",
+    		type:"post",
+    		data:{id:id,permName:permName,permUrl:permUrl,permRel:permRel,isEnable:isEnable,permType:permType},
+    		timeout:60000,
+    		success:function(data){
+				if(!CheckAjaxResponseHandler.checkAjaxResponse(data)){
+					window.setTimeout("$('#modal-form').modal('hide')", 0);
+
+				}
+				
+				ladda.stop();
+				$("#modal-form").modal("hide");
+	
+				$($("#dd-handle-id-"+id).find("b")[0]).html(permName);
+    			
+    		},
+    		error:function(){
+    			ladda.stop();
+    		}
+    	}); 
+		
+	}
+	
+ 	function submitAdd(){
+ 		if(!checkPermValue()){
+ 			return;
+ 		}
+		var ladda = Ladda.create(document.querySelector("#submit_btn"));
+		ladda.start();
+ 		
+ 		
+		var parentId = $("#form-field-parentId").val();
+		var id = $("#form-field-permId").val();
+		var permName = $("#form-field-permName").val();
+		var permUrl = $("#form-field-permUrl").val();
+		var permRel = $("#form-field-permRel").val();
+		var isEnable = 0;//是否启用，0：不启用；1：启用；
+		var permType = $("#form-field-permType").val();
+		
+		//是否启用，0：不启用；1：启用；
+		if($("#form-field-isEnable").prop("checked")){
+			isEnable = 1;
+		}
+		
+      	$.ajax({
+    		url:"${contextPath}/perm/add_perm",
+    		type:"post",
+    		data:{parentId:parentId,permName:permName,permUrl:permUrl,permRel:permRel,isEnable:isEnable,permType:permType},
+    		timeout:60000,
+    		success:function(data){
+				window.setTimeout("$('modal-form').modal('hide')", 0);
+				ladda.stop();
+				loadNestableList();//刷新树
+				$("#modal-form").modal("hide");
+    		},
+    		error:function(){
+    			ladda.stop();
+    		}
+    	}); 
+		
+	}
+	
+ 	function checkPermValue(){
+		var permName = $("#form-field-permName").val().trim();
+		if(permName == null || permName == ""){
+			$("#form-field-permName").parent().parent().addClass("has-error");
+			$("#form-field-permName").next().html("权限名称不可空");
+			return false;
+		}
+		$("#form-field-permName").parent().parent().removeClass("has-error");
+		$("#form-field-permName").next().html("");
+		return true;
+ 	}
+ 	
+	function deleteNode(id){
+		bootbox.confirm({  
+	        buttons: {  
+	            confirm: {  
+	                label: "确定",  
+	                className: "btn-info"  
+	            },  
+	            cancel: {  
+	                label:"取消",  
+	                className:"btn-default"  
+	            }  
+	        },  
+	        message: "<h4>确定要删除此权限吗?</h4>",  
+	        callback: function(result) {  
+	            if(result) {  
+	            	$.ajax({
+			    		url:"${contextPath}/perm/delete_perm",
+			    		type:"post",
+			    		data:{id:id},
+			    		timeout:60000,
+			    		async : false,
+			    		success:function(data){
+							if(data=="exist_child"){
+								bootbox.alert({
+						            buttons: {  
+						               ok: {  
+						                    label: "确定",  
+						                    className: "btn-info"  
+						                }  
+						            },  
+						            message: "<h4>当前节点存在子节点，请先删除子节点！</h4>",  
+						            callback: function() {  
+						                //alert('关闭了alert');  
+						            },  
+						            title: "提示信息",  
+						        });
+							}else if(data=="success"){
+								$("#dd-handle-id-"+id).parent().remove();
+							}else if(data=="error"){
+								bootbox.alert({
+						            buttons: {  
+						               ok: {  
+						                    label: "确定",  
+						                    className: "btn-info"  
+						                }  
+						            },  
+						            message: "<h4>系统异常，请重新尝试！</h4>",  
+						            callback: function() {  
+						                //alert('关闭了alert');  
+						            },  
+						            title: "提示信息",  
+						        });
+							}
+							
+							
+			    		},
+			    		error:function(){
+			    			bootbox.alert({
+					            buttons: {  
+					               ok: {  
+					                    label: "确定",  
+					                    className: "btn-info"  
+					                }  
+					            },  
+					            message: "<h4>系统异常，请重新尝试！</h4>",  
+					            callback: function() {  
+					                //alert('关闭了alert');  
+					            },  
+					            title: "提示信息",  
+					        });
+			    		}
+			    	}); 
+					
+	            }
+	        },  
+	        title: "确认提醒",  
+		});
+		
+      	
+	}
+	
+ 	function addNode(id,type){
+ 		
+		$("#edit_title").html("新增权限");
+		$("#submit_btn").attr("onclick","submitAdd()");
+		$("#form-field-parentId").val(id);
+		$("#form-field-permId").val("");
+		$("#form-field-permName").val("");
+		$("#form-field-permUrl").val("");
+		$("#form-field-permRel").val("");
+		$("#form-field-isEnable").prop("checked",true);
+		$("#form-field-permType").val(0);
+		
+		if(type == 'root'){
+ 		$("#modal-form").modal("show");
+			
+		}
+	}
+	
+	
+	
+ </script>

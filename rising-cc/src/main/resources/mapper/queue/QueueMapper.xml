@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.rising.cc.dao.queue.QueueDao">
+    <resultMap id="queueMap" type="Queue">
+        <result property="id" column="id"/>
+        <result property="queue" column="queue"/>
+        <result property="exchange" column="exchange"/>
+        <result property="name" column="name"/>
+        <result property="customer" column="customer"/>
+        <result property="handler.id" column="handlerId"/>
+        <result property="handler.name" column="handlerName"/>
+        <result property="handler.url" column="handlerUrl"/>
+        <result property="handler.failUrl" column="handlerFailUrl"/>
+        <result property="handler.rate" column="handlerRate"/>
+        <result property="handler.type" column="handlerType"/>
+        <result property="handler.envirId" column="handlerEnvirId"/>
+    </resultMap>
+
+    <select id="findQueueByPagination" parameterType="Pagination" resultMap="queueMap">
+        select
+        q.id,q.queue,q.exchange,q.name,q.customer,
+        h.id handlerId,h.name handlerName,h.url handlerUrl,h.failUrl handlerFailUrl,h.rate handlerRate,h.type handlerType,h.envirId handlerEnvirId
+        from t_queue_queue q,t_queue_handler h
+        where q.handlerId = h.id
+            <if test="condition != null">
+                <if test="condition.queue != null">
+                    and q.queue =#{condition.queue}
+                </if>
+                <if test="condition.exchange != null">
+                    and q.exchange = #{condition.exchange}
+                </if>
+                <if test="condition.envirId != null">
+                    and q.envirId = #{condition.envirId}
+                </if>
+            </if>
+        limit
+        <![CDATA[
+				#{startIndex} ,#{pageSize}
+			]]>
+    </select>
+    <select id="findQueueByQo" parameterType="com.rising.cc.pojo.qo.queue.QueueQo" resultMap="queueMap">
+        select
+        q.id,q.queue,q.exchange,q.name,q.customer,
+        h.id handlerId,h.name handlerName,h.url handlerUrl,h.failUrl handlerFailUrl,h.rate handlerRate,h.type handlerType,h.envirId handlerEnvirId
+        from t_queue_queue q,t_queue_handler h
+        where q.handlerId = h.id
+                <if test="queue != null">
+                    and q.queue =#{queue}
+                </if>
+                <if test="exchange != null">
+                    and q.exchange = #{exchange}
+                </if>
+                <if test="handlerId != null">
+                    and q.handlerId = #{handlerId}
+                </if>
+            <if test="envirId != null">
+                and q.envirId = #{envirId}
+            </if>
+    </select>
+    <select id="countQueueByPagination" parameterType="Pagination" resultType="Integer">
+        select
+        count(1)
+        from t_queue_queue q,t_queue_handler h
+        where q.handlerId = h.id
+            <if test="condition != null">
+                <if test="condition.queue != null and condition.queue != ''">
+                    and q.queue =#{condition.queue}
+                </if>
+                <if test="condition.exchange != null and condition.exchange !=''">
+                    and q.exchange = #{condition.exchange}
+                </if>
+                <if test="condition.envirId != null">
+                    and q.envirId = #{condition.envirId}
+                </if>
+            </if>
+    </select>
+
+    <insert id="saveQueue" parameterType="Queue">
+        insert into t_queue_queue(name,
+        exchange,
+        queue,
+        customer,
+        handlerId,
+        envirId)
+        values(#{name,jdbcType=VARCHAR},
+        #{exchange,jdbcType=VARCHAR},
+        #{queue,jdbcType=VARCHAR},
+        #{customer,jdbcType=INTEGER},
+        #{handler.id,jdbcType=INTEGER},
+        #{envirId,jdbcType=INTEGER})
+        <selectKey keyProperty="id" resultType="Integer" order="AFTER">
+            select LAST_INSERT_ID() as id
+        </selectKey>
+    </insert>
+
+    <update id="updateQueue" parameterType="Queue">
+        update t_queue_queue
+        <set>
+            <if test="customer != null  ">
+                customer = #{customer},
+            </if>
+            <if test="handler.id != null ">
+                handlerId = #{handler.id},
+            </if>
+        </set>
+          where id = #{id}
+    </update>
+
+    <delete id="deleteQueue" parameterType="Integer">
+        delete from t_queue_queue where id = #{id}
+    </delete>
+</mapper>

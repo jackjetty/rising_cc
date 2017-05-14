@@ -1,0 +1,21 @@
+<#assign contextPath=springMacroRequestContext.getContextPath() />
+<#import "/public/frame/default.html" as frame />
+
+<!-- 内容出现在html head标记结束之前 -->
+<@frame.head "首页">
+</@frame.head>
+
+<!-- 内容出现在html 主体 -->
+<!-- 此处为 右下侧主体内容content -->
+<@frame.main "default">
+
+
+</@frame.main>
+
+<!-- 内容出现在html body标记结束之前 -->
+<!-- 此处为 javascript 所在模块 -->
+<@frame.end "default">
+
+</@frame.end>
+
+

@@ -1,0 +1,13 @@
+<#assign contextPath=springMacroRequestContext.getContextPath() />
+<#import "/public/frame/default_content.html" as frame />
+
+
+<!-- 内容出现在html 主体 -->
+<@frame.main "interf_method_list_content">
+</@frame.main>
+
+<!-- 内容出现在html body标记结束之前 -->
+<@frame.end "interf_method_list_resource">
+</@frame.end>
+
+

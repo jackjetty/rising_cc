@@ -1,0 +1,30 @@
+<#assign contextPath=springMacroRequestContext.getContextPath() />
+<div class="breadcrumbs" id="breadcrumbs">
+	<script type="text/javascript">
+		try{ace.settings.check('breadcrumbs' , 'fixed')}catch(e){}
+	</script>
+	
+<!-- 传说中的面包屑，，自己修改成自己的   begin -->
+	<ul class="breadcrumb">
+		<li>
+			<i class="icon-home home-icon"></i>
+			<a href="${contextPath}/index">首页</a>
+		</li>
+		<li class="active">mongodb管理</li>
+	</ul><!-- .breadcrumb -->
+<!-- 传说中的面包屑，，自己修改成自己的  end -->
+
+</div>
+
+<div class="page-content">
+						
+	<div class="row">
+		<div class="col-xs-12">
+			<table id="grid-table"></table>
+	
+			<div id="grid-pager"></div>
+	
+			<!-- PAGE CONTENT ENDS -->
+		</div><!-- /.col -->
+	</div><!-- /.row -->
+</div><!-- /.page-content -->

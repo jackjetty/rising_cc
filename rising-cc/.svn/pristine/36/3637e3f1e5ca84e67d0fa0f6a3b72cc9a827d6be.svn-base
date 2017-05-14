@@ -1,0 +1,252 @@
+<#assign contextPath=springMacroRequestContext.getContextPath() />
+<script type="text/javascript">
+	var grid_selector = "#grid-table";
+	var pager_selector = "#grid-pager";
+	
+	//resize to fit page size
+	$(window).on('resize.jqGrid', function () {
+		$(grid_selector).jqGrid( 'setGridWidth', $(".page-content").width() );
+	});
+	//resize on sidebar collapse/expand
+	var parent_column = $(grid_selector).closest('[class*="col-"]');
+	$(document).on('settings.ace.jqGrid' , function(ev, event_name, collapsed) {
+		if( event_name === 'sidebar_collapsed' || event_name === 'main_container_fixed' ) {
+			//setTimeout is for webkit only to give time for DOM changes and then redraw!!!
+			setTimeout(function() {
+				$(grid_selector).jqGrid( 'setGridWidth', parent_column.width() );
+			}, 0);
+		}
+	});
+	
+	jQuery(grid_selector).jqGrid({
+		url: "${contextPath}/engin/engin_list",
+		datatype: "json",
+		//data:ss,
+		//datatype:"json",
+		mtype: "POST",
+		caption: "项目工程列表",
+		autowidth: true,
+		altRows: true,
+		multiselect: true,
+		multiboxonly: true,
+		viewrecords : true,
+		height: 600 ,
+		colNames:["","工程名称","工程编码","工程负责人","所属项目","所属项目负责人","工程创建时间","创建人"],
+		colModel:[
+			{name:'',index:'', width:100, fixed:true, sortable:false, resize:false,
+				formatter:function(cellvalue, options, rowObject){
+					return "<div class=\"hidden-sm hidden-xs action-buttons\">"+
+								"<a class=\"green\" href=\"${contextPath}/engin/to_update_config?enginId="+rowObject.id+"\" data-toggle=\"modal\" data-target=\"#modal-form\"><i class=\"ace-icon fa fa-pencil bigger-110\"></i>设置配置</a>"+
+								"</div>";
+					},  
+				},
+			{name:'engineeringName',index:'engineeringName', width:150,sorttype:"string",editable: true,editrules:{required:true}},
+			{name:'engineeringCode',index:'engineeringCode', width:150,sorttype:"string",editable: true,editrules:{required:true}},
+			{name:'personLiable',index:'e.personLiable', width:150,sorttype:"string",editable: true,editrules:{required:true}},
+			{name:'projectId',index:'projectId',formatter:"select", width:150,sorttype:"string",editable: true,edittype:"select",editrules:{required:true},editoptions:{value:"${projects!''}"},stype:"select",searchoptions:{value:"${projects!''}"}},
+			{name:'projectDto.personLiable',index:'p.personLiable', width:150,sorttype:"string",editable: false},
+			{name:'createTime',index:'e.createTime', width:150,formatter:"date",formatoptions:{srcformat: 'Y-m-d H:i:s',newformat: 'Y-m-d H:i:s'},editable: false,sorttype:"date",unformat: pickDate,search:false},
+			{name:'createUser',index:'e.createUser', width:150,sorttype:"string",editable: false,search:false}
+		], 
+		jsonReader: {
+			root: "list",
+			total: "totalPage",//总页数
+			page: "pageNo",//当前页码
+			records: "totalCount",//总记录数
+			repeatitems: false
+		},
+		rowNum:10,
+		rowList:[10,20,30],
+		pager : pager_selector,
+	
+		loadComplete : function(data) {
+			var table = this;
+			setTimeout(function(){
+				styleCheckbox(table);
+				
+				updateActionIcons(table);
+				updatePagerIcons(table);
+				enableTooltips(table);
+			}, 0);
+		},
+		editurl:"${contextPath}/engin/save_engin"
+		
+	});
+	
+	//navButtons
+	jQuery(grid_selector).jqGrid('navGrid',pager_selector,
+		{ 	//navbar options
+			edit: true,
+			editicon : 'ace-icon fa fa-pencil blue',
+			add: true,
+			addicon : 'ace-icon fa fa-plus-circle purple',
+			del: true,
+			delicon : 'ace-icon fa fa-trash-o red',
+			search: true,
+			searchicon : 'ace-icon fa fa-search orange',
+			refresh: true,
+			refreshicon : 'ace-icon fa fa-refresh green',
+			view: true,
+			viewicon : 'ace-icon fa fa-search-plus grey',
+		},
+		{
+			//edit record form
+			recreateForm: true,
+			beforeShowForm : function(e) {
+				var form = $(e[0]);
+				form.closest('.ui-jqdialog').find('.ui-jqdialog-titlebar').wrapInner('<div class="widget-header" />');
+				style_edit_form(form);
+			},
+			afterComplete : function(response){
+				if(CheckAjaxResponseHandler.checkAjaxResponse(response.responseText)){
+					if(response.responseText == "code_existing"){
+						bootbox.alert({
+				            buttons: {
+				               ok: {  
+				                    label: "确定",  
+				                    className: "btn-info"  
+				                }  
+				            },  
+				            message: "<h4>工程编码已经存在，不能添加重复！</h4>",  
+				            callback: function() {  
+				                //alert('关闭了alert');  
+				            },
+				            title: "提示信息",  
+				        });
+						
+					}
+				}
+			},
+			closeAfterEdit: true
+		},
+		{
+			//new record form
+			//width: 700,
+			recreateForm: true,
+			viewPagerButtons: false,
+			beforeShowForm : function(e) {
+				var form = $(e[0]);
+				form.closest('.ui-jqdialog').find('.ui-jqdialog-titlebar')
+				.wrapInner('<div class="widget-header" />');
+				style_edit_form(form);
+			},
+			closeAfterAdd: true,
+			afterComplete : function(response){
+				if(CheckAjaxResponseHandler.checkAjaxResponse(response.responseText)){
+					if(response.responseText == "code_existing"){
+						bootbox.alert({
+				            buttons: {
+				               ok: {  
+				                    label: "确定",  
+				                    className: "btn-info"  
+				                }  
+				            },  
+				            message: "<h4>工程编码已经存在，不能添加重复！</h4>",  
+				            callback: function() {  
+				                //alert('关闭了alert');  
+				            },
+				            title: "提示信息",  
+				        });
+						
+					}
+				}
+			}
+		},
+		{
+			//delete record form
+			recreateForm: true,
+			beforeShowForm : function(e) {
+				var form = $(e[0]);
+				if(form.data('styled')) return false;
+				
+				form.closest('.ui-jqdialog').find('.ui-jqdialog-titlebar').wrapInner('<div class="widget-header" />');
+				style_delete_form(form);
+				
+				form.data('styled', true);
+			},
+			afterComplete : function(response){
+				CheckAjaxResponseHandler.checkAjaxResponse(response.responseText);
+			}
+		},
+		{
+			//search form
+			recreateForm: true,
+			afterShowSearch: function(e){
+				var form = $(e[0]);
+				form.closest('.ui-jqdialog').find('.ui-jqdialog-title').wrap('<div class="widget-header" />');
+				style_search_form(form);
+			},
+			afterRedraw: function(){
+				style_search_filters($(this));
+			}
+			,
+			multipleSearch: true,
+			/**
+			multipleGroup:true,
+			showQuery: true
+			*/
+		},
+		{
+			//view record form
+			recreateForm: true,
+			beforeShowForm: function(e){
+				var form = $(e[0]);
+				form.closest('.ui-jqdialog').find('.ui-jqdialog-title').wrap('<div class="widget-header" />')
+			}
+		}
+	);
+	
+	//var selr = jQuery(grid_selector).jqGrid('getGridParam','selrow');
+	
+	$(document).one('ajaxloadstart.page', function(e) {
+		$(grid_selector).jqGrid('GridUnload');
+		$('.ui-jqdialog').remove();
+	});
+		
+ 	//打开
+/* 	$('#modal-form').on('show.bs.modal', function () {
+		
+ 	}) */
+ 	
+ 	//关闭modal时移除数据，，这样再次打开模态框时才能再次请求remote路径
+ 	$("#modal-form").on("hide.bs.modal", function () {
+ 		$(this).removeData("bs.modal");
+	});
+
+	/* function projects (){alert(1)
+　　//动态生成select内容
+　　var str="";
+　　$.ajax({
+			url:"${contextPath}/project/find_project_list_by_qo",
+			type:"post",
+	  	    data:{status:1},
+			async:false,
+			dataType:"json",
+			success:function(data){
+		　　if (data != null) {
+			　　for(var i=0 ; i<data.length ; i++){
+						str+=data[i].id+":"+data[i].projectName;
+						if(i!=length-1){
+							str+=";";
+						}
+			　　} 　
+		　　}
+	　　}
+　　});
+　　return str;
+　} */
+ 	
+	function show_success(content){
+		$("#alert_success").show();
+		$("#alert_success_content").html(content);
+		$("#alert_error").hide();
+		window.setTimeout("$('#alert_success').hide();$('#alert_success_content').html('');", 2000);
+	}
+	
+	function show_error(content){
+		$("#alert_error").show();
+		$("#alert_error_content").html(content);
+		$("#alert_success").hide();
+		window.setTimeout("$('#alert_error').hide();$('#alert_error_content').html('');", 2000);
+	}
+ </script>

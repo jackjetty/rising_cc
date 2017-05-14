@@ -1,0 +1,377 @@
+<#assign contextPath=springMacroRequestContext.getContextPath() />
+<script type="text/javascript">
+	var grid_selector = "#grid-table";
+	var pager_selector = "#grid-pager";
+	
+	//resize to fit page size
+	$(window).on('resize.jqGrid', function () {
+		$(grid_selector).jqGrid( 'setGridWidth', $(".page-content").width() );
+	});
+	//resize on sidebar collapse/expand
+	var parent_column = $(grid_selector).closest('[class*="col-"]');
+	$(document).on('settings.ace.jqGrid' , function(ev, event_name, collapsed) {
+		if( event_name === 'sidebar_collapsed' || event_name === 'main_container_fixed' ) {
+			//setTimeout is for webkit only to give time for DOM changes and then redraw!!!
+			setTimeout(function() {
+				$(grid_selector).jqGrid( 'setGridWidth', parent_column.width() );
+			}, 0);
+		}
+	});
+	
+	jQuery(grid_selector).jqGrid({
+		url: "${contextPath}/user/user_list",
+		datatype: "json",
+		//data:ss,
+		//datatype:"json",
+		mtype: "POST",
+		caption: "用户列表",
+		autowidth: true,
+		altRows: true,
+		multiselect: true,
+		multiboxonly: true,
+		viewrecords : true,
+		height: 600 ,
+		colNames:[ '','用户ID','账号','姓名','角色','邮箱','手机号码','备注','状态'],
+		colModel:[
+			{name:'',index:'', width:110, fixed:true, sortable:false, resize:false,
+					formatter:function(cellvalue, options, rowObject){
+						return "<div class=\"hidden-sm hidden-xs action-buttons\">"+
+									"<a class=\"green\" href=\"${contextPath}/user/to_set_user_envir?userId="+rowObject.id+"\" data-toggle=\"modal\" data-target=\"#modal-form-envir\">"+
+									"<i class=\"ace-icon fa fa-pencil bigger-110\"></i>设置环境权限</a><br>"+
+									"<a class=\"green\" href=\"#modal-form\" data-toggle=\"modal\" data-target=\"#modal-form\" onclick=\"refreshRoleModal("+rowObject.id+");\"><i class=\"ace-icon fa fa-pencil bigger-110\"></i>设置角色</a>"+
+									"</div>";
+					},  
+				},
+			{name:'id',index:'id', width:120,sorttype:"int",formatter: "int",editable: false,hidden: true},
+			{name:'userName',index:'userName', width:100,sorttype:"string",editable: true,editrules:{required:true,custom:true, custom_func:function(value, colname){
+				if (value==null || value ==""){
+					return [false,"用户名不可为空"];
+				}else{
+					return [true,""];
+				}
+			}}},
+			{name:'realName',index:'realName', width:150,sorttype:"string",editable: true,editrules:{required:true}},
+			{name:'rolesStr',index:'rolesStr', width:150,sorttype:"string",editable: false,editrules:{required:true}},
+			{name:'email',index:'email', width:150,sorttype:"string",editable: true,formatter:"string",editrules:{email:true,required:false}},
+			{name:'telphone',index:'telphone', width:150,sorttype:"string",editable: true,editrules:{required:false,custom:true, custom_func:function(value, colname){
+				 var  re = /^1\d{10}$/;
+				    if (!re.test(value)) {
+				    	return [false,"手机号码: 不是有效的手机号码"];
+				    }
+				    return [true,""];
+				}}},
+			{name:'note',index:'note', width:150,sorttype:"string",editable: true},
+			{name:'status',index:'status', width:90, sorttype:"int",formatter: "select",edittype:"select",editrules:{required:true},editable: true,editoptions:{value:"0:禁用;1:启用"},stype:"select",searchoptions:{value:"0:禁用;1:启用"}}//状态：0：禁用；1：启用；80：删除；
+		], 
+		jsonReader: {
+			root: "list",
+			total: "totalPage",//总页数
+			page: "pageNo",//当前页码
+			records: "totalCount",//总记录数
+			repeatitems: false
+		},
+		rowNum:10,
+		rowList:[10,20,30],
+		pager : pager_selector,
+	
+		loadComplete : function(data) {
+			var table = this;
+			setTimeout(function(){
+				styleCheckbox(table);
+				
+				updateActionIcons(table);
+				updatePagerIcons(table);
+				enableTooltips(table);
+			}, 0);
+		},
+		editurl:"${contextPath}/user/save_userinfo"
+		
+	});
+	
+	//navButtons
+	jQuery(grid_selector).jqGrid('navGrid',pager_selector,
+		{ 	//navbar options
+			edit: true,
+			editicon : 'ace-icon fa fa-pencil blue',
+			add: true,
+			addicon : 'ace-icon fa fa-plus-circle purple',
+			del: true,
+			delicon : 'ace-icon fa fa-trash-o red',
+			search: true,
+			searchicon : 'ace-icon fa fa-search orange',
+			refresh: false,
+			refreshicon : 'ace-icon fa fa-refresh green',
+			view: true,
+			viewicon : 'ace-icon fa fa-search-plus grey',
+		},
+		{
+			//edit record form
+			recreateForm: true,
+			beforeShowForm : function(e) {
+				var form = $(e[0]);
+				form.closest('.ui-jqdialog').find('.ui-jqdialog-titlebar').wrapInner('<div class="widget-header" />');
+				style_edit_form(form);
+			},
+			afterComplete : function(response){
+				if(CheckAjaxResponseHandler.checkAjaxResponse(response.responseText)){
+					if(response.responseText == "username_existing"){
+						bootbox.alert({
+				            buttons: {
+				               ok: {  
+				                    label: "确定",  
+				                    className: "btn-info"  
+				                }  
+				            },  
+				            message: "<h5>用户名已存在，添加失败！</h5>",  
+				            callback: function() {  
+				                //alert('关闭了alert');  
+				            },
+				            title: "提示信息",  
+				        });
+						
+					}
+				}
+			},
+			closeAfterEdit: true
+		},
+		{
+			//new record form
+			//width: 700,
+			recreateForm: true,
+			viewPagerButtons: false,
+			beforeShowForm : function(e) {
+				var form = $(e[0]);
+				form.closest('.ui-jqdialog').find('.ui-jqdialog-titlebar')
+				.wrapInner('<div class="widget-header" />');
+				style_edit_form(form);
+			},
+			closeAfterAdd: true,
+			afterComplete : function(response){
+				if(CheckAjaxResponseHandler.checkAjaxResponse(response.responseText)){
+					if(response.responseText == "username_existing"){
+						bootbox.alert({
+				            buttons: {
+				               ok: {  
+				                    label: "确定",  
+				                    className: "btn-info"  
+				                }  
+				            },  
+				            message: "<h5>用户名已存在，添加失败！</h5>",  
+				            callback: function() {  
+				                //alert('关闭了alert');  
+				            },
+				            title: "提示信息",  
+				        });
+						
+					}
+				}
+			}
+		},
+		{
+			//delete record form
+			recreateForm: true,
+			beforeShowForm : function(e) {
+				var form = $(e[0]);
+				if(form.data('styled')) return false;
+				
+				form.closest('.ui-jqdialog').find('.ui-jqdialog-titlebar').wrapInner('<div class="widget-header" />');
+				style_delete_form(form);
+				
+				form.data('styled', true);
+			},
+			afterComplete : function(response){
+				CheckAjaxResponseHandler.checkAjaxResponse(response.responseText);
+			}
+		},
+		{
+			//search form
+			recreateForm: true,
+			afterShowSearch: function(e){
+				var form = $(e[0]);
+				form.closest('.ui-jqdialog').find('.ui-jqdialog-title').wrap('<div class="widget-header" />');
+				style_search_form(form);
+			},
+			afterRedraw: function(){
+				style_search_filters($(this));
+			}
+			,
+			multipleSearch: true,
+			/**
+			multipleGroup:true,
+			showQuery: true
+			*/
+		},
+		{
+			//view record form
+			recreateForm: true,
+			beforeShowForm: function(e){
+				var form = $(e[0]);
+				form.closest('.ui-jqdialog').find('.ui-jqdialog-title').wrap('<div class="widget-header" />')
+			}
+		}
+	).jqGrid('navButtonAdd',pager_selector,{//添加按钮
+        caption:"",
+        title:"刷新列表",
+        buttonicon:"ace-icon fa fa-refresh green",
+        onClickButton:function(){
+            $(this).trigger("reloadGrid");
+        }
+    }).jqGrid('navButtonAdd',pager_selector,{//重置密码
+        caption:"",
+        title:"重置密码",
+        buttonicon:"ace-icon fa fa-repeat red",
+        onClickButton:function(){
+        	resetPassword();
+        }
+    });
+	
+	$(document).one('ajaxloadstart.page', function(e) {
+		$(grid_selector).jqGrid('GridUnload');
+		$('.ui-jqdialog').remove();
+	});
+		
+ 	//打开
+/* 	$('#modal-form').on('show.bs.modal', function () {
+		
+ 	}) */
+ 	
+ 	//关闭modal
+ 	$('#modal-form').on('hide.bs.modal', function () {//关闭modal时，把checkbox至空
+ 		var checks = $("input[type=checkbox][name=form-field-checkbox-role]");
+ 		for (var int = 0; int < checks.length; int++) {
+ 			$(checks[int]).prop("checked",false);
+		}
+ 		
+ 		$(grid_selector).trigger("reloadGrid");
+ 		
+	});
+	
+	 	 	//关闭modal时移除数据，，这样再次打开模态框时才能再次请求remote路径
+ 	$("#modal-form-envir").on("hide.bs.modal", function () {
+ 		$(this).removeData("bs.modal");
+	});
+	
+	
+	function resetPassword(){
+		swal({
+				title: "确认",   
+				text: "确定重置密码吗？",   
+				type: "info",   
+				showCancelButton: true,   
+				closeOnConfirm: false,   
+				showLoaderOnConfirm: true
+			}, function(){
+				var rowIds=$(grid_selector).jqGrid("getGridParam","selarrrow");
+				if(rowIds.length > 0){
+					$.ajax({
+			    		url:"${contextPath}/user/reset_pwd",
+			    		type:"post",
+			    		datatype:"text",
+			    		traditional:true,
+			    		data:{idList:rowIds},
+			    		timeout:60000,
+			    		success:function(data){
+			    			if(CheckAjaxResponseHandler.checkAjaxResponse(data)){
+				    			swal("重置密码成功！", "", "success");
+			    			}else{
+			    				swal.close();
+			    			}
+	
+			    		},
+			    		error:function(){
+			    			swal("重置密码异常，请重新尝试！", "", "error");
+			    		}
+			    	});
+					
+				}else{
+					setTimeout(function(){swal("请选择要重置密码的用户！", "", "error")}, 100);
+				}
+					
+			});
+	}
+	
+	function refreshRoleModal(userId){
+		$("#user_id").val(userId);
+		
+		$.ajax({
+    		url:"${contextPath}/user/find_user_role",
+    		type:"post",
+    		traditional:true,
+    		data:{userId:userId},
+    		timeout:60000,
+    		async : false,
+    		success:function(data){
+    			var checks = $("input[type=checkbox][name=form-field-checkbox-role]");
+    			for (var i = 0; i < checks.length; i++) {
+	    			for (var j = 0; j < data.length; j++) {
+	    				if(checks[i].value == data[j].id){
+		    				$(checks[i]).prop("checked",true);
+	    				}
+	    			}
+    			}
+    				
+    		},
+    		error:function(){
+    			
+    		}
+    	});
+		
+	}
+ 	
+ 	function submitSelectedRole(){
+		var ladda = Ladda.create(document.querySelector("#submit_btn"));
+		ladda.start();
+
+		var userId = $("#user_id").val();
+ 		var selectChks = $("input[type=checkbox][name=form-field-checkbox-role]:checked");
+		
+ 		if(selectChks.length < 1){
+ 			show_error("请先选择角色！");
+ 			return;
+ 		}
+ 		
+		var roleIds = [];
+		for (var int = 0; int < selectChks.length; int++) {
+			roleIds.push(selectChks[int].value);
+		}
+		
+		$.ajax({
+    		url:"${contextPath}/user/set_role",
+    		type:"post",
+    		traditional:true,
+    		data:{userId:userId,roleIds:roleIds},
+    		dataType:"text",
+    		timeout:60000,
+    		success:function(data){
+    			if(data=="success"){
+    				show_success("保存成功！");
+    			}else{
+    				show_error("保存失败！");
+    			}
+    			
+    			ladda.stop();
+    		},
+    		error:function(){
+    			show_error("保存失败！");
+    			
+    			ladda.stop();
+    		}
+    	});  
+ 		
+ 	}
+
+ 	
+	function show_success(content){
+		$("#alert_success").show();
+		$("#alert_success_content").html(content);
+		$("#alert_error").hide();
+		window.setTimeout("$('#alert_success').hide();$('#alert_success_content').html('');", 2000);
+	}
+	
+	function show_error(content){
+		$("#alert_error").show();
+		$("#alert_error_content").html(content);
+		$("#alert_success").hide();
+		window.setTimeout("$('#alert_error').hide();$('#alert_error_content').html('');", 2000);
+	}
+ </script>

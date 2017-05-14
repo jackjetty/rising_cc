@@ -1,0 +1,147 @@
+<#assign contextPath=springMacroRequestContext.getContextPath() />
+<div class="modal-header">
+	<button type="button" class="close" data-dismiss="modal">&times;</button>
+	<h4 class="blue bigger" >设置Api信息</h4>
+</div>
+
+<div class="modal-body"  style="width: 700px">
+
+<div class="alert alert-danger" style="display: none;" id="alert_error">
+	<button type="button" class="close" data-dismiss="alert">
+		<i class="ace-icon fa fa-times"></i>
+	</button>
+
+	<strong>
+		<i class="ace-icon fa fa-times"></i>
+		错误！
+	</strong>
+		<span id="alert_error_content">保存失败！</span>
+	<br />
+</div>
+
+<div class="alert alert-block alert-success" style="display: none;" id="alert_success">
+	<button type="button" class="close" data-dismiss="alert">
+		<i class="ace-icon fa fa-times"></i>
+	</button>
+
+	<p>
+		<strong>
+			<i class="ace-icon fa fa-check"></i>
+			成功 ！
+		</strong>
+		<span id="alert_success_content">保存成功！</span>
+	</p>
+
+</div>
+
+<div class="row">
+	<div class="col-xs-12 col-sm-1">
+		<div class="space"></div>
+
+	</div>
+
+	<div class="col-xs-12 col-sm-11">
+	
+		<div class="widget-body">
+			<div class="widget-main padding-8">
+				<input type="hidden" id="account_id" value="${accountId!''}"/>
+				<button class="btn btn-white btn-success btn-round" onclick="selectAll(true);" id=""><i class="ace-icon fa fa-check"></i>全选</button>
+				<button class="btn btn-white btn-warning btn-round" onclick="selectAll(false);" id=""><i class="ace-icon fa fa-times red2"></i>全不选</button>
+				<button class="btn btn-white btn-default btn-round" onclick="invertAll();" id=""><i class="ace-icon fa fa-reply icon-only"></i>反选</button>
+
+				<#list allDtoList as all>
+					<div class="checkbox">
+						<label class="block">
+							<#assign apiCi ="">
+							<#list dtoList as dto>
+								<#if dto.apiInfoDto.id ==all.id>
+									<#assign apiCi = dto>
+								</#if>
+							</#list>
+								<input type="hidden" value="<#if apiCi?? && apiCi !="">${apiCi.id!''}</#if>"/>
+								<input name="api_check" type="checkbox" class="ace input-lg"  value="${all.id!''}"  <#if apiCi?? && apiCi !="">checked</#if>/>
+								<span class="lbl bigger-120">${all.apiName!''}（${all.apiCode!''}）</span>
+						</label>
+					</div>
+				</#list>
+				
+			</div>
+		</div>
+	</div>
+</div>
+
+</div>
+
+<div class="modal-footer">
+	<button class="btn btn-sm" data-dismiss="modal"><i class="ace-icon fa fa-times"></i>取消</button>
+	<button class="btn btn-sm btn-primary ladda-button" onclick="submit();" id="submit_btn" data-style="slide-down">
+	<span class="ladda-label"><i class="ace-icon fa fa-check"></i>保存</span></button>
+</div>
+<script type="text/javascript">
+	
+	function invertAll(){
+		var selectChks = $("input[type=checkbox][name=api_check]");
+		for (var int = 0; int < selectChks.length; int++) {
+			if(selectChks[int].checked)
+				selectChks[int].checked = false;
+			else
+				selectChks[int].checked = true;
+		}
+	}
+	
+	function selectAll(c){
+		var selectChks = $("input[type=checkbox][name=api_check]");
+		for (var int = 0; int < selectChks.length; int++) {
+			selectChks[int].checked = c;
+		}
+	}
+
+
+	function submit(){
+		var ladda = Ladda.create(document.querySelector("#submit_btn"));
+		ladda.start();
+		
+		var accountId = $("#account_id").val();
+//		var selectChks = $("input[type=checkbox][name=api_check]:checked");
+		var selectChks = $("input[type=checkbox][name=api_check]");
+ 		
+		var addIds = [];
+		var delIds = [];
+		for (var int = 0; int < selectChks.length; int++) {
+			var id = $(selectChks[int]).prev().val();
+			if(selectChks[int].checked){
+				if(id == null || id == ""){//新增的
+					addIds.push(selectChks[int].value);
+				}
+			}else{
+				if(id != null && id != ""){//删除的
+					delIds.push(selectChks[int].value);
+				}
+			}
+			
+		}
+		
+		$.ajax({
+    		url:"${contextPath}/api/set_account_api_info",
+    		type:"post",
+    		traditional:true,
+    		data:{addIds:addIds,delIds:delIds,accountId:accountId},
+    		dataType:"text",
+    		timeout:60000,
+    		success:function(data){
+    			if(data=="success"){
+    				show_success("保存成功！");
+    			}else{
+    				show_error("保存失败，请刷新页面重新尝试！ ");
+    			}
+    			ladda.stop();
+    		},
+    		error:function(){
+				show_error("保存异常，请刷新页面重新尝试！ ");
+				ladda.stop();
+    		}
+    	});
+		
+	}
+	
+</script>

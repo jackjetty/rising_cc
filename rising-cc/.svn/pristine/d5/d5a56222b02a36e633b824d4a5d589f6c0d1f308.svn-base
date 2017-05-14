@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.rising.cc.dao.monitoring.RabbitmqMonitoringDao">
+	
+	<resultMap type="com.rising.cc.model.monitoring.RabbitmqConfig" id="rabbitmqConfigMap">
+		<id property="id" column="id" />
+		<result property="queue" column="queue" />
+		<result property="alarm" column="alarm" />
+		<result property="status" column="status" />
+		<result property="isSendMsg" column="isSendMsg" />
+		<result property="isSendMail" column="isSendMail" />
+		<result property="mobile" column="mobile" />
+		<result property="email" column="email" />
+	</resultMap>
+
+	<sql id="columnRabbitmqConfigByAll">
+		t.id id,
+		t.queue,
+		t.alarm,
+		t.status,
+		t.isSendMsg,
+		t.isSendMail,
+		t.mobile,
+		t.email
+	</sql>
+    <sql id="whereRabbitmqConfigPagination">
+        <where>
+            <if test="condition.queue != null and condition.queue != ''">
+                and t.queue = #{condition.queue}
+            </if>
+        </where>
+    </sql>
+
+
+
+    <select id="findStartRabbitmqConfig"  resultMap="rabbitmqConfigMap">
+        select <include refid="columnRabbitmqConfigByAll"/>
+        from t_monitoring_queue_config t
+        where t.status = 1
+    </select>
+</mapper>

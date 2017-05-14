@@ -1,0 +1,153 @@
+<#assign contextPath=springMacroRequestContext.getContextPath() />
+<div class="modal-header">
+	<button type="button" class="close" data-dismiss="modal">&times;</button>
+	<h4 class="blue bigger" >编辑工程配置信息</h4>
+</div>
+
+<div class="modal-body"  style="width: 1200px">
+
+<div class="alert alert-danger" style="display: none;" id="alert_error">
+	<button type="button" class="close" data-dismiss="alert">
+		<i class="ace-icon fa fa-times"></i>
+	</button>
+
+	<strong>
+		<i class="ace-icon fa fa-times"></i>
+		错误！
+	</strong>
+		<span id="alert_error_content">保存失败！</span>
+	<br />
+</div>
+
+<div class="alert alert-block alert-success" style="display: none;" id="alert_success">
+	<button type="button" class="close" data-dismiss="alert">
+		<i class="ace-icon fa fa-times"></i>
+	</button>
+
+	<p>
+		<strong>
+			<i class="ace-icon fa fa-check"></i>
+			成功 ！
+		</strong>
+		<span id="alert_success_content">保存成功！</span>
+	</p>
+
+</div>
+
+
+	<div class="tabbable">
+		<input type="hidden" id="enginId" value="${enginId!''}"/>
+		<ul class="nav nav-tabs" id="myTab">
+			<#list envirTypeList as envT>
+				<li class="<#if envT_index == 0>in active</#if>">
+					<a data-toggle="tab" href="#${envT.envirCode!''}">
+						<i class="<#if envT_index==0>yellow ace-icon fa fa-cogs bigger-120
+										<#elseif envT_index==1>green ace-icon fa fa-cog bigger-120
+										<#elseif envT_index==2>red ace-icon fa fa-bullhorn bigger-120
+										<#elseif envT_index==3>blue ace-icon fa fa-cogs bigger-120
+										<#elseif envT_index==4>green ace-icon fa fa-cogs bigger-120
+										<#else>yellow ace-icon fa fa-cogs bigger-120
+										</#if>"></i>${envT.envirName!''}
+					</a>
+				</li>
+			</#list>
+		</ul>
+	
+		<div class="tab-content" id="content_env_pro_div">
+		<#list envirTypeList as envT>
+			<div id="${envT.envirCode!''}" class="tab-pane fade <#if envT_index == 0>in active</#if>">
+				<div class="tabbable tabs-left">
+					<ul class="nav nav-tabs" id="myTab3">
+						<#list configTypeDtoList as configType>
+							
+							<li class="<#if configType_index == 0>active</#if>">
+								<a data-toggle="tab" href="#properties_${envT.envirCode!''}_${configType_index!0}">
+									<i class="pink ace-icon fa fa-globe bigger-110"></i>
+									${configType.configName!''}<br>
+									&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;（classpath:/${configType.fileName!''}）
+								</a>
+							</li>
+								
+						</#list>
+
+					</ul>
+
+					<div class="tab-content">
+					<#list configTypeDtoList as configType>
+						<div id="properties_${envT.envirCode!''}_${configType_index!0}" class="tab-pane in <#if configType_index == 0>active</#if>">
+							<textarea id="${envT.envirCode!''}_${configType.id!''}" name="textarea_env_config" class="autosize-transition form-control" style="height: 500px"><#list configInfoDtoList as config><#if config.envType == envT.envirCode && config.enginConfigTypeDto.id == configType.id>${config.data!''}</#if></#list></textarea>
+							<input type="hidden" value="${envT.envirCode!''}"/><!-- 环境编码 -->
+							<input type="hidden" value="${configType.id!''}"/><!-- 配置类型ID -->
+							<input type="hidden" value="${configType.fileName!''}"/><!-- 配置文件名称 -->
+						</div>
+					</#list>
+					</div>
+				</div>
+			</div>
+		
+		</#list>
+		</div>
+	</div>
+
+</div>
+
+<div class="modal-footer">
+	<button class="btn btn-sm" data-dismiss="modal"><i class="ace-icon fa fa-times"></i>取消</button>
+	<button class="btn btn-sm btn-primary ladda-button" data-style="slide-down" onclick="submitProperties();" id="submit_btn">
+	<span class="ladda-label"><i class="ace-icon fa fa-check"></i>保存</span></button>
+</div>
+<script type="text/javascript">
+	function submitProperties(){
+		
+		var ladda = Ladda.create(document.querySelector("#submit_btn"));
+		ladda.start();
+		
+		var enginId = $("#enginId").val();
+		var textareaVals= $("#content_env_pro_div").find("[name='textarea_env_config']");
+		
+		var engin = {id:enginId};//工程对象；
+		
+		var dataArr = [];
+		
+		for (var int = 0; int < textareaVals.length; int++) {
+			var textarea = $(textareaVals[int]).val();
+			if(textarea != null && textarea != ""){
+				var envType = $(textareaVals[int]).next().val();
+				var configTypeId = $(textareaVals[int]).next().next().val();
+				var fileName = $(textareaVals[int]).next().next().next().val();
+	
+				var enginConfigType = {id:configTypeId,fileName:fileName};//配置类型对象；
+				var data = {engin:engin,enginConfigType:enginConfigType,data:textarea,envType:envType};
+				
+				dataArr[int] = data;
+				
+			}
+			
+		}
+		
+		$.ajax({
+    		url:"${contextPath}/engin/update_config",
+    		type:"post",
+    		traditional:true,
+    		data:{dataArr:JSON.stringify(dataArr),enginId:enginId},
+    		dataType:"text",
+    		timeout:60000,
+    		success:function(data){
+    			if(data=="success"){
+    				show_success("保存成功！");
+    			}else{
+    				show_error("保存失败！ 请查看数据填写格式（例：xxxx=xxxx）");
+    			}
+    			
+    			ladda.stop();
+    		},
+    		error:function(){
+    			show_error("保存失败！ 请查看数据填写格式（例：xxxx=xxxx）");
+    			
+    			ladda.stop();
+    		}
+    	});
+		
+	}
+	
+</script>

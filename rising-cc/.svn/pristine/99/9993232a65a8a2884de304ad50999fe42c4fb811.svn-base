@@ -1,0 +1,10 @@
+<#assign contextPath=springMacroRequestContext.getContextPath() />
+<#import "/public/frame/default_content.html" as frame />
+
+<@frame.main "log_table_list_content">
+</@frame.main>
+
+<@frame.end "log_table_list_resource">
+</@frame.end>
+
+

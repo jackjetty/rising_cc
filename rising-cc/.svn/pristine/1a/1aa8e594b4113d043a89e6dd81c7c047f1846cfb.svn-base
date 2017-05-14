@@ -1,0 +1,10 @@
+<#assign contextPath=springMacroRequestContext.getContextPath() />
+<#import "/public/frame/default_content.html" as frame />
+
+<@frame.main "role_list_content">
+</@frame.main>
+
+<@frame.end "role_list_resource">
+</@frame.end>
+
+

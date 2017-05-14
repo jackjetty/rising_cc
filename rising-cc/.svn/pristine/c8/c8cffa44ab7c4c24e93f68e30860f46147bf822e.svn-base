@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.rising.cc.dao.service.ServerDao">
+    <resultMap id="ServerMap" type="Server">
+        <result property="id" column="id"/>
+        <result property="serverName" column="serverName"/>
+        <result property="ip" column="ip"/>
+        <result property="status" column="status"/>
+        <result property="type" column="type"/>
+        <result property="address" column="address"/>
+    </resultMap>
+
+    <select id="findServerByPagination" parameterType="Pagination" resultMap="ServerMap">
+        select
+        id,serverName,ip,status,type,address
+        from t_service_server
+        <where>
+            <if test="condition != null">
+                <if test="condition.status != null and condition.status != ''">
+                    and status like '%'+#{condition.status}+'%'
+                </if>
+                <if test="condition.type != null">
+                    and type = #{condition.type}
+                </if>
+            </if>
+        </where>
+        limit
+        <![CDATA[
+				#{startIndex} ,#{pageSize}
+			]]>
+    </select>
+    <select id="findServerByQo" parameterType="com.rising.cc.pojo.qo.service.ServerQo" resultMap="ServerMap">
+        select
+        id,serverName,ip,status,type,address
+        from t_service_server
+        <where>
+
+                <if test="id != null">
+                    and id = #{id}
+                </if>
+                <if test="type != null">
+                    and type = #{type}
+                </if>
+        </where>
+    </select>
+    <select id="countServerByPagination" parameterType="Pagination" resultType="Integer">
+        select
+        count(1)
+        from t_service_server
+        <where>
+            <if test="condition != null">
+                <if test="condition.status != null">
+                    and status like '%'+#{condition.status}+'%'
+                </if>
+                <if test="condition.type != null">
+                    and type = #{condition.type}
+                </if>
+            </if>
+        </where>
+    </select>
+
+    <insert id="saveServer" parameterType="Server">
+        insert into t_service_server(status,
+        serverName,
+        ip,
+        type,
+        address)
+        values(#{status,jdbcType=INTEGER},
+        #{serverName,jdbcType=VARCHAR},
+        #{ip,jdbcType=VARCHAR},
+        #{type,jdbcType=INTEGER},
+        #{address,jdbcType=VARCHAR})
+        <selectKey keyProperty="id" resultType="Integer" order="AFTER">
+            select LAST_INSERT_ID() as id
+        </selectKey>
+    </insert>
+    
+     <update id="updateServer" parameterType="Server">
+        update t_service_server
+        <set>
+            <if test="status != null and status !='' ">
+                status = #{server.status},
+            </if>
+            <if test="serverName != null and serverName !='' ">
+                serverName = #{server.serverName},
+            </if>
+            <if test="ip != null and ip !='' ">
+                ip = #{server.ip},
+            </if>
+            <if test="type != null">
+                type = #{server.type},
+            </if>
+            <if test="address != null and address != ''">
+                address = #{server.address},
+            </if>
+        </set>
+          where id = #{server.id}
+    </update>
+
+    <update id="removeServer" parameterType="Integer">
+        update  t_service_server SET isEnable = 0 where id = #{id}
+    </update>
+
+</mapper>

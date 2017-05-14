@@ -1,0 +1,345 @@
+<#assign contextPath=springMacroRequestContext.getContextPath() />
+<script type="text/javascript">
+	var grid_selector = "#grid-table";
+	var pager_selector = "#grid-pager";
+	
+	//resize to fit page size
+	$(window).on('resize.jqGrid', function () {
+		$(grid_selector).jqGrid( 'setGridWidth', $(".page-content").width() );
+	});
+	//resize on sidebar collapse/expand
+	var parent_column = $(grid_selector).closest('[class*="col-"]');
+	$(document).on('settings.ace.jqGrid' , function(ev, event_name, collapsed) {
+		if( event_name === 'sidebar_collapsed' || event_name === 'main_container_fixed' ) {
+			//setTimeout is for webkit only to give time for DOM changes and then redraw!!!
+			setTimeout(function() {
+				$(grid_selector).jqGrid( 'setGridWidth', parent_column.width() );
+			}, 0);
+		}
+	});
+	
+	
+	jQuery(grid_selector).jqGrid({
+		url: "${contextPath}/role/role_list",
+		datatype: "json",
+		//data:ss,
+		//datatype:"json",
+		mtype: "POST",
+		caption: "用户列表",
+		autowidth: true,
+		altRows: true,
+		multiselect: true,
+		multiboxonly: true,
+		viewrecords : true,
+		height: 600 ,
+		colNames:[ '','角色ID','角色名','状态'],
+		colModel:[
+			{name:'',index:'', width:100, fixed:true, sortable:false, resize:false,
+					formatter:function(cellvalue, options, rowObject){
+						return "<div class=\"hidden-sm hidden-xs action-buttons\">"+
+									"<a class=\"green\" href=\"#modal-form\" data-toggle=\"modal\" data-target=\"#modal-form\" onclick=\"refreshTree(null,"+rowObject.id+");\"><i class=\"ace-icon fa fa-pencil bigger-110\"></i>设置权限</a>"+
+									"</div>";
+					}
+				},
+			{name:'id',index:'id', width:150,sorttype:"int",formatter: "int",editable: false,hidden: true},
+			{name:'roleName',index:'roleName', width:150,sorttype:"string",editrules:{required:true},editable: true},
+			{name:'status',index:'status', width:90, sorttype:"int",formatter: "select",edittype:"select",editrules:{required:true},editable: true,editoptions:{value:"0:禁用;1:启用"}}//状态：0：禁用；1：启用；80：删除；
+		], 
+		jsonReader: {
+			root: "list",
+			total: "totalPage",//总页数
+			page: "pageNo",//当前页码
+			records: "totalCount",//总记录数
+			repeatitems: false
+		},
+		rowNum:10,
+		rowList:[10,20,30],
+		pager : pager_selector,
+	
+		loadComplete : function(data) {
+			var table = this;
+			setTimeout(function(){
+				styleCheckbox(table);
+				
+				updateActionIcons(table);
+				updatePagerIcons(table);
+				enableTooltips(table);
+			}, 0);
+		},
+		
+		editurl:"${contextPath}/role/save_role"
+		
+	});
+	
+	
+	//navButtons
+	jQuery(grid_selector).jqGrid('navGrid',pager_selector,
+		{ 	//navbar options
+			edit: true,
+			editicon : 'ace-icon fa fa-pencil blue',
+			add: true,
+			addicon : 'ace-icon fa fa-plus-circle purple',
+			del: true,
+			delicon : 'ace-icon fa fa-trash-o red',
+			search: true,
+			searchicon : 'ace-icon fa fa-search orange',
+			refresh: true,
+			refreshicon : 'ace-icon fa fa-refresh green',
+			view: true,
+			viewicon : 'ace-icon fa fa-search-plus grey',
+		},
+		{
+			//edit record form
+			//width: 700,
+			recreateForm: true,
+			beforeShowForm : function(e) {
+				var form = $(e[0]);
+				form.closest('.ui-jqdialog').find('.ui-jqdialog-titlebar').wrapInner('<div class="widget-header" />');
+				style_edit_form(form);
+			},
+			afterComplete : function(response){
+				CheckAjaxResponseHandler.checkAjaxResponse(response.responseText);
+			},
+			closeAfterEdit: true
+		},
+		{
+			//new record form
+			//width: 700,
+			recreateForm: true,
+			viewPagerButtons: false,
+			beforeShowForm : function(e) {
+				var form = $(e[0]);
+				form.closest('.ui-jqdialog').find('.ui-jqdialog-titlebar')
+				.wrapInner('<div class="widget-header" />');
+				style_edit_form(form);
+			},
+			closeAfterAdd: true,
+			afterComplete : function(response){
+				CheckAjaxResponseHandler.checkAjaxResponse(response.responseText);
+			}
+		},
+		{
+			//delete record form
+			recreateForm: true,
+			beforeShowForm : function(e) {
+				var form = $(e[0]);
+				if(form.data('styled')) return false;
+				
+				form.closest('.ui-jqdialog').find('.ui-jqdialog-titlebar').wrapInner('<div class="widget-header" />');
+				style_delete_form(form);
+				
+				form.data('styled', true);
+			},
+			afterComplete : function(response){
+				CheckAjaxResponseHandler.checkAjaxResponse(response.responseText);
+			}
+		},
+		{
+			//search form
+			recreateForm: true,
+			afterShowSearch: function(e){
+				var form = $(e[0]);
+				form.closest('.ui-jqdialog').find('.ui-jqdialog-title').wrap('<div class="widget-header" />');
+				style_search_form(form);
+			},
+			afterRedraw: function(){
+				style_search_filters($(this));
+			}
+			,
+			multipleSearch: true,
+			/**
+			multipleGroup:true,
+			showQuery: true
+			*/
+		},
+		{
+			//view record form
+			recreateForm: true,
+			beforeShowForm: function(e){
+				var form = $(e[0]);
+				form.closest('.ui-jqdialog').find('.ui-jqdialog-title').wrap('<div class="widget-header" />')
+			}
+		}
+	);
+	
+	
+	$(document).one('ajaxloadstart.page', function(e) {
+		$(grid_selector).jqGrid('GridUnload');
+		$('.ui-jqdialog').remove();
+	});
+	
+	//var selr = jQuery(grid_selector).jqGrid('getGridParam','selrow');
+		
+	
+	///树的数据来源变量
+	var tree_data;
+	
+ 	function refreshTree(parentId,roleId){
+ 		$("#role_id").val(roleId);
+ 		
+ 		tree_data ={};//先把数据至空，初始化一个空的树，后续刷新会重新加载数据
+ 		
+ 		$('#tree1').ace_tree({
+ 			dataSource: function(options, callback){
+
+ 				//var roleId = $("#role_id").val();
+ 				var $data = null;
+ 				if(!("text" in options) && !("type" in options)){
+ 					$data = tree_data;//the root tree
+ 					callback({ data: $data });
+ 					return;
+ 				}else if("type" in options && options.type == "folder") {
+ 					 options.additionalParameters={
+ 							'children' : {
+ 							}
+ 						};
+ 					options.additionalParameters.children = loadTree(options.data, roleId);
+ 					if("additionalParameters" in options && "children" in options.additionalParameters)
+ 						$data = options.additionalParameters.children || {};
+ 					else $data = {}
+ 				}
+ 				
+ 				if($data != null)//this setTimeout is only for mimicking some random delay
+ 					setTimeout(function(){
+ 						
+ 						callback({ data: $data });
+ 						
+ 					} , parseInt(Math.random() * 500) + 200);
+ 		
+ 				//we have used static data here
+ 				//but you can retrieve your data dynamically from a server using ajax call
+ 				//checkout examples/treeview.html and examples/treeview.js for more info
+ 			},
+ 			multiSelect: true,
+ 			//folderSelect: true,
+ 			cacheItems: true,
+ 			selectable : true,
+ 			'open-icon' : 'ace-icon tree-minus',
+ 			'close-icon' : 'ace-icon tree-plus',
+ 			'selected-icon' : 'ace-icon fa fa-check',
+ 			'unselected-icon' : 'ace-icon fa fa-times',
+ 			loadingHTML : '<div class="tree-loading"><i class="ace-icon fa fa-refresh fa-spin blue"></i></div>'
+ 		});
+ 		
+ 		tree_data = loadTree(null, roleId) ;
+ 		
+ 		$('#tree1').tree('render');//刷新
+	}
+
+	
+	function loadTree(parentId,roleId){
+		
+		var roleId = $("#role_id").val();
+		var dataT = {};
+		$.ajax({
+			url:"${contextPath}/role/perm_node_child_list",
+			type:"post",
+			data:{parentId:parentId,roleId:roleId},
+			timeout:60000,
+			async : false,
+			success:function(data){
+				if(CheckAjaxResponseHandler.checkAjaxResponse(data)){
+				//alert(JSON.stringify(data));
+					dataT = data;
+					
+				}else{
+					setTimeout("$('#modal-form').modal('hide')", 0);//关闭modal
+				}
+			},
+			error:function(){
+				
+			}
+		});
+		return dataT;
+	}
+	
+	
+	
+
+
+/* 
+ *  绑定的一些事件方法
+ $('#tree1')
+.on('loaded.fu.tree', function(e) {
+})
+.on('updated.fu.tree', function(e, result) {
+})
+.on('selected.fu.tree', function(e,data) {
+	//alert(data.selected[0].text);
+})
+.on('deselected.fu.tree', function(e) {
+})
+.on('opened.fu.tree', function(e) {
+})
+.on('closed.fu.tree', function(e) {
+}); */
+
+
+
+
+/*
+树的数据结构
+var tree_data = {
+		'for-sale' : {text: 'For Sale', type: 'folder' , additionalParameters :{
+			'children' : {
+				'appliances' : {text: 'Appliances', type: 'item',data:'123'},
+				'arts-crafts' : {text: 'Arts & Crafts', type: 'item'}
+			}
+		}}	,
+		'vehicles' : {text: 'Vehicles', type: 'folder'}
+	} */
+
+
+	function submitSelectedPerm(){
+	
+		var ladda = Ladda.create(document.querySelector("#submit_btn"));
+		ladda.start();
+		
+		
+		var roleId = $("#role_id").val();
+		var items = $('#tree1' ).tree('selectedItems');
+		var permIds = [];
+		for (var int = 0; int < items.length; int++) {
+			permIds.push(items[int].data);
+		}
+
+		$.ajax({
+    		url:"${contextPath}/role/set_perm",
+    		type:"post",
+    		traditional:true,
+    		data:{roleId:roleId,permIds:permIds},
+    		dataType:"text",
+    		timeout:60000,
+    		success:function(data){
+    			if(CheckAjaxResponseHandler.checkAjaxResponse(data)){
+	    			if(data=="success"){
+	    				show_success();
+	    			}else{
+	    				show_error();
+	    			}
+    				
+    			}
+    			
+    			ladda.stop();
+    		},
+    		error:function(){
+    			show_error();
+				
+    			ladda.stop();
+    		}
+    	}); 
+		
+	}
+	
+	function show_success(){
+		$("#alert_success").show();
+		$("#alert_error").hide();
+		window.setTimeout("$('#alert_success').hide();", 2000);
+	}
+	
+	function show_error(){
+		$("#alert_error").show();
+		$("#alert_success").hide();
+		window.setTimeout("$('#alert_error').hide();", 2000);
+	}
+ </script>

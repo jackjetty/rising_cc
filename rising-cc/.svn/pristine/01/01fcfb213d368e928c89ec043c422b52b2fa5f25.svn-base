@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.rising.cc.dao.monitoring.SMSMonitoringDao">
+	
+	<resultMap type="com.rising.cc.model.monitoring.SMSConfig" id="smsConfigMap">
+		<id property="id" column="id" />
+		<result property="queue" column="queue" />
+		<result property="errorCode" column="errorCode" />
+		<result property="errorCount" column="errorCount" />
+		<result property="isSendMsg" column="isSendMsg" />
+		<result property="isSendMail" column="isSendMail" />
+		<result property="mobile" column="mobile" />
+		<result property="email" column="email" />
+	</resultMap>
+
+	<sql id="columnSMSConfigByAll">
+		t.id id,
+		t.queue,
+		t.errorCode,
+		t.errorCount,
+		t.isSendMsg,
+		t.isSendMail,
+		t.mobile,
+		t.email
+	</sql>
+    <sql id="whereSMSConfigPagination">
+        <where>
+            <if test="condition.queue != null and condition.queue != ''">
+                and t.queue = #{condition.queue}
+            </if>
+        </where>
+    </sql>
+
+
+
+    <select id="findSMSConfigByPagination" parameterType="Pagination" resultMap="smsConfigMap">
+        select <include refid="columnSMSConfigByAll"/>
+        from t_monitoring_sms_config t
+        <include refid="whereSMSConfigPagination"/>
+        limit
+        <![CDATA[
+				#{startIndex} ,#{pageSize}
+			]]>
+    </select>
+</mapper>

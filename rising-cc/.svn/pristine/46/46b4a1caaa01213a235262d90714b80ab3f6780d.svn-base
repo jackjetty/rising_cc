@@ -1,0 +1,8 @@
+<#assign contextPath=springMacroRequestContext.getContextPath() />
+<#import "/public/frame/default_content.html" as frame />
+
+<@frame.main "queue_list_content">
+</@frame.main>
+
+<@frame.end "queue_list_resource">
+</@frame.end>

@@ -1,0 +1,186 @@
+<#assign contextPath=springMacroRequestContext.getContextPath() />
+<#macro main content>
+	<#switch content>
+		<#case "user_list_content">
+			<#include "/public/content/user/user_list_content.html">
+			<#break>
+		<#case "role_list_content">
+			<#include "/public/content/role/role_list_content.html">
+			<#break>
+       	<#case "perm_list_content">
+			<#include "/public/content/perm/perm_list_content.html">
+			<#break>
+		<#case "database_list_content">
+			<#include "/public/content/basicdata/database/database_list_content.html">
+			<#break>
+		<#case "dubbo_list_content">
+			<#include "/public/content/basicdata/dubbo/dubbo_list_content.html">
+			<#break>
+		<#case "mongodb_list_content">
+			<#include "/public/content/basicdata/mongodb/mongodb_list_content.html">
+			<#break>
+		<#case "rabbitmq_list_content">
+			<#include "/public/content/basicdata/rabbitmq/rabbitmq_list_content.html">
+			<#break>
+		<#case "redis_list_content">
+			<#include "/public/content/basicdata/redis/redis_list_content.html">
+			<#break>
+		<#case "log_content">
+			<#include "/public/content/log/log_content.html">
+			<#break>
+		<#case "log_table_list_content">
+			<#include "/public/content/log/log_table_list_content.html">
+			<#break>
+		<#case "log_db_list_content">
+			<#include "/public/content/log/log_db_list_content.html">
+			<#break>
+		<#case "engin_config_type_list_content">
+			<#include "/public/content/project/engin_config_type/engin_config_type_list_content.html">
+			<#break>
+		<#case "project_list_content">
+			<#include "/public/content/project/project/project_list_content.html">
+			<#break>
+		<#case "engin_list_content">
+			<#include "/public/content/project/engin/engin_list_content.html">
+			<#break>
+		<#case "queue_list_content">
+			<#include "/public/content/queue/queue_list_content.html">
+			<#break>
+		<#case "handler_list_content">
+			<#include "/public/content/queue/handler_list_content.html">
+			<#break>
+		<#case "api_list_content">
+			<#include "/public/content/api/api/api_list_content.html">
+			<#break>
+		<#case "api_account_list_content">
+			<#include "/public/content/api/account/account_list_content.html">
+			<#break>
+        <#case "interf_method_list_content">
+            <#include "/public/content/interf/interf_method_list_content.html">
+            <#break>
+        <#case "interf_manager_list_content">
+            <#include "/public/content/interf/interf_manager_list_content.html">
+            <#break>
+		<#case "server_list_content">
+			<#include "/public/content/service/server_list_content.html">
+			<#break>
+		<#case "services_list_content">
+			<#include "/public/content/service/services_list_content.html">
+			<#break>
+		<#case "timertask_list_content">
+			<#include "/public/content/task/timertask_list_content.html">
+			<#break>
+
+		<#case "not_perm_content">
+			<#include "/public/content/auth/not_perm_content.html">
+			<#break>
+		<#case "not_found_content">
+			<#include "/public/content/error/not_found_content.html">
+			<#break>
+		<#case "system_error_content">
+			<#include "/public/content/error/system_error_content.html">
+			<#break>
+		<#case "banding_error_content">
+			<#include "/public/content/error/banding_error_content.html">
+			<#break>
+		<#default>
+				<#include "/public/content/default.html">
+				<#break>
+	</#switch>
+		<!-- 页面主体 -->
+
+</#macro>
+
+<#macro end resource>
+
+		<#switch resource>
+               	<#case "user_list_resource">
+					<#include "/public/resource/user/user_list_resource.html">
+					<#break>
+               	<#case "role_list_resource">
+					<#include "/public/resource/role/role_list_resource.html">
+					<#break>
+               	<#case "perm_list_resource">
+					<#include "/public/resource/perm/perm_list_resource.html">
+					<#break>
+				<#case "database_list_resource">
+					<#include "/public/resource/basicdata/database/database_list_resource.html">
+					<#break>
+				<#case "dubbo_list_resource">
+					<#include "/public/resource/basicdata/dubbo/dubbo_list_resource.html">
+					<#break>
+				<#case "mongodb_list_resource">
+					<#include "/public/resource/basicdata/mongodb/mongodb_list_resource.html">
+					<#break>
+				<#case "rabbitmq_list_resource">
+					<#include "/public/resource/basicdata/rabbitmq/rabbitmq_list_resource.html">
+					<#break>
+				<#case "redis_list_resource">
+					<#include "/public/resource/basicdata/redis/redis_list_resource.html">
+					<#break>
+                <#case "log_resource">
+                    <#include "/public/resource/log/log_resource.html">
+                    <#break>
+                <#case "log_table_list_resource">
+                    <#include "/public/resource/log/log_table_list_resource.html">
+                    <#break>
+                <#case "log_db_list_resource">
+                    <#include "/public/resource/log/log_db_list_resource.html">
+                    <#break>
+				<#case "engin_config_type_list_resource">
+					<#include "/public/resource/project/engin_config_type/engin_config_type_list_resource.html">
+					<#break>
+				<#case "project_list_resource">
+					<#include "/public/resource/project/project/project_list_resource.html">
+					<#break>
+				<#case "engin_list_resource">
+					<#include "/public/resource/project/engin/engin_list_resource.html">
+					<#break>
+				<#case "api_list_resource">
+					<#include "/public/resource/api/api/api_list_resource.html">
+					<#break>
+				<#case "api_account_list_resource">
+					<#include "/public/resource/api/account/account_list_resource.html">
+					<#break>
+				<#case "queue_list_resource">
+					<#include "/public/resource/queue/queue_list_resource.html">
+					<#break>
+				<#case "handler_list_resource">
+					<#include "/public/resource/queue/handler_list_resource.html">
+					<#break>
+				<#case "server_list_resource">
+					<#include "/public/resource/service/server_list_resource.html">
+					<#break>
+				<#case "services_list_resource">
+					<#include "/public/resource/service/services_list_resource.html">
+					<#break>
+				<#case "timertask_list_resource">
+					<#include "/public/resource/task/timertask_list_resource.html">
+					<#break>
+					
+				<#case "not_perm_resource">
+					<#include "/public/resource/auth/not_perm_resource.html">
+					<#break>
+				<#case "system_error_resource">
+					<#include "/public/resource/error/system_error_resource.html">
+					<#break>
+				<#case "not_found_resource">
+					<#include "/public/resource/error/not_found_resource.html">
+					<#break>
+				<#case "banding_error_resource">
+					<#include "/public/resource/error/banding_error_resource.html">
+					<#break>
+                <#case "interf_method_list_resource">
+                    <#include "/public/resource/interf/interf_method_list_resource.html">
+                    <#break>
+                <#case "interf_manager_list_resource">
+                    <#include "/public/resource/interf/interf_manager_list_resource.html">
+                    <#break>
+				<#default>
+					<#include "/public/resource/default.html">
+					<#break>
+			</#switch>
+</#macro>
+
+
+

@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.rising.cc.dao.envir.EnvirTypeDao">
+
+
+	<sql id="columnEnvirTypeByAll">
+		e.id,
+		e.envirName,
+		e.envirCode,
+		e.createTime,
+		e.createUser
+	</sql>
+
+	<select id="findEnvirTypeListAll"  resultType="EnvirType">
+		select 
+		<include refid="columnEnvirTypeByAll"/>
+		from t_envir_type e 
+	</select>
+
+	<select id="findEnvirTypeListByUserId" parameterType="Integer" resultType="EnvirType">
+		select 
+			<include refid="columnEnvirTypeByAll"/>
+			from t_sys_user_envir ue, t_envir_type e 
+		where ue.envirId = e.id and ue.userId = #{userId,jdbcType=INTEGER}
+	</select>
+	
+</mapper>

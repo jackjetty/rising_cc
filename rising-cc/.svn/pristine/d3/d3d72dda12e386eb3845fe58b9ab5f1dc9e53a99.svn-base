@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.rising.cc.dao.api.ApiInfoDao">
+	
+	<sql id="columnApiInfoByAll">
+			a.id,
+			a.apiCode,
+			a.apiName,
+			a.apiDesc,
+			a.timeOut,
+			a.status,
+			a.createTime,
+			a.createUser
+	</sql>
+	
+	<sql id="whereConditionPagination">
+		<if test="condition != null">
+			<if test="condition.envirId != null">
+				and a.envirId = #{condition.envirId,jdbcType=INTEGER} 
+			</if>
+		 	<if test="condition.apiCode != null">
+		 		and a.apiCode = #{condition.apiCode,jdbcType=VARCHAR} 
+		 	</if>
+		 	<if test="condition.status != null">
+		 		and a.status = #{condition.status,jdbcType=INTEGER} 
+		 	</if>
+		</if>
+	</sql>
+	
+	<select id="findApiInfoListByPagination" parameterType="Pagination" resultType="ApiInfo">
+		select * from (
+			select <include refid="columnApiInfoByAll"/>
+			 from t_api_info a inner join t_envir_type t on a.envirId = t.id 
+			<include refid="common.whereConditionPagination"/>
+			<include refid="whereConditionPagination"/>
+			<include refid="common.sortConditionPagination"/>
+		)
+		 t limit 
+			<![CDATA[
+				#{startIndex} ,#{pageSize}
+			]]>
+	</select>
+	
+	<select id="countApiInfoListByPagination" parameterType="Pagination" resultType="Integer">
+		select count(1) from t_api_info a inner join t_envir_type t on a.envirId = t.id 
+		<include refid="common.whereConditionPagination"/>
+		<include refid="whereConditionPagination"/>
+	</select>
+	
+	<update id="updateApiInfo" parameterType="ApiInfo">
+        update t_api_info
+        <set>
+        	<if test="envirId != null">
+	            envirId = #{envirId,jdbcType=INTEGER},
+        	</if>
+        	<if test="apiCode != null and apiCode != '' ">
+	            apiCode = #{apiCode , jdbcType=VARCHAR},
+        	</if>
+        	<if test="apiName != null and apiName != '' ">
+	            apiName = #{apiName , jdbcType=VARCHAR},
+        	</if>
+        	<if test="apiDesc != null and apiDesc != '' ">
+	            apiDesc = #{apiDesc , jdbcType=VARCHAR},
+        	</if>
+        	<if test="timeOut != null">
+	            timeOut = #{timeOut , jdbcType=INTEGER},
+        	</if>
+        	<if test="status != null">
+	            status = #{status , jdbcType=INTEGER},
+        	</if>
+        </set>
+        where id = #{id , jdbcType=INTEGER}
+	</update>
+	
+	<delete id="deleteBatchApiInfo" parameterType="List">
+		delete from t_api_info where id in 
+		<foreach collection="list" item="id" open="(" separator="," close=")">
+			 #{id,jdbcType=INTEGER}
+		</foreach>
+	</delete>
+	
+	<insert id="insertApiInfo" parameterType="ApiInfo">
+		insert into t_api_info(
+				envirId,
+				apiCode,
+				apiName,
+				apiDesc,
+				timeOut,
+				status,
+				createTime,
+				createUser
+		) values(
+			#{envirId,jdbcType=INTEGER},
+			#{apiCode,jdbcType=VARCHAR},
+			#{apiName,jdbcType=VARCHAR},
+			#{apiDesc,jdbcType=VARCHAR},
+			#{timeOut,jdbcType=INTEGER},
+			#{status,jdbcType=INTEGER},
+			#{createTime,jdbcType=TIMESTAMP},
+			#{createUser,jdbcType=VARCHAR}
+		)
+	</insert>
+	
+	<select id="findApiInfoListByQo" parameterType="BaseQo" resultType="ApiInfo">
+		select 
+			<include refid="columnApiInfoByAll"/>
+			 from t_api_info a 
+			 <where>
+			 	<if test="apiCode != null and apiCode != '' ">
+			 		and a.apiCode = #{apiCode,jdbcType=VARCHAR} 
+			 	</if>
+			 	<if test="envirId != null">
+			 		and a.envirId = #{envirId,jdbcType=VARCHAR} 
+			 	</if>
+			 	<if test="status != null">
+			 		and a.status = #{status,jdbcType=INTEGER} 
+			 	</if>
+				<if test="sidx != null and sidx != '' and sord != null and sord != '' ">
+					order by ${sidx} ${sord}
+				</if>
+			 </where> 
+	</select>
+	
+	<select id="countApiInfoAccountListByApiIds" parameterType="List" resultType="int">
+		select 
+			count(1) 
+			 from t_api_info a inner join t_api_account_info ai on a.id = ai.apiId 
+			 where a.id in 
+	 		<foreach collection="list" item="id" open="(" separator="," close=")">
+				 #{id,jdbcType=INTEGER}
+			</foreach> 
+	</select>
+	
+</mapper>

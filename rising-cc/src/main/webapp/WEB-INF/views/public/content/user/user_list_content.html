@@ -1,0 +1,140 @@
+<#assign contextPath=springMacroRequestContext.getContextPath() />
+<div class="breadcrumbs" id="breadcrumbs">
+	<script type="text/javascript">
+		try{ace.settings.check('breadcrumbs' , 'fixed')}catch(e){}
+	</script>
+	
+<!-- 传说中的面包屑，，自己修改成自己的   begin -->
+	<ul class="breadcrumb">
+		<li>
+			<i class="ace-icon fa fa-home home-icon"></i>
+			<a href="${contextPath}/index">首页</a>
+		</li>
+		<li class="active">用户管理</li>
+	</ul><!-- .breadcrumb -->
+<!-- 传说中的面包屑，，自己修改成自己的  end -->
+
+</div>
+
+<div class="page-content">
+						<div class="row">
+							<div class="col-xs-12">
+								<!-- PAGE CONTENT BEGINS -->
+
+						<!-- 		<div class="alert alert-info">
+									<i class="icon-hand-right"></i>
+
+									Please note that demo server is not configured to save the changes, therefore you may get an error message.
+									<button class="close" data-dismiss="alert">
+										<i class="icon-remove"></i>
+									</button>
+								</div> -->
+
+								<table id="grid-table"></table>
+
+								<div id="grid-pager"></div>
+
+								<div id="modal-form" class="modal" tabindex="-1">
+										<div class="modal-dialog">
+											<div class="modal-content">
+												<div class="modal-header">
+													<button type="button" class="close" data-dismiss="modal">&times;</button>
+													<h4 class="blue bigger" >设置角色</h4>
+												</div>
+	
+												<div class="modal-body">
+												
+												
+											<div class="alert alert-danger" style="display: none;" id="alert_error">
+												<button type="button" class="close" data-dismiss="alert">
+													<i class="ace-icon fa fa-times"></i>
+												</button>
+	
+												<strong>
+													<i class="ace-icon fa fa-times"></i>
+													错误！
+												</strong>
+													<span id="alert_error_content">保存失败！</span>
+												<br />
+											</div>
+											
+											<div class="alert alert-block alert-success" style="display: none;" id="alert_success">
+												<button type="button" class="close" data-dismiss="alert">
+													<i class="ace-icon fa fa-times"></i>
+												</button>
+	
+												<p>
+													<strong>
+														<i class="ace-icon fa fa-check"></i>
+														成功 ！
+													</strong>
+													<span id="alert_success_content">保存成功！</span>
+												</p>
+	
+											</div>
+										
+										
+													<div class="row">
+														<div class="col-xs-12 col-sm-1">
+															<div class="space"></div>
+	
+														</div>
+	
+														<div class="col-xs-12 col-sm-11">
+														
+															<div class="widget-body">
+																<div class="widget-main padding-8">
+																	<input type="hidden" id="user_id"/>
+																	
+																	<#list roleList as role>
+																		<div class="checkbox">
+																			<label class="block">
+																				<input name="form-field-checkbox-role" type="checkbox" class="ace input-lg"  value="${role.id!''}" />
+																				<span class="lbl bigger-120">${role.roleName!''}</span>
+																			</label>
+																		</div>
+																	</#list>
+																	
+																</div>
+															</div>
+														</div>
+													</div>
+												</div>
+	
+												<div class="modal-footer">
+													<button class="btn btn-sm" data-dismiss="modal">
+														<i class="ace-icon fa fa-times"></i>
+														取消
+													</button>
+	
+													<button class="btn btn-sm btn-primary ladda-button" data-style="slide-down" onclick="submitSelectedRole();" id="submit_btn">
+														<span class="ladda-label"><i class="ace-icon fa fa-check"></i>
+														保存</span>
+													</button>
+												</div>
+											</div>
+										</div>
+									</div>
+									
+								<!-- 设置用户环境模态框 -->
+								<div id="modal-form-envir" class="modal" tabindex="-1">
+									<div class="modal-dialog" style="width: 700px;">
+										<div class="modal-content">
+											<div class="modal-header">
+											</div>
+
+											<div class="modal-body">
+											加载中.........
+											</div>
+
+											<div class="modal-footer">
+											</div>
+										</div>
+									</div>
+								</div>
+								
+
+								<!-- PAGE CONTENT ENDS -->
+							</div><!-- /.col -->
+						</div><!-- /.row -->
+					</div><!-- /.page-content -->

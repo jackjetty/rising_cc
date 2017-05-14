@@ -1,0 +1,77 @@
+<#assign contextPath=springMacroRequestContext.getContextPath() />
+<div class="breadcrumbs" id="breadcrumbs">
+	<script type="text/javascript">
+		try{ace.settings.check('breadcrumbs' , 'fixed')}catch(e){}
+	</script>
+	
+<!-- 传说中的面包屑，，自己修改成自己的   begin -->
+	<ul class="breadcrumb">
+		<li>
+			<i class="ace-icon fa fa-home home-icon"></i>
+			<a href="${contextPath}/index">首页</a>
+		</li>
+		<li class="active">not_found</li>
+	</ul><!-- .breadcrumb -->
+<!-- 传说中的面包屑，，自己修改成自己的  end -->
+
+</div>
+
+<div class="page-content">
+			<!-- 右侧选择皮肤浮动窗口 begin -->
+		<#--<#include "/public/toolbar/default.html">-->
+		<!-- 右侧选择皮肤浮动窗口 end -->   
+<div class="row">
+	<div class="col-xs-12">
+		<!-- PAGE CONTENT BEGINS -->
+
+		<div class="error-container">
+			<div class="well">
+				<h1 class="grey lighter smaller">
+					<span class="blue bigger-125">
+						<i class="ace-icon fa fa-sitemap"></i>
+						400
+					</span>
+					参数绑定出错了！
+				</h1>
+
+				<hr />
+				<h3 class="lighter smaller">抱歉，我们想尽办法，但是搞不定啊！</h3>
+
+				<div>
+					<div class="space"></div>
+					<h4 class="smaller">您可以尝试以下操作：</h4>
+
+					<ul class="list-unstyled spaced inline bigger-110 margin-15">
+						<li>
+							<i class="ace-icon fa fa-hand-o-right blue"></i>
+							重新检查拼写错误的URL
+						</li>
+
+						<li>
+							<i class="ace-icon fa fa-hand-o-right blue"></i>
+							告诉我们
+						</li>
+					</ul>
+				</div>
+
+				<hr />
+				<div class="space"></div>
+
+				<div class="center">
+					<a href="javascript:history.back()" class="btn btn-grey">
+						<i class="ace-icon fa fa-arrow-left"></i>
+						返回上一页
+					</a>
+
+					<a href="${contextPath}/index" class="btn btn-primary">
+						<i class="ace-icon fa fa-tachometer"></i>
+						去首页
+					</a>
+				</div>
+			</div>
+		</div>
+
+		<!-- PAGE CONTENT ENDS -->
+	</div><!-- /.col -->
+</div><!-- /.row -->
+</div><!-- /.page-content -->

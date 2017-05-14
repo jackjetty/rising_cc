@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.rising.cc.dao.project.EngineeringDao">
+	
+	<resultMap type="Engineering" id="engineeringMap">
+		<result property="id" column="id"/>
+		<result property="project.id" column="project_Id"/>
+		<result property="project.projectName" column="project_projectName"/>
+		<result property="project.projectCode" column="project_projectCode"/>
+		<result property="project.personLiable" column="project_personLiable"/>
+		<result property="engineeringName" column="engineeringName"/>
+		<result property="engineeringCode" column="engineeringCode"/>
+		<result property="personLiable" column="personLiable"/>
+		<result property="createTime" column="createTime"/>
+		<result property="createUser" column="createUser"/>
+	</resultMap>
+		
+	<sql id="columnEngineeringByAll">
+			e.id as id,
+			p.id as project_Id,
+			p.projectName as project_projectName,
+			p.projectCode as project_projectCode,
+			p.personLiable as project_personLiable,
+			e.engineeringName as engineeringName,
+			e.engineeringCode as engineeringCode,
+			e.personLiable as personLiable,
+			e.createTime as createTime,
+			e.createUser as createUser
+	</sql>
+	
+	<select id="findEngineeringListByPagination" parameterType="Pagination" resultMap="engineeringMap">
+		select * from (
+			select <include refid="columnEngineeringByAll"/>
+			 from t_engineering e inner join t_project p on  e.projectId = p.id  
+			<include refid="common.whereConditionPagination"/>
+			<include refid="common.sortConditionPagination"/>
+		)
+		 t limit 
+			<![CDATA[
+				#{startIndex} ,#{pageSize}
+			]]>
+	</select>
+	
+	<select id="findEngineeringListByQo" parameterType="BaseQo" resultMap="engineeringMap">
+			select <include refid="columnEngineeringByAll"/>
+			 from t_engineering e ,t_project p where e.projectId = p.id 
+			 <if test="engineeringCode != null and engineeringCode != '' ">
+	            and engineeringCode = #{engineeringCode , jdbcType=VARCHAR}
+        	</if>
+	</select>
+	
+	<select id="countEngineeringListByPagination" parameterType="Pagination" resultType="Integer">
+		select count(1) from t_engineering e inner join t_project p on  e.projectId = p.id  
+		<include refid="common.whereConditionPagination"/>
+	</select>
+	
+	<update id="updateEngineering" parameterType="Engineering">
+        update t_engineering 
+        <set>
+        	<if test="projectId != null">
+	            projectId = #{projectId , jdbcType=INTEGER},
+        	</if>
+        	<if test="engineeringName != null">
+	            engineeringName = #{engineeringName , jdbcType=VARCHAR},
+        	</if>
+        	<if test="engineeringCode != null">
+	            engineeringCode = #{engineeringCode , jdbcType=VARCHAR},
+        	</if>
+        	<if test="personLiable != null">
+	            personLiable = #{personLiable , jdbcType=VARCHAR},
+        	</if>
+        </set>
+        where id = #{id , jdbcType=INTEGER}
+	</update>
+	
+	
+	<delete id="deleteBatchEngineering" parameterType="List">
+		delete from t_engineering where id in
+		<foreach collection="list" item="id" open="(" separator="," close=")">
+			 #{id,jdbcType=INTEGER}
+		</foreach>
+	</delete>
+
+	<delete id="deleteEngineeringByProjectIds" parameterType="List">
+		delete from t_engineering where projectId in
+		<foreach collection="list" item="id" open="(" separator="," close=")">
+			 #{id,jdbcType=INTEGER}
+		</foreach>
+	</delete>
+	
+	<insert id="insertEngineering" parameterType="Engineering">
+		insert into t_engineering(
+			projectId,
+			engineeringName,
+			engineeringCode,
+			personLiable,
+			createTime,
+			createUser
+		) values(
+			#{projectId,jdbcType=INTEGER},
+			#{engineeringName,jdbcType=VARCHAR},
+			#{engineeringCode,jdbcType=VARCHAR},
+			#{personLiable,jdbcType=VARCHAR},
+			#{createTime,jdbcType=TIMESTAMP},
+			#{createUser,jdbcType=VARCHAR}
+		)
+	</insert>
+	
+	
+	
+</mapper>

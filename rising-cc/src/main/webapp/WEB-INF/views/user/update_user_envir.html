@@ -1,0 +1,163 @@
+<#assign contextPath=springMacroRequestContext.getContextPath() />
+<div class="modal-header">
+	<button type="button" class="close" data-dismiss="modal">&times;</button>
+	<h4 class="blue bigger" >设置用户环境权限</h4>
+</div>
+
+<div class="modal-body"  style="width: 700px">
+
+<div class="alert alert-danger" style="display: none;" id="alert_s_error">
+	<button type="button" class="close" data-dismiss="alert">
+		<i class="ace-icon fa fa-times"></i>
+	</button>
+
+	<strong>
+		<i class="ace-icon fa fa-times"></i>
+		错误！
+	</strong>
+		<span id="alert_s_error_content">保存失败！</span>
+	<br />
+</div>
+
+<div class="alert alert-block alert-success" style="display: none;" id="alert_s_success">
+	<button type="button" class="close" data-dismiss="alert">
+		<i class="ace-icon fa fa-times"></i>
+	</button>
+
+	<p>
+		<strong>
+			<i class="ace-icon fa fa-check"></i>
+			成功 ！
+		</strong>
+		<span id="alert_s_success_content">保存成功！</span>
+	</p>
+
+</div>
+
+<div class="row">
+	<div class="col-xs-12 col-sm-1">
+		<div class="space"></div>
+
+	</div>
+
+	<div class="col-xs-12 col-sm-11">
+	
+		<div class="widget-body">
+			<div class="widget-main padding-8">
+				<input type="hidden" id="s_user_id" value="${userId!''}"/>
+				<button class="btn btn-white btn-success btn-round" onclick="selectAll(true);" id=""><i class="ace-icon fa fa-check"></i>全选</button>
+				<button class="btn btn-white btn-warning btn-round" onclick="selectAll(false);" id=""><i class="ace-icon fa fa-times red2"></i>全不选</button>
+				<button class="btn btn-white btn-default btn-round" onclick="invertAll();" id=""><i class="ace-icon fa fa-reply icon-only"></i>反选</button>
+
+				<#list envirTypeList as all>
+					<div class="checkbox">
+						<label class="block">
+							<#assign bool = false>
+							<#list dtoList as dto>
+								<#if dto.id ==all.id>
+									<#assign bool = true>
+								</#if>
+							</#list>
+								<input type="hidden" value="<#if  bool == true>old</#if>"/>
+								<input name="envir_check" type="checkbox" class="ace input-lg"  value="${all.id!''}"  <#if  bool == true>checked</#if>/>
+								<span class="lbl bigger-120">${all.envirName!''}（${all.envirCode!''}）</span>
+						</label>
+					</div>
+				</#list>
+				
+			</div>
+		</div>
+	</div>
+</div>
+
+</div>
+
+<div class="modal-footer">
+	<button class="btn btn-sm" data-dismiss="modal"><i class="ace-icon fa fa-times"></i>取消</button>
+	<button class="btn btn-sm btn-primary ladda-button" onclick="submit();" id="submit_s_btn" data-style="slide-down">
+	<span class="ladda-label"><i class="ace-icon fa fa-check"></i>保存</span></button>
+</div>
+<script type="text/javascript">
+	
+	function invertAll(){
+		var selectChks = $("input[type=checkbox][name=envir_check]");
+		for (var int = 0; int < selectChks.length; int++) {
+			if(selectChks[int].checked)
+				selectChks[int].checked = false;
+			else
+				selectChks[int].checked = true;
+		}
+	}
+	
+	function selectAll(c){
+		var selectChks = $("input[type=checkbox][name=envir_check]");
+		for (var int = 0; int < selectChks.length; int++) {
+			selectChks[int].checked = c;
+		}
+	}
+
+
+	function submit(){
+		var ladda = Ladda.create(document.querySelector("#submit_s_btn"));
+		ladda.start();
+		
+		var userId = $("#s_user_id").val();
+//		var selectChks = $("input[type=checkbox][name=api_check]:checked");
+		var selectChks = $("input[type=checkbox][name=envir_check]");
+ 		
+		var addIds = [];
+		var delIds = [];
+		for (var int = 0; int < selectChks.length; int++) {
+			var id = $(selectChks[int]).prev().val();
+			if(selectChks[int].checked){
+				if(id == null || id == ""){//新增的
+					addIds.push(selectChks[int].value);
+				}
+			}else{
+				if(id != null && id != ""){//删除的
+					delIds.push(selectChks[int].value);
+				}
+			}
+			
+		}
+		
+		$.ajax({
+    		url:"${contextPath}/user/set_user_envir",
+    		type:"post",
+    		traditional:true,
+    		data:{addIds:addIds,delIds:delIds,userId:userId},
+    		dataType:"text",
+    		timeout:60000,
+    		success:function(data){
+    			if(CheckAjaxResponseHandler.checkAjaxResponse(data)){
+	    			if(data=="success"){
+	    				show_s_success("保存成功！");
+	    			}else{
+	    				show_s_error("保存失败，请刷新页面重新尝试！ ");
+	    			}
+    			}
+    			ladda.stop();
+    		},
+    		error:function(){
+				show_s_error("保存异常，请刷新页面重新尝试！ ");
+				ladda.stop();
+    		}
+    	});
+		
+	}
+	
+	function show_s_success(content){
+		$("#alert_s_success").show();
+		$("#alert_s_success_content").html(content);
+		$("#alert_s_error").hide();
+		window.setTimeout("$('#alert_s_success').hide();$('#alert_s_success_content').html('');", 2000);
+	}
+	
+	function show_s_error(content){
+		$("#alert_s_error").show();
+		$("#alert_s_error_content").html(content);
+		$("#alert_s_success").hide();
+		window.setTimeout("$('#alert_s_error').hide();$('#alert_s_error_content').html('');", 2000);
+	}
+	
+</script>

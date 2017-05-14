@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.rising.cc.dao.role.SysRoleDao">
+
+	<sql id="columnSysUserByAll">
+		r.id,
+		r.roleName,
+		r.status,
+		r.isBuilt,
+		r.createTime,
+		r.createUser
+	</sql>
+	
+	<sql id="whereConditionPagination">
+		<if test ="condition !=null">
+			<if test ="condition.noStatus !=null">
+				and r.status <![CDATA[<>]]> #{condition.noStatus,jdbcType=INTEGER}
+			</if>
+		</if>
+	</sql>
+
+
+	<select id="findAllSysRoleByUserName" parameterType="String"  resultType="SysRole">
+		select 
+			<include refid="columnSysUserByAll"/>
+			from  t_sys_role r
+				inner join t_sys_user_role ur on ur.roleId = r.id
+				inner join t_sys_user u on u.id = ur.userId
+			where u.userName = #{userName,jdbcType=VARCHAR} and r.status <![CDATA[<>80]]>
+	</select>
+	
+	<select id="findRoleListByPagination" parameterType="Pagination" resultType="SysRole">
+		select * from (
+			select <include refid="columnSysUserByAll"/>
+			 from t_sys_role r 
+			<include refid="common.whereConditionPagination"/>
+			<include refid="whereConditionPagination"/>
+			<include refid="common.sortConditionPagination"/>
+		)
+		 t limit 
+			<![CDATA[
+				#{startIndex} ,#{pageSize}
+			]]>
+	</select>
+	
+	<select id="countRoleListByPagination" parameterType="Pagination" resultType="Integer">
+		select count(1) from t_sys_role r 
+		<include refid="common.whereConditionPagination"/>
+		<include refid="whereConditionPagination"/>
+	</select>
+	
+	<delete id="deleteOldRolePermByRoleId"  parameterType="int">
+		delete from t_sys_role_permission where roleId = #{roleId,jdbcType=INTEGER}
+	</delete>
+
+	<insert id="insertBatchRolePerm" parameterType="List">
+		insert into t_sys_role_permission (roleId,permId,createTime,createUser)   
+	    values  
+	    <foreach collection="list" item="item" index="index" open="" separator=","  close="">  
+	        (#{item.roleId,jdbcType=INTEGER},#{item.permId,jdbcType=INTEGER},#{item.createTime,jdbcType=TIMESTAMP},#{item.createUser,jdbcType=VARCHAR})
+	    </foreach>  
+	</insert>
+	
+	<select id="findUserRoleListByUserId" parameterType="int"  resultType="SysRole">
+		select <include refid="columnSysUserByAll"/> from t_sys_role r where 
+		r.id in ( select roleId from t_sys_user_role ur where ur.userId = #{userId,jdbcType=INTEGER})
+	</select>
+	
+	<select id="findRoleListByQo" parameterType="BaseQo" resultType="SysRole" >
+		select <include refid="columnSysUserByAll"/> from t_sys_role r 
+		<where>
+			<if test="status != null and status !='' ">
+				and r.status = #{status,jdbcType=INTEGER}
+			</if>
+		</where>
+	</select>
+	
+	<insert id="insertSysRole" parameterType="SysRole">
+		insert into t_sys_role(roleName,
+										status,
+										isBuilt,
+										createTime,
+										createUser)
+						values(#{roleName,jdbcType=VARCHAR},
+									#{status,jdbcType=INTEGER},
+									#{isBuilt,jdbcType=INTEGER},
+									#{createTime,jdbcType=TIMESTAMP},
+									#{createUser,jdbcType=VARCHAR})
+	</insert>
+	
+	<update id="updateSysRoleById" parameterType="SysRole">
+		update t_sys_role 
+		<set>
+			<if test="roleName != null and roleName !='' ">
+				roleName = #{roleName,jdbcType=VARCHAR},
+			</if>
+			<if test="status != null">
+				status = #{status,jdbcType=INTEGER},
+			</if>
+			<if test="isBuilt != null">
+				isBuilt = #{isBuilt,jdbcType=INTEGER},
+			</if>
+			<if test="createTime != null">
+				createTime = #{createTime,jdbcType=TIMESTAMP},
+			</if>
+			<if test="createUser != null and createUser !='' ">
+				createUser = #{createUser,jdbcType=VARCHAR},
+			</if>
+		</set>
+		where id = #{id,jdbcType=INTEGER}
+	</update>
+	
+	<update id="updateSysRoleStatusByIds" >
+		update t_sys_role set  status = #{status,jdbcType=INTEGER}
+		where id in 
+		<foreach collection="ids" open="(" separator="," close=")" item="id">
+			#{id,jdbcType=INTEGER}
+		</foreach>
+	</update>
+	
+</mapper>

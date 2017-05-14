@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.rising.cc.dao.intf.InterfManagerDao">
+	
+	<resultMap type="com.rising.cc.model.interf.InterfManager" id="interfManagerMapper">
+		<id property="id" column="id" />
+		<result property="envirId" column="envirId" />
+		<result property="engineering.id" column="enginId" />
+		<result property="interfMethod.id" column="methodId" />
+	</resultMap>
+
+	<sql id="columnInterfManagerByAll">
+        t.envirId,
+        t.enginId,
+        t.methodId
+	</sql>
+    <sql id="whereInterfManagerPagination">
+        <where>
+            <if test="condition.envirId != null">
+                and t.envirId = #{condition.envirId}
+            </if>
+        </where>
+
+    </sql>
+
+
+
+    <select id="findInterfManagerByPagination" parameterType="Pagination" resultMap="interfManagerMapper">
+        select <include refid="columnInterfManagerByAll"/>
+        from t_interface_manager t
+        <include refid="whereInterfManagerPagination"/>
+        limit
+        <![CDATA[
+				#{startIndex} ,#{pageSize}
+			]]>
+    </select>
+    <select id="countInterfManagerByPagination" parameterType="Pagination" resultType="Integer">
+        select count(1)
+        from t_interface_manager t
+        <include refid="whereInterfManagerPagination"/>
+    </select>
+    <insert id="saveInterfManager" parameterType="com.rising.cc.model.interf.InterfManager">
+        insert into t_interface_manager(envirId,
+        enginId,
+        methodId)
+        values(#{envirId,jdbcType=INTEGER},
+        #{engineering.id,jdbcType=INTEGER},
+        #{interfManager.id,jdbcType=INTEGER})
+        <selectKey keyProperty="id" resultType="Integer" order="AFTER">
+            select LAST_INSERT_ID() as id
+        </selectKey>
+    </insert>
+
+    <update id="updateInterfManager" parameterType="com.rising.cc.model.interf.InterfManager">
+        update t_interface_manager
+            <set>
+                <if test="envirId != null">
+                    envirId = #{envirId,jdbcType=INTEGER},
+                </if>
+                <if test="engineering.id != null">
+                    enginId = #{engineering.id,jdbcType=INTEGER},
+                </if>
+                <if test="interfManager.id != null">
+                    methodId = #{interfManager.id,jdbcType=INTEGER},
+                </if>
+            </set>
+        where id = #{id,jdbcType=INTEGER}
+    </update>
+
+    <delete id="deleteInterfManager" parameterType="com.rising.cc.model.interf.InterfManager">
+        delete t_interface_manager where id = #{id,jdbcType=INTEGER}
+    </delete>
+</mapper>

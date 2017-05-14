@@ -1,0 +1,42 @@
+<#assign contextPath=springMacroRequestContext.getContextPath() />
+<#macro head title>
+		<#include "/public/css/default.html">
+</#macro>
+
+<#macro main content>
+<body class="no-skin">
+		<!-- header页面 -->
+		<#include "/public/header/default.html">
+		<#nested>
+            <div class="main-container" id="main-container">
+                <script type="text/javascript">
+                    try {
+                        ace.settings.check('main-container', 'fixed')
+                    } catch (e) {
+                    }
+                </script>
+
+					<#include "/public/side/default.html">
+                    <#nested>
+
+                     <div class="main-content">
+                        <div class="main-content-inner" id="main-content-inner-id">
+								<#include "/public/content/default.html">
+						</div>
+                    </div><!--/.main-content-->
+
+            </div><!--/main-container-->
+		<!-- 页面主体 -->
+
+	</#macro>
+
+	<#macro end resource>
+
+		<#nested>
+		<#include "/public/resource/default.html">
+       </body>
+       </html>
+</#macro>
+
+
+

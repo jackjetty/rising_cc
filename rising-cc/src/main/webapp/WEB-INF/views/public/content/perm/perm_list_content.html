@@ -1,0 +1,126 @@
+<#assign contextPath=springMacroRequestContext.getContextPath() />
+<div class="breadcrumbs" id="breadcrumbs">
+	<script type="text/javascript">
+		try{ace.settings.check('breadcrumbs' , 'fixed')}catch(e){}
+	</script>
+	
+<!-- 传说中的面包屑，，自己修改成自己的   begin -->
+	<ul class="breadcrumb">
+		<li>
+			<i class="icon-home home-icon"></i>
+			<a href="${contextPath}/index">首页</a>
+		</li>
+		<li class="active">权限管理</li>
+	</ul><!-- .breadcrumb -->
+<!-- 传说中的面包屑，，自己修改成自己的  end -->
+
+</div>
+
+<div class="page-content">
+		<div class="row">
+				<div class="col-xs-12">
+				<!-- PAGE CONTENT BEGINS -->
+					<div class="col-sm-6">
+						<div class="widget-box widget-color-blue2"  style="height: 800px;overflow: auto;">
+							<div class="widget-header">
+								<h4 class="widget-title lighter smaller">权限列表</h4>
+							</div>
+
+							<div class="widget-body">
+								<div class="widget-main padding-8">
+								<button class="glyphicon-plus btn btn-info" id="bootbox-confirm" onclick="addNode(null,'root');">&nbsp;&nbsp;新增根节点</button>
+										<div class="dd" id="nestable">
+												
+										</div>
+										
+								
+									<div id="modal-form" class="modal" tabindex="-1">
+										<div class="modal-dialog">
+											<div class="modal-content">
+												<div class="modal-header">
+													<button type="button" class="close" data-dismiss="modal">&times;</button>
+													<h4 class="blue bigger" id="edit_title">编辑权限</h4>
+												</div>
+	
+												<div class="modal-body">
+													<div class="row">
+														<div class="col-xs-12 col-sm-2">
+															<div class="space"></div>
+	
+														</div>
+	
+														<div class="col-xs-12 col-sm-10">
+	
+															<div class="form-group">
+																<div>
+																	<label for="form-field-username">权限名称：</label>
+																	<input type="hidden" id="form-field-parentId" value="" />
+																	<input type="hidden" id="form-field-permId" value="" />
+																	<input type="text" id="form-field-permName" placeholder="权限名称" value="" />
+																	<div class="help-block col-xs-12 col-sm-reset inline"></div>
+																</div>
+															</div>
+															<div class="form-group">
+																<div>
+																	<label for="form-field-permUrl">权限链接：</label>
+																	<input type="text" id="form-field-permUrl" placeholder="权限链接" value="" />
+																	<div class="help-block col-xs-12 col-sm-reset inline"></div>
+																</div>
+															</div>
+															<div class="form-group">
+																<div>
+																	<label for="form-field-permRel">权限标识：</label>
+																	<input type="text" id="form-field-permRel" placeholder="权限标识" value="" />
+																</div>
+															</div>
+															<div class="form-group">
+																	<div>
+																		<label for="form-field-isEnable">是否启用：</label>
+																		<label>
+																			<input name="switch-field-isEnable" class="ace ace-switch ace-switch-5" type="checkbox"  id="form-field-isEnable"/>
+																			<span class="lbl"></span>
+																		</label>
+																	</div>
+															</div>
+															<div class="form-group">
+																	<div>
+																		<label for="form-field-permType">菜单类型：</label>
+																		<label>
+																			<select class="form-control" id="form-field-permType">
+																				<option value="0">菜单级别</option>
+																				<option value="1">按钮级别</option>
+																			</select>
+																			<span class="lbl"></span>
+																		</label>
+																	</div>
+															</div>
+	
+															<div class="space-4"></div>
+	
+														</div>
+													</div>
+												</div>
+	
+												<div class="modal-footer">
+													<button class="btn btn-sm" data-dismiss="modal">
+														<i class="ace-icon fa fa-times"></i>
+														取消
+													</button>
+	
+													<button class="btn btn-sm btn-primary ladda-button" data-style="slide-down" onclick="submitUpdate();" id="submit_btn">
+														<span class="ladda-label"><i class="ace-icon fa fa-check"></i>
+														保存</span>
+													</button>
+												</div>
+											</div>
+										</div>
+									</div><!-- PAGE CONTENT ENDS -->
+								</div>
+								
+							</div>
+						</div>
+					</div>
+			</div><!-- /.col -->
+		</div><!-- /.row -->
+</div><!-- /.page-content -->
+				

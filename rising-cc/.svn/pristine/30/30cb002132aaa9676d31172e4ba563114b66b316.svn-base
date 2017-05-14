@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE configuration PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-config.dtd">
+<configuration>
+	<settings>
+		<setting name="lazyLoadingEnabled" value="false" />
+	</settings>
+
+	<typeAliases>
+		<typeAlias type="com.rising.common.page.Pagination" alias="Pagination" />
+		<typeAlias type="com.rising.cc.common.component.BaseQo" alias="BaseQo" />
+		<typeAlias type="com.rising.cc.common.component.BaseModel" alias="BaseModel" />
+		
+		<typeAlias type="com.rising.cc.model.envir.EnvirType" alias="EnvirType" />
+		
+		<typeAlias type="com.rising.cc.model.user.SysUser" alias="SysUser" />
+		<typeAlias type="com.rising.cc.model.user.SysUserBasicInfo" alias="SysUserBasicInfo" />
+		<typeAlias type="com.rising.cc.model.role.SysRole" alias="SysRole" />
+		<typeAlias type="com.rising.cc.model.perm.SysPermission" alias="SysPermission" />
+		<typeAlias type="com.rising.cc.model.role.SysRolePermission" alias="SysRolePermission" />
+		<typeAlias type="com.rising.cc.model.user.SysUserRole" alias="SysUserRole" />
+		<typeAlias type="com.rising.cc.model.user.SysUserEnvir" alias="SysUserEnvir" />
+		
+		<typeAlias type="com.rising.cc.model.project.EnginConfigType" alias="EnginConfigType" />
+		<typeAlias type="com.rising.cc.model.project.EnginConfigInfo" alias="EnginConfigInfo" />
+		<typeAlias type="com.rising.cc.model.project.Engineering" alias="Engineering" />
+		<typeAlias type="com.rising.cc.model.project.Project" alias="Project" />
+		
+        <typeAlias type="com.rising.cc.model.api.ApiInfo" alias="ApiInfo"/>
+        <typeAlias type="com.rising.cc.model.api.ApiAccount" alias="ApiAccount"/>
+        <typeAlias type="com.rising.cc.model.api.ApiAccountInfo" alias="ApiAccountInfo"/>
+
+        <typeAlias type="com.rising.cc.model.log.LogTable" alias="LogTable"/>
+        <typeAlias type="com.rising.cc.model.log.LogField" alias="LogField"/>
+        <typeAlias type="com.rising.cc.model.log.LogDB" alias="LogDB"/>
+
+
+        <typeAlias type="com.rising.cc.model.service.Server" alias="Server"/>
+        <typeAlias type="com.rising.cc.model.service.Services" alias="Services"/>
+        <typeAlias type="com.rising.cc.model.service.ServicesAndServer" alias="ServicesAndServer"/>
+
+        <typeAlias type="com.rising.cc.model.interf.InterfInfo" alias="InterfInfo"/>
+        <typeAlias type="com.rising.cc.model.interf.InterfManager" alias="InterfManager"/>
+        <typeAlias type="com.rising.cc.model.interf.InterfMethod" alias="InterfMethod"/>
+
+        <typeAlias type="com.rising.cc.model.monitoring.SMSConfig" alias="smsConfig"/>
+
+        <typeAlias type="com.rising.cc.model.queue.Queue" alias="Queue"/>
+        <typeAlias type="com.rising.cc.model.queue.Handler" alias="Handler"/>
+
+		<typeAlias type="com.rising.cc.model.basicdata.SysDataBaseInfo" alias="SysDataBaseInfo" />
+		<typeAlias type="com.rising.cc.model.basicdata.SysDubboInfo" alias="SysDubboInfo" />
+		<typeAlias type="com.rising.cc.model.basicdata.SysMongoDbInfo" alias="SysMongoDbInfo" />
+		<typeAlias type="com.rising.cc.model.basicdata.SysRabbitMqInfo" alias="SysRabbitMqInfo" />
+		<typeAlias type="com.rising.cc.model.basicdata.SysRedisInfo" alias="SysRedisInfo" />
+		
+		<typeAlias type="com.rising.cc.model.task.TimerTask" alias="TimerTask" />
+	</typeAliases>
+
+	<mappers>
+		
+		<mapper resource="mapper/Common.xml" />
+		<mapper resource="mapper/envir/EnvirTypeMapper.xml" />
+		
+		<!-- 用户相关 -->
+		<mapper resource="mapper/user/SysUserMapper.xml" />
+		<mapper resource="mapper/perm/SysPermMapper.xml" />
+		<mapper resource="mapper/role/SysRoleMapper.xml" />
+		<mapper resource="mapper/user/SysUserBasicInfoMapper.xml" />
+		
+		<!-- 工程管理相关 -->
+		<mapper resource="mapper/project/EnginConfigInfoMapper.xml" />
+		<mapper resource="mapper/project/EnginConfigTypeMapper.xml" />
+		<mapper resource="mapper/project/EngineeringMapper.xml" />
+		<mapper resource="mapper/project/ProjectMapper.xml" />
+		
+		<!-- api管理相关 -->
+		<mapper resource="mapper/api/ApiInfoMapper.xml" />
+		<mapper resource="mapper/api/ApiAccountMapper.xml" />
+		<mapper resource="mapper/api/ApiAccountInfoMapper.xml" />
+        <!-- 日志管理-->
+		<mapper resource="mapper/log/LogTableMapper.xml" />
+		<mapper resource="mapper/log/LogDBMapper.xml" />
+        <!--服务管理-->
+		<mapper resource="mapper/service/ServerMapper.xml" />
+		<mapper resource="mapper/service/ServicesMapper.xml" />
+        <!--队列管理-->
+		<mapper resource="mapper/queue/QueueMapper.xml" />
+		<mapper resource="mapper/queue/HandlerMapper.xml" />
+        <!--接口管理-->
+        <mapper resource="mapper/interf/InterfInfoMapper.xml"/>
+        <mapper resource="mapper/interf/InterfManagerMapper.xml"/>
+        <mapper resource="mapper/interf/InterfMethodMapper.xml"/>
+
+        <mapper resource="mapper/monitoring/SMSConfigMapper.xml"/>
+        <mapper resource="mapper/monitoring/RabbitmqConfigMapper.xml"/>
+
+		<!--基本功能配置  -->
+		<mapper resource="mapper/basicdata/SysDataBaseMapper.xml" />
+		<mapper resource="mapper/basicdata/SysDubboMapper.xml" />
+		<mapper resource="mapper/basicdata/SysMongoDbMapper.xml" />
+		<mapper resource="mapper/basicdata/SysRabbitMqMapper.xml" />
+		<mapper resource="mapper/basicdata/SysRedisMapper.xml" />
+		
+		<mapper resource="mapper/task/TimerTaskMapper.xml" />
+		
+	</mappers>
+
+</configuration>
