@@ -1,0 +1,7 @@
+ALTER TABLE t_user_info ADD unique(mobile);
+ALTER TABLE t_user_info ADD unique(jobNo);
+ALTER TABLE t_user_info ADD unique(userName);
+ALTER TABLE t_user_info_temp ADD unique(jobNo);
+ALTER TABLE t_one_card_recharge_record ADD unique(tradeNo);
+ALTER TABLE t_enter_record ADD unique(tradeNo);
+ALTER TABLE t_enter_best_pay_record ADD unique(tradeNo);
