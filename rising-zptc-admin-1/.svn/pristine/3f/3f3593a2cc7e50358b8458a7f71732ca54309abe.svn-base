@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.bhyf.dao.enter.EnterStatisticsDao">
+
+	<resultMap type="EnterStatistics" id="enterStatisticsMap">
+		<result property="enter.id" column="enterId"/>
+		<result property="enter.enterExamName" column="enterExamName"/>
+		<result property="enter.enterExamNum" column="enterExamNum"/>
+		<result property="enter.enterCategory" column="enterCategory"/>
+		<result property="enter.userCategory" column="userCategory"/>
+		<result property="enter.beginTime" column="beginTime"/>
+		<result property="enter.endTime" column="endTime"/>
+		<result property="enter.decscription" column="decscription"/>
+		<result property="enter.enterNum" column="enterNum"/>
+		<result property="enter.enterSumNum" column="enterSumNum"/>
+		<result property="enter.enterPlace" column="enterPlace"/>
+		<result property="enter.enterMoney" column="enterMoney"/>
+		<result property="enter.status" column="status"/>
+
+		<result property="id" column="id"/>
+		<result property="enterSumMoney" column="enterSumMoney"/>
+		<result property="enterBestPaySumMoney" column="enterBestPaySumMoney"/>
+		<result property="reconciliation" column="reconciliation"/>
+	</resultMap>
+
+	<sql id="columnEnterStatisticsByAll">
+		e.id as enterId,
+		e.enterExamName,
+		e.enterExamNum,
+		e.enterCategory,
+		e.userCategory,
+		e.beginTime,
+		e.endTime,
+		e.decscription,
+		e.enterNum,
+		e.enterSumNum,
+		e.enterPlace,
+		e.enterMoney,
+		e.status,
+		es.id,
+		es.enterSumMoney,
+		es.enterBestPaySumMoney,
+		es.reconciliation
+	</sql>
+
+	<sql id = "whereConditionPagination">
+		<if test ="condition !=null">
+			<if test ="condition.enterExamName !=null and condition.enterExamName !=''">
+				and enterExamName = #{condition.enterExamName,jdbcType=VARCHAR}
+			</if>
+			<if test ="condition.enterCategory !=null ">
+				and enterCategory = #{condition.enterCategory,jdbcType=INTEGER}
+			</if>
+		</if>
+	</sql>
+	<sql id = "whereConditionQo">
+			<if test ="enterExamName !=null and enterExamName !=''">
+				and enterExamName = #{enterExamName,jdbcType=VARCHAR}
+			</if>
+			<if test ="enterCategory !=null ">
+				and enterCategory = #{enterCategory,jdbcType=INTEGER}
+			</if>
+			<if test ="enterId !=null ">
+				and enterId = #{enterId,jdbcType=INTEGER}
+			</if>
+	</sql>
+
+	<select id="findEnterStatisticsByQo" parameterType="com.bhyf.pojo.qo.enter.EnterStatisticsQo" resultMap="enterStatisticsMap">
+		select
+		<include refid="columnEnterStatisticsByAll"/>
+		from t_enter_statistics es,t_enter e
+		where e.id = es.enterId
+		<include refid="whereConditionQo"/>
+	</select>
+	<select id="findEnterStatisticsByPagination" parameterType="Pagination" resultMap="enterStatisticsMap">
+		select
+		<include refid="columnEnterStatisticsByAll"/>
+		from t_enter_statistics es,t_enter e
+		where e.id = es.enterId
+		<include refid="whereConditionPagination"/>
+	</select>
+	<select id="countEnterStatisticsByPagination" parameterType="Pagination" resultType="Integer">
+		select
+		count(1)
+		from t_enter_statistics es,t_enter e
+		where e.id = es.enterId
+		<include refid="whereConditionPagination"/>
+	</select>
+
+
+	<insert id="saveEnterStatistics" parameterType="EnterStatistics">
+		insert into t_enter_statistics(
+		enterId)
+		values(
+		#{enter.id,jdbcType=INTEGER}
+		)
+	</insert>
+
+
+	<select id = "findTotalMoney" parameterType="com.bhyf.pojo.qo.enter.EnterStatisticsQo" resultType="Double">
+		SELECT
+			sum(money)
+		FROM
+			t_best_pay_record b,
+			t_enter_best_pay_record e
+		WHERE
+			b.tradeNo = e.tradeNo
+			<if test ="enterId !=null ">
+				and e.enterId = #{enterId,jdbcType=INTEGER}
+			</if>
+			<if test ="status !=null ">
+				and e.status = #{status,jdbcType=INTEGER}
+			</if>
+	</select>
+
+	<update id="updateEnterStatistics" parameterType="EnterStatistics">
+		update t_enter_statistics
+		<set>
+			<if test="enterSumMoney != null ">
+				enterSumMoney = #{enterSumMoney,jdbcType=DOUBLE},
+			</if>
+			<if test="enterBestPaySumMoney != null ">
+				enterBestPaySumMoney = #{enterBestPaySumMoney,jdbcType=DOUBLE},
+			</if>
+			<if test="reconciliation != null  and reconciliation != ''">
+				reconciliation = #{reconciliation,jdbcType=DOUBLE},
+			</if>
+		</set>
+		where id = #{id,jdbcType=INTEGER}
+	</update>
+
+</mapper>

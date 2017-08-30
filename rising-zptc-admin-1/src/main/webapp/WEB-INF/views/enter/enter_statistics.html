@@ -1,0 +1,297 @@
+<#assign contextPath=springMacroRequestContext.getContextPath() />
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<html>
+<head>
+    <base href="" />
+
+    <title>report.html</title>
+
+    <meta name="keywords" content="keyword1,keyword2,keyword3">
+    <meta name="description" content="this is my page">
+    <meta name="content-type" content="text/html; charset=UTF-8">
+
+    <link rel="stylesheet" href="${contextPath}/resources/css/default.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="${contextPath}/resources/js/jquery-easyui-1.4.2/themes/default/easyui.css" />
+    <link rel="stylesheet" type="text/css" href="${contextPath}/resources/js/jquery-easyui-1.4.2/themes/icon.css" />
+    <script type="text/javascript" src="${contextPath}/resources/js/jquery-1.7.2.min.js"></script>
+    <script type="text/javascript" src="${contextPath}/resources/js/jquery-easyui-1.4.2/jquery.easyui.min.js"></script>
+    <script type="text/javascript" src="${contextPath}/resources/common/My97DatePicker/WdatePicker.js"></script>
+    <script type="text/javascript" src="${contextPath}/resources/js/date-expand.js"></script>
+    <script type="text/javascript"  src='${contextPath}/resources/js/ajaxfileupload.js'></script>
+</head>
+
+<body class="easyui-layout">
+<div id="careRoadContentDiv" region="center" title="翼支付对账列表" border="false" style="overflow:hidden;">
+    <table id="list"></table>
+</div>
+
+<div id="jqueryToolbar" style="padding:5px;height:auto">
+    <div style="padding:10px 0 10px 10px">
+        <table>
+            <tr>
+                <td>考试名称:</td>
+                <td><input class="easyui-validatebox" type="text" id="enterExamName_qo" data-options=""></td>
+                <td>状态:</td>
+                <td>
+                <select class="easyui-combobox" id="enterCategory_qo" style="width:142px;" panelHeight="80">
+                    <option value="">请选择</option>
+                    <option value="1">报名缴费</option>
+                    <option value="2">报名</option>
+                    <option value="3">缴费</option>
+                </select>
+                </td>
+            </tr>
+            <tr>
+                <td>导入数据：</td>
+                <td><input type="file" id="upload_file" name="uploadFile"/></td>
+            </tr>
+        </table>
+    </div>
+    <div style="margin-top:5px; margin-left:10px; padding-bottom:8px; border-bottom:1px solid #ccc;">
+        <a href="javascript:;" class="easyui-linkbutton" iconCls="icon-search" onclick="searchData()">查询</a>
+        <a href="javascript:;" class="easyui-linkbutton" iconCls="icon-print" onclick="exportExcel()">导出</a>
+        <a href="javascript:;" class="easyui-linkbutton" iconCls="icon-add" onclick="uploadFile()">导入</a>
+        <a href="javascript:;" class="easyui-linkbutton" iconCls="icon-sum" onclick="statisticsData()">统计</a>
+        <a href="javascript:;" class="easyui-linkbutton" iconCls="icon-edit" onclick="toUpdate()">修改平账信息</a>
+    </div>
+</div>
+<div id="dlg" class="easyui-dialog" title="编辑对账" closed="true" style="width:400px;height:200px;padding:10px"
+     data-options="
+                iconCls: 'icon-save',
+                buttons: '#dlg-buttons'
+            ">
+    <table>
+        <tr>
+            <td>平账信息:</td>
+            <td><input class="easyui-validatebox" type="text" id="reconciliation" data-options=""/></td>
+        </tr>
+    </table>
+</div>
+<div id="dlg-buttons">
+    <a href="javascript:void(0)" class="easyui-linkbutton" onclick="javascript:update()">修改</a>
+    <a href="javascript:void(0)" class="easyui-linkbutton" onclick="javascript:$('#dlg').dialog('close')">关闭</a>
+</div>
+<script type="text/javascript">
+    var recordId = "";
+    $(function(){
+        $('#list').datagrid({
+            nowrap: false,
+            striped: true,
+            fit: true,
+            singleSelect:true,
+            fitColumns:true,
+            idField:'id',
+            url:'${contextPath}/enter_statistics/enter_statistics_list',
+            columns:[[
+                {field:'id',title:'',hidden:true},
+                {field:'index',title:'序号', align:'center',width:50,formatter:function(value, rec, index){
+                    return index+1;
+                }},
+                {field:'enterExamName',title:'报名项目名称', align:'center',width:60},
+                {field:'enterCategory',title:'考试类别', align:'center',width:100, formatter:function(value, rec, index){
+                    switch(value){
+                        case 1 : return "报名缴费";
+                            break;
+                        case 2 : return "报名";
+                            break;
+                        case 3 : return "缴费";
+                            break;
+                        default: return "";
+                    }
+                }},
+                {field:'enterNum',title:'报考名额', align:'center',width:150},
+                {field:'enterSumNum',title:'报名人数', align:'center',width:150},
+                {field:'enterMoney',title:'考试金额', align:'center',width:150},
+                {field:'enterSumMoney',title:'收费总计', align:'center',width:150},
+                {field:'enterBestPaySumMoney',title:'翼支付收费总计', align:'center',width:150},
+                {field:'reconciliation',title:'对账记录', align:'center',width:150}
+
+            ]],
+            toolbar:'#jqueryToolbar',
+            pagination:true,
+            pageSize: 50,//每页显示的记录条数，默认为
+            pageList: [10,20,30,40,50],//可以设置每页记录条数的列表
+            onLoadSuccess:function(data){
+                $('#list').datagrid('clearSelections'); //清除掉列表选中记录
+                if(data.total==0){
+                    $('.datagrid-body-inner').eq(0).addClass("l_elist");
+                    //$('.datagrid-body').eq(1).append('<div class="r_elist">无数据</div>');
+                }else{
+                    $('.datagrid-body-inner').eq(0).removeClass("l_elist");
+                }
+            }
+        });
+
+        //设置分页控件
+        var p = $('#list').datagrid('getPager');
+        $(p).pagination({
+            beforePageText: '第',//页数文本框前显示的汉字
+            afterPageText: '页    共 {pages} 页',
+            displayMsg: '当前显示第 {from} 到 {to} 条记录   共 {total} 条记录'/*,
+             onBeforeRefresh:function(){
+             $(this).pagination('loading');
+             alert('before refresh');
+             $(this).pagination('loaded');
+             }*/
+        });
+
+
+    })
+
+    function searchData() {
+        var a = new Array();
+        var enterExamName = $("#enterExamName_qo").val().trim();
+        var enterCategory = $("#enterCategory_qo").combobox("getValue").trim();
+        if(enterExamName !=null && enterExamName!="") {
+            a["enterExamName"]=enterExamName;
+        }
+        if(enterCategory !=null && enterCategory!="") {
+            a["enterCategory"]=enterCategory;
+        }
+        doSearch(a);
+    }
+
+    function doSearch(queryParams){
+        $("#list").datagrid('clearSelections');
+        $("#list").datagrid('options').queryParams=queryParams;
+        $("#list").datagrid('load');
+    }
+    function exportExcel(){
+        window.location.href="${contextPath}/enter_record/export_enter_record_list";
+    }
+    function statisticsData(){
+        var row = $('#list').datagrid('getSelected');
+        if(row == null){
+            alert("请选择一条记录");
+            return
+        }
+        recordId = row.id;
+        $.ajax({
+            type: "post",
+            url: "${contextPath}/enter_statistics/statistics_data",
+            traditional:true,
+            dataType: "json",
+            contentType:"application/x-www-form-urlencoded; charset=utf-8",
+            data:{id:recordId},
+            async: false,
+            success: function(data){
+                alert(data);
+            }
+        });
+        recordId="";
+        $('#list').datagrid('reload');
+    }
+    function uploadFile(){
+        $.ajaxFileUpload({
+            type : "post",
+            url : "${contextPath}/enter_statistics/upload_file",
+            fileElementId: "upload_file",
+            secureuri : false,
+            dataType : "json",
+            timeout : 600000,
+            success: function (data, status) {
+                alert(data.num);
+            },
+            error: function (data, status, e) {
+                alert("上传错误，请重新尝试！");
+            }
+        });
+    }
+
+    function toUpdate(){
+        var row = $('#list').datagrid('getSelected');
+        if(row == null){
+            alert("请选择一条记录");
+            return
+        }
+        recordId = row.id;
+        var reconciliation  = $("#reconciliation").val(row.reconciliation);
+        $("#dlg").dialog('open');
+    }
+    function update(){
+        var reconciliation  = $("#reconciliation").val();
+        if(!checkString(reconciliation,"内容",200)){
+            return
+        }
+        $.ajax({
+            type: "post",
+            url: "${contextPath}/enter_statistics/update_enter_statistics",
+            dataType: "json",
+            contentType:"application/x-www-form-urlencoded; charset=utf-8",
+            data:{id:recordId,reconciliation:reconciliation},
+            async: false,
+            success: function(data){
+            }
+        });
+        recordId = "";
+        $('#list').datagrid('reload');
+        $('#dlg').dialog('close');
+    }
+    function formatter1(date){
+        if (!date){return '';}
+        return $.fn.datebox.defaults.formatter.call(this, date);
+    }
+    function parser1(s){
+        if (!s){return null;}
+        return $.fn.datebox.defaults.parser.call(this, s);
+    }
+    function formatter2(date){
+        if (!date){return '';}
+        var y = date.getFullYear();
+        var m = date.getMonth()+1;
+        var d = date.getDate();
+        var h = date.getHours();
+        var i = date.getMinutes();
+        var s = date.getSeconds();
+        return  y+'-'+(m<10?('0'+m):m)+'-'+(d<10?('0'+d):d)+' '+(h<10?('0'+h):h)+':'+(i<10?('0'+i):i)+':'+(s<10?('0'+s):s);
+    }
+    function parser2(s){
+        var y = s.substring(0,4);
+        var m =s.substring(5,7);
+        var d = s.substring(8,10);
+        var h = s.substring(11,13);
+        var min = s.substring(14,16);
+        var sec = s.substring(17,20);
+        return new Date(y,m-1,d,h,min,sec);
+    }
+    function checkString(str,message,length){
+        if(str == "" || str == null){
+            alert("请输入"+message);
+            return false;
+        }
+        if(length != null &&length != 0){
+            if(str.length > length){
+                alert(message +"长度超过"+length);
+                return false;
+            }
+        }
+        return true;
+    }
+    function checkNum(num,isNull,message,length)
+    {
+        if(isNull){
+            if(num == null || num == "undefined" || num == ''){
+                return true
+            }
+        }
+        var re = /^[0-9]+.?[0-9]*$/;   //判断字符串是否为数字     //判断正整数 /^[1-9]+[0-9]*]*$/
+
+        if (!re.test(num))
+        {
+            alert(message+"请输入数字");
+            return false;
+        }
+        if(length !=null && length != 0){
+            if(num.length>length){
+                alert(message+"长度不能超过"+length);
+                return false;
+            }
+        }
+        return true;
+    }
+</script>
+
+</body>
+</html>
+

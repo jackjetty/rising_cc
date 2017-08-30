@@ -1,0 +1,20 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head id="Head1">
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>幼教云-服务/产品订购管理系统</title>
+    <link href="resource/css/default.css" rel="stylesheet" type="text/css" />
+
+    <link rel="stylesheet" type="text/css" href="resource/js/themes/default/easyui.css" />
+    <link rel="stylesheet" type="text/css" href="resource/js/themes/icon.css" />
+    <script type="text/javascript" src="resource/js/jquery-1.7.2.min.js"></script>
+    <script type="text/javascript" src="resource/js/jquery.easyui.min.js"></script>
+	<script type="text/javascript" src='resource/js/XiuCai.index.js'> </script>
+	<script type="text/javascript" src='resource/js/bhyf_menus.js'> </script>
+	
+</head>
+<body class="easyui-layout" style="overflow-y: hidden"  fit="true"   scroll="no">
+	welcoming !
+
+</body>
+</html>

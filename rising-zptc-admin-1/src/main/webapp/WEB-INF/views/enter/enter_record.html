@@ -1,0 +1,314 @@
+<#assign contextPath=springMacroRequestContext.getContextPath() />
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<html>
+<head>
+    <base href="" />
+
+    <title>report.html</title>
+
+    <meta name="keywords" content="keyword1,keyword2,keyword3">
+    <meta name="description" content="this is my page">
+    <meta name="content-type" content="text/html; charset=UTF-8">
+
+    <link rel="stylesheet" href="${contextPath}/resources/css/default.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="${contextPath}/resources/js/jquery-easyui-1.4.2/themes/default/easyui.css" />
+    <link rel="stylesheet" type="text/css" href="${contextPath}/resources/js/jquery-easyui-1.4.2/themes/icon.css" />
+    <script type="text/javascript" src="${contextPath}/resources/js/jquery-1.7.2.min.js"></script>
+    <script type="text/javascript" src="${contextPath}/resources/js/jquery-easyui-1.4.2/jquery.easyui.min.js"></script>
+    <script type="text/javascript" src="${contextPath}/resources/common/My97DatePicker/WdatePicker.js"></script>
+    <script type="text/javascript" src="${contextPath}/resources/js/date-expand.js"></script>
+    <script type="text/javascript"  src='${contextPath}/resources/js/ajaxfileupload.js'></script>
+</head>
+
+<body class="easyui-layout">
+<div id="careRoadContentDiv" region="center" title="报名记录列表" border="false" style="overflow:hidden;">
+    <table id="list"></table>
+</div>
+
+<div id="jqueryToolbar" style="padding:5px;height:auto">
+    <div style="padding:10px 0 10px 10px">
+        <table>
+            <tr>
+                <td>考试名称:</td>
+                <td><input class="easyui-validatebox" type="text" id="enterExamName_qo" data-options=""></td>
+                <td>姓名:</td>
+                <td><input class="easyui-validatebox" type="text" id="userName_qo" data-options=""></td>
+                <td>身份证:</td>
+                <td><input class="easyui-validatebox" type="text" id="idNum_qo" data-options=""></td>
+            </tr>
+            <tr>
+                <td>时间:</td>
+                <td>
+                    <input type="text" class="Wdate" id="beginTime_qo" onfocus="WdatePicker({skin:'whyGreen',dateFmt:'yyyy-MM-dd'})"/>
+                </td>
+                <td>-</td>
+                <td>
+                <input type="text" class="Wdate" id="endTime_qo" onfocus="WdatePicker({skin:'whyGreen',dateFmt:'yyyy-MM-dd'})"/>
+                </td>
+            </tr>
+        </table>
+    </div>
+    <div style="margin-top:5px; margin-left:10px; padding-bottom:8px; border-bottom:1px solid #ccc;">
+        <a href="javascript:;" class="easyui-linkbutton" iconCls="icon-search" onclick="searchData()">查询</a>
+        <a href="javascript:;" class="easyui-linkbutton" iconCls="icon-large-smartart" onclick="findDetail()">详情</a>
+        <a href="javascript:;" class="easyui-linkbutton" iconCls="icon-print" onclick="exportExcel()">导出</a>
+    </div>
+</div>
+<div id="dlg" class="easyui-dialog" title="报名详情" closed="true" style="width:400px;height:300px;padding:10px"
+     data-options="
+                iconCls: 'icon-save'
+            ">
+    <table>
+            <tr>
+                <td>报名项目</td>
+                <td><input type="text" readonly="readonly" id ="enterExamName"></td>
+            </tr>
+            <tr>
+                <td>报名金额</td>
+                <td><input type="text" readonly="readonly" id ="payMoney"></td>
+            </tr>
+            <tr>
+                <td>姓名</td>
+                <td><input type="text" readonly="readonly" id ="userName"></td>
+            </tr>
+            <tr>
+                <td>身份证</td>
+                <td><input type="text" readonly="readonly" id ="idNum"></td>
+            </tr>
+            <tr>
+                <td>手机号码</td>
+                <td><input type="text" readonly="readonly" id ="mobile"></td>
+            </tr>
+            <tr>
+                <td>性别</td>
+                <td><input type="text" readonly="readonly" id ="sex"></td>
+            </tr>
+            <tr>
+                <td>补充一</td>
+                <td><input type="text" readonly="readonly" id ="other1"></td>
+            </tr>
+            <tr>
+                <td>补充二</td>
+                <td><input type="text" readonly="readonly" id ="other2"></td>
+            </tr>
+            <tr>
+                <td>备注</td>
+                <td><input type="text" readonly="readonly" id ="remark"></td>
+            </tr>
+</table>
+</div>
+<script type="text/javascript">
+    var recordId = "";
+    $(function(){
+        $('#list').datagrid({
+            nowrap: false,
+            striped: true,
+            fit: true,
+            singleSelect:true,
+            fitColumns:true,
+            idField:'id',
+            url:'${contextPath}/enter_record/enter_record_list',
+            columns:[[
+                {field:'id',title:'',hidden:true},
+                {field:'index',title:'序号', align:'center',width:50,formatter:function(value, rec, index){
+                    return index+1;
+                }},
+                {field:'tradeNo',title:'翼支付交易单号', align:'center',width:160},
+                {field:'payNo',title:'缴费单号', align:'center',width:100},
+                {field:'userName',title:'报名人', align:'center',width:100},
+                {field:'enterCategory',title:'考试类别', align:'center',width:100, formatter:function(value, rec, index){
+                    switch(value){
+                        case 1 : return "报名缴费";
+                            break;
+                        case 2 : return "报名";
+                            break;
+                        case 3 : return "缴费";
+                            break;
+                        default: return "";
+                    }
+                }},
+                {field:'idNum',title:'报名人身份证号', align:'center',width:150},
+                {field:'stuNo',title:'学号', align:'center',width:150},
+                {field:'payMoney',title:'缴费金额', align:'center',width:150}
+
+            ]],
+            toolbar:'#jqueryToolbar',
+            pagination:true,
+            pageSize: 50,//每页显示的记录条数，默认为
+            pageList: [10,20,30,40,50],//可以设置每页记录条数的列表
+            onLoadSuccess:function(data){
+                $('#list').datagrid('clearSelections'); //清除掉列表选中记录
+                if(data.total==0){
+                    $('.datagrid-body-inner').eq(0).addClass("l_elist");
+                    //$('.datagrid-body').eq(1).append('<div class="r_elist">无数据</div>');
+                }else{
+                    $('.datagrid-body-inner').eq(0).removeClass("l_elist");
+                }
+            }
+        });
+
+        //设置分页控件
+        var p = $('#list').datagrid('getPager');
+        $(p).pagination({
+            beforePageText: '第',//页数文本框前显示的汉字
+            afterPageText: '页    共 {pages} 页',
+            displayMsg: '当前显示第 {from} 到 {to} 条记录   共 {total} 条记录'/*,
+             onBeforeRefresh:function(){
+             $(this).pagination('loading');
+             alert('before refresh');
+             $(this).pagination('loaded');
+             }*/
+        });
+
+
+    })
+
+    function searchData() {
+        var a = new Array();
+        var enterExamName = $("#enterExamName_qo").val().trim();
+        var userName = $("#userName_qo").val().trim();
+        var idNum = $("#idNum_qo").val().trim();
+        var beginTime = $("#beginTime_qo").val();
+        var endTime = $("#endTime_qo").val();
+        if(enterExamName !=null && enterExamName!="") {
+            a["enterExamName"]=enterExamName;
+        }
+        if(userName !=null && userName!="") {
+            a["userName"]=userName;
+        }
+        if(idNum !=null && idNum!="") {
+            a["idNum"]=idNum;
+        }
+        if(beginTime !=null && beginTime!="") {
+            a["beginTime"]=new Date(beginTime.split("-")[0],beginTime.split("-")[1]-1,beginTime.split("-")[2]);
+        }
+        if(endTime !=null && endTime!="") {
+            a["endTime"]=new Date(endTime.split("-")[0],endTime.split("-")[1]-1,endTime.split("-")[2]);
+        }
+        doSearch(a);
+    }
+
+    function doSearch(queryParams){
+        $("#list").datagrid('clearSelections');
+        $("#list").datagrid('options').queryParams=queryParams;
+        $("#list").datagrid('load');
+    }
+    /**
+     * 中文转unicode字符工具
+     */
+    function toUnicode(str) {
+        var i = 0,
+                l = str.length,
+                result = [], //转换后的结果数组
+                unicodePrefix, //unicode前缀 (example:\1234||\u1234)
+                unicode16; //转换成16进制后的unicode
+
+        //如果是css中使用格式为\1234之类
+        unicodePrefix =  '\\u';
+
+        for (; i < l; i++) {
+            //转为16进制的unicode, js及css里须转成16进制
+            unicode16 = str.charCodeAt(i).toString(16);
+            result.push( unicodePrefix + unicode16 );
+        }
+
+        return result.join('');
+    }
+    function exportExcel(){
+
+        var a = "";
+        var enterExamName = $("#enterExamName_qo").val().trim();
+        var userName = $("#userName_qo").val().trim();
+        var idNum = $("#idNum_qo").val().trim();
+        var beginTime = $("#beginTime_qo").val();
+        var endTime = $("#endTime_qo").val();
+        if(enterExamName !=null && enterExamName!="") {
+            a+="&enterExamName="+enterExamName;
+        }
+        if(userName !=null && userName!="") {
+            a+="&userName="+userName;
+        }
+        if(idNum !=null && idNum!="") {
+            a+="&idNum="+idNum;
+        }
+        if(beginTime !=null && beginTime!="") {
+            a+="beginTime="+new Date(beginTime.split("-")[0],beginTime.split("-")[1]-1,beginTime.split("-")[2]);
+        }
+        if(endTime !=null && endTime!="") {
+            a+="endTime"+new Date(endTime.split("-")[0],endTime.split("-")[1]-1,endTime.split("-")[2]);
+        }
+
+        if(a.length >0){
+            a= a.substring(1, a.length);
+        }
+        if(a.length >0){
+            window.location.href="${contextPath}/enter_record/export_enter_record_list?"+a;
+        }else{
+            window.location.href="${contextPath}/enter_record/export_enter_record_list";
+        }
+    }
+    function findDetail(){
+        var row = $('#list').datagrid('getSelected');
+        if(row == null){
+            alert("请选择一条记录");
+            return
+        }
+        recordId = row.id;
+        $.ajax({
+            type: "GET",
+            url: "${contextPath}/enter_record/find_enter_record_detail",
+            traditional:true,
+            dataType: "json",
+            contentType:"application/x-www-form-urlencoded; charset=utf-8",
+            data:{id:recordId},
+            async: false,
+            success: function(data){
+                $("#enterExamName").val(data.enterExamName);
+                $("#payMoney").val(data.payMoney);
+                $("#userName").val(data.userName);
+                $("#idNum").val(data.idNum);
+                $("#mobile").val(data.mobile);
+                $("#sex").val(data.sex);
+                $("#other1").val(data.other1);
+                $("#other2").val(data.other2);
+                $("#remark").val(data.remark);
+            }
+        });
+        $("#dlg").dialog('open');
+        recordId="";
+    }
+
+    function formatter1(date){
+        if (!date){return '';}
+        return $.fn.datebox.defaults.formatter.call(this, date);
+    }
+    function parser1(s){
+        if (!s){return null;}
+        return $.fn.datebox.defaults.parser.call(this, s);
+    }
+    function formatter2(date){
+        if (!date){return '';}
+        var y = date.getFullYear();
+        var m = date.getMonth()+1;
+        var d = date.getDate();
+        var h = date.getHours();
+        var i = date.getMinutes();
+        var s = date.getSeconds();
+        return  y+'-'+(m<10?('0'+m):m)+'-'+(d<10?('0'+d):d)+' '+(h<10?('0'+h):h)+':'+(i<10?('0'+i):i)+':'+(s<10?('0'+s):s);
+    }
+    function parser2(s){
+        var y = s.substring(0,4);
+        var m =s.substring(5,7);
+        var d = s.substring(8,10);
+        var h = s.substring(11,13);
+        var min = s.substring(14,16);
+        var sec = s.substring(17,20);
+        return new Date(y,m-1,d,h,min,sec);
+    }
+
+</script>
+
+</body>
+</html>
+

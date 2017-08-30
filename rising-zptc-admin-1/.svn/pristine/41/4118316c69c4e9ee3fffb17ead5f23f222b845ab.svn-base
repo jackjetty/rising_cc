@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.bhyf.dao.recharge.RechargeCommentDao">
+
+
+	<sql id="columnRechargeCommentByAll">
+		id,
+		comment
+	</sql>
+
+
+	<select id="findRechargeComment"  resultType="RechargeComment">
+		select
+		<include refid="columnRechargeCommentByAll"/>
+		from t_basic_recharge_comment
+	</select>
+	<update id="updateRechargeComment" parameterType="RechargeComment">
+		update t_basic_recharge_comment
+		<set>
+			<if test="comment != null and comment != ''">
+				comment = #{comment,jdbcType=VARCHAR}
+			</if>
+		</set>
+	</update>
+
+
+</mapper>

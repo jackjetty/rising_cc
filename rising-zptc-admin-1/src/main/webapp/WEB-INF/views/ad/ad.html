@@ -1,0 +1,589 @@
+<#assign contextPath=springMacroRequestContext.getContextPath() />
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<html>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>轮播管理</title>
+<link rel="stylesheet" type="text/css" href="${contextPath}/resources/themes/default/easyui.css">
+<link rel="stylesheet" type="text/css" href="${contextPath}/resources/themes/icon.css">
+<script type="text/javascript" src="${contextPath}/resources/js/jquery-1.7.2.js"></script>
+<script type="text/javascript" src="${contextPath}/resources/js/jquery.easyui.min.js"></script>
+<script type="text/javascript" src="${contextPath}/resources/js/easyui-lang-zh_CN.js"></script>
+<style type="text/css">
+<!--
+.panel-margin-buttom {
+	margin-bottom: 20px;
+}
+
+#searchpanel a.pushBtn {
+	-moz-user-select: none;
+	background: url("image/button/btnout_bg_left.gif") no-repeat scroll left
+		top transparent;
+	float: left;
+	height: 24px;
+	margin: 2px 5px 0 0;
+	outline: medium none;
+	text-decoration: none;
+}
+
+#searchpanel a.pushBtn img {
+	float: left;
+	margin: 2px 0 4px 6px;
+	border: 0;
+}
+
+#searchpanel a.pushBtn b {
+	background: url("image/button/btnout_bg_right.gif") no-repeat scroll
+		right top transparent;
+	color: #666666;
+	cursor: pointer;
+	display: inline-block;
+	font-size: 12px;
+	font-weight: normal;
+	height: 24px;
+	line-height: 24px;
+	padding: 0 7px 0 5px;
+	white-space: nowrap;
+}
+
+#searchpanel a.pushBtn:hover {
+	background: url("${contextPath}/resources/image/button/btnover_bg_left.gif") no-repeat scroll
+		left top transparent;
+	text-decoration: none;
+}
+
+#searchpanel a.pushBtn:hover b {
+	background: url("${contextPath}/resources/image/button/btnover_bg_right.gif") no-repeat scroll
+		right top transparent;
+	color: #114477;
+	font-size: 12px;
+}
+
+li {
+	list-style: none;
+}
+
+.clearfix:after {
+	content: ".";
+	display: block;
+	height: 0;
+	clear: both;
+	visibility: hidden;
+}
+
+
+.clearfix {
+	zoom: 1;
+}
+#dlg td{
+	border : 1px solid #CCCCCC;
+	border-bottom : 0px;
+}
+#detail_dialog td{
+	border : 1px solid #CCCCCC;
+	border-bottom : 0px;
+}
+
+#edit-dialog td{
+	border : 1px solid #CCCCCC;
+	border-bottom : 0px;
+}
+-->
+</style>
+</head>
+<script type="text/javascript">
+	function toSave() {
+			$('#dlg').dialog('open');
+			$("#add_adName").val('');
+			$("#add_origImageLinkUrl").val('');
+			$("#add_targImageLinkUrl").val('');
+			$("#add_status").val('');
+			$("#add_sortNum").val('');
+			$("#add_pic").attr('src','');
+			$("#add_pic").css("display","none");
+		}
+	function toUpdate() {
+
+			var rows = $('#list').datagrid('getSelections');
+			if (rows.length == 0) {
+				alert("请选择需要编辑的数据！");
+				return false;
+			} else if (rows.length > 1) {
+				alert("一次只能编辑一行！");
+			} else {
+				var row = $("#list").datagrid('getSelected');
+				$("#edit_adName").val(row.adName);
+				$("#edit_sortNum").val(row.sortNum);
+				$("#edit_origImageLinkUrl").text('${contextPath}/imgManager/viewImages?picPath='+row.origImageLinkUrl);
+				$("#edit_targImageLinkUrl").val(row.targImageLinkUrl);
+				$("#edit_pic").attr('src',row.origImageLinkUrl).css("display","block");
+				$("#edit_status").html("");
+				if(row.status == '1'){
+					$("#edit_status").append("<option value=\"1\" selected >发布</option>");
+					$("#edit_status").append("<option value=\"0\">未发布</option>");
+				}else if(row.status == '0'){
+					$("#edit_status").append("<option value=\"0\" selected >未发布</option>");
+					$("#edit_status").append("<option value=\"1\">发布</option>");
+				}else{
+					$("#edit_status").append("<option value=\"1\" selected >发布</option>");
+					$("#edit_status").append("<option value=\"0\">未发布</option>");
+				}
+
+				$('#edit-dialog').dialog('open');
+			}
+		}
+
+		function removeData() {
+			var rows = $('#list').datagrid('getSelections');
+			if(window.confirm("确认删除这"+rows.length+"记录？")){
+				var menuIds = '';
+				for(var i=0;i<rows.length;i++){
+					menuIds = menuIds + ","+rows[i].id;
+				}
+				$.ajax({
+					url : "${contextPath}/ad/deleteRollImg",
+					data : "id="+ menuIds,
+					dataType : "json",
+					type : "post",
+					success : function(data) {
+						if(data.success != undefined){
+							alert(data.success);
+							$('#list').datagrid('reload');
+						}else{
+							alert(data.error);
+							$('#list').datagrid('reload');
+						}
+					},
+					error : function(data) {
+						alert("error 后台出现错误！");
+					}
+				});
+			}else{
+				return false;
+			}
+		}
+
+	$(function() {
+		$('#list').datagrid({
+			nowrap: false,
+			striped: true,
+			fit: true,
+			singleSelect:true,
+			fitColumns:true,
+			idField:'id',
+			url:'${contextPath}/ad/ad_list',
+			columns:[[
+				{field:'id',title:'',hidden:true},
+				{field:'index',title:'序号', align:'center',width:50,formatter:function(value, rec, index){
+					return index+1;
+				}},
+				{field:'adName',title:'图片名称', align:'center',width:60},
+				{field:'origImageLinkUrl',title:'图片', align:'center',width:100,formatter:lookImg},
+				{field:'targImageLinkUrl',title:'图片外链接', align:'center',width:100},
+				{field:'sortNum',title:'排序', align:'center',width:100},
+				{field:'status',title:'操作', align:'center',width:100,formatter:changeStatus}
+			]],
+			toolbar:'#jqueryToolbar',
+			pagination:true,
+			pageSize: 50,//每页显示的记录条数，默认为
+			pageList: [10,20,30,40,50],//可以设置每页记录条数的列表
+			onLoadSuccess:function(data){
+				$('#list').datagrid('clearSelections'); //清除掉列表选中记录
+				if(data.total==0){
+					$('.datagrid-body-inner').eq(0).addClass("l_elist");
+					//$('.datagrid-body').eq(1).append('<div class="r_elist">无数据</div>');
+				}else{
+					$('.datagrid-body-inner').eq(0).removeClass("l_elist");
+				}
+			}
+		});
+		//设置分页控件
+		var p = $('#list').datagrid('getPager');
+		$(p).pagination({
+			beforePageText: '第',//页数文本框前显示的汉字
+			afterPageText: '页    共 {pages} 页',
+			displayMsg: '当前显示第 {from} 到 {to} 条记录   共 {total} 条记录'/*,
+			 onBeforeRefresh:function(){
+			 $(this).pagination('loading');
+			 alert('before refresh');
+			 $(this).pagination('loaded');
+			 }*/
+		});
+	});
+				function save() {
+					var adName = $("#add_adName").val().trim();
+					if(!checkString(adName,"图片名称",10)){
+						return
+					}
+					var origImageLinkUrl = $("#add_pic").attr('src');
+					if (origImageLinkUrl == '') {
+						alert('图片不能为空！');
+						return false;
+					}
+					var sortNum = $("#add_sortNum").val().trim();
+					if(!checkNum(sortNum,"图片排序",3)){
+						return
+					}
+					var targImageLinkUrl = $('#add_targImageLinkUrl').val();
+					targImageLinkUrl = targImageLinkUrl.replace(/\&/g, "%26");
+					if(!checkString(targImageLinkUrl,"图片链接",100)){
+						return
+					}
+					var status = $("#add_status").val();
+					$.ajax({
+						url: "${contextPath}/ad/addRollImg",
+						data: "adName=" + adName + "&origImageLinkUrl=" + origImageLinkUrl + "&targImageLinkUrl=" + targImageLinkUrl + "&sortNum=" + sortNum
+						+ "&status=" + status,
+						dataType: "json",
+						type: "post",
+						success: function (data) {
+							alert(data);
+							if (data.success != undefined) {
+								alert(data.success);
+								$('#dlg').dialog('close');
+								$('#list').datagrid('reload');
+							} else {
+								alert(data.error);
+							}
+
+						},
+						error: function (data) {
+							alert("error 后台出现错误！");
+						}
+					});
+				}
+				function update() {
+
+					var row = $("#list").datagrid('getSelected');
+					var id = row.id;
+					var adName = $("#edit_adName").val().trim();
+					if(!checkString(adName,"图片名称",10)){
+						return
+					}
+					var origImageLinkUrl = $("#edit_pic").attr('src');
+					if (origImageLinkUrl == '') {
+						alert('图片不能为空！');
+						return false;
+					}
+					var sortNum = $("#edit_sortNum").val().trim();
+					if(!checkNum(sortNum,"图片排序",3)){
+						return false;
+					}
+					var targImageLinkUrl = $('#edit_targImageLinkUrl').val();
+					targImageLinkUrl = targImageLinkUrl.replace(/\&/g, "%26");
+					if(!checkString(targImageLinkUrl,"图片链接",0)){
+						return false;
+					}
+					var status = $("#edit_status").val();
+					$.ajax({
+						url: "${contextPath}/ad/editRollImg",
+						data: "id=" + id + "&adName=" + adName + "&origImageLinkUrl=" + origImageLinkUrl + "&targImageLinkUrl=" + targImageLinkUrl + "&sortNum=" + sortNum
+						+ "&status=" + status,
+						dataType: "json",
+						type: "post",
+						success: function (data) {
+							if (data.success != undefined) {
+								alert(data.success);
+								$('#edit-dialog').dialog('close');
+								$('#list').datagrid('reload');
+							} else {
+								alert(data.error);
+							}
+
+						},
+						error: function (data) {
+							alert("error 后台出现错误！");
+						}
+					});
+				}
+
+
+
+	function changeStatus(value,row,index){
+		if(row.status == '1'){
+			return "已发布|<a href=\"javascript:look('" + row.id +"','"+0+"');\">取消发布</a>";
+		}else{
+			return "未发布|<a href=\"javascript:look('" + row.id +"','"+1+"');\">发布</a>";
+		}
+
+	}
+
+	function look(orderId,status) {
+		if(confirm("确定修改该图片状态？")){
+			$.ajax({
+				url:"${contextPath}/ad/changeStatus",
+				type:"post",
+				dataType:"json",
+				data : "id="+orderId + "&status=" + status,
+				success:function(data){
+					if(data.success != undefined){
+						alert(data.success);
+						$('#list').datagrid('reload');
+					}else{
+						alert(data.error);
+					}
+				},
+				error:function(){}
+			});
+		}
+	}
+	//校验上传文件是否为图片格式
+	function validatePic(pic,filePath) {
+	    var strs = new Array(); //定义一数组
+	    var pic1= $("#"+filePath).val();
+	    strs = pic1.split('.');
+	    var suffix = strs [strs .length - 1];
+
+	    if (suffix != 'jpg' && suffix != 'gif' && suffix != 'jpeg' && suffix != 'png') {
+	        alert("你选择的不是图片,请选择图片！");
+	        var obj = document.getElementById(filePath);
+	        obj.outerHTML = obj.outerHTML; //这样清空，在IE8下也能执行成功
+	         //obj.select(); document.selection.clear(); 好像这种方法也可以清空 input file 的value值，不过我没测试
+	    }
+	    /* if(pic1.length>20){
+	    	if(suffix != 'jpeg'){
+		    	$("#"+filePath).val(pic1.substring(0,5)+"..."+pic1.substring(pic1.length-9,pic1.length-4)+"."+suffix);
+	    	}else{
+	    		$("#"+filePath).val(pic1.substring(0,5)+"..."+pic1.substring(pic1.length-10,pic1.length-5)+"."+suffix);
+	    	}
+	    } */
+	    showImg(pic,filePath);
+	}
+	function showImg(picId,fileId) {
+	    var pic = document.getElementById(picId);
+	    var file = document.getElementById(fileId);
+	    if(window.FileReader){
+	       oFReader = new FileReader();
+	       oFReader.readAsDataURL(file.files[0]);
+	       oFReader.onload = function (oFREvent) {pic.src = oFREvent.target.result;
+	       pic.style.display = "block";
+	       };        
+	    }
+	    else if (document.all) {
+	        file.select();
+	        var reallocalpath = document.selection.createRange().text;
+	        if (window.ie6) pic.src = reallocalpath; 
+	        else { 
+	            pic.style.filter = "progid:DXImageTransform.Microsoft.AlphaImageLoader(sizingMethod='image',src=\"" + reallocalpath + "\")";
+	            pic.src = 'data:../image/gif;base64,R0lGODlhAQABAIAAAP///wAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw==';
+	            pic.style.display = "block";
+	        }
+	    }
+	    else if (file.files) {//firefox6-
+	        if (file.files.item(0)) {
+	            url = file.files.item(0).getAsDataURL();
+	            pic.src = url;
+	            pic.style.display = "block";
+	        }
+	    }
+	}
+	function lookImg(value,rowData,rowIndex){
+   		var div = "<img src=\""+rowData.origImageLinkUrl+"\" style=\"margin-top:-40px;margin:auto;HEIGHT: 70px!important;cursor:pointer\"></img>";
+   		return div;
+    }
+	//校验上传文件是否为图片格式
+	function validatePic(pic,filePath) {
+	    var strs = new Array(); //定义一数组
+	    var pic1= $("#"+filePath).val();
+	    strs = pic1.split('.');
+	    var suffix = strs [strs .length - 1];
+
+	    if (suffix != 'jpg' && suffix != 'gif' && suffix != 'jpeg' && suffix != 'png') {
+	        alert("你选择的不是图片,请选择图片！");
+	        var obj = document.getElementById(filePath);
+	        obj.outerHTML = obj.outerHTML; //这样清空，在IE8下也能执行成功
+	         //obj.select(); document.selection.clear(); 好像这种方法也可以清空 input file 的value值，不过我没测试
+	    }
+	    /* if(pic1.length>20){
+	    	if(suffix != 'jpeg'){
+		    	$("#"+filePath).val(pic1.substring(0,5)+"..."+pic1.substring(pic1.length-9,pic1.length-4)+"."+suffix);
+	    	}else{
+	    		$("#"+filePath).val(pic1.substring(0,5)+"..."+pic1.substring(pic1.length-10,pic1.length-5)+"."+suffix);
+	    	}
+	    } */
+	    showImg(pic,filePath);
+	}
+	function showImg(picId,fileId) {
+	    var pic = document.getElementById(picId);
+	    var file = document.getElementById(fileId);
+	    if(window.FileReader){
+	       oFReader = new FileReader();
+	       oFReader.readAsDataURL(file.files[0]);
+	       oFReader.onload = function (oFREvent) {pic.src = oFREvent.target.result;
+	       pic.style.display = "block";
+	       };        
+	    }
+	    else if (document.all) {
+	        file.select();
+	        var reallocalpath = document.selection.createRange().text;
+	        if (window.ie6) pic.src = reallocalpath; 
+	        else { 
+	            pic.style.filter = "progid:DXImageTransform.Microsoft.AlphaImageLoader(sizingMethod='image',src=\"" + reallocalpath + "\")";
+	            pic.src = 'data:../image/gif;base64,R0lGODlhAQABAIAAAP///wAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw==';
+	            pic.style.display = "block";
+	        }
+	    }
+	    else if (file.files) {//firefox6-
+	        if (file.files.item(0)) {
+	            url = file.files.item(0).getAsDataURL();
+	            pic.src = url;
+	            pic.style.display = "block";
+	        }
+	    }
+	}
+	function searchData() {
+		var a = new Array();
+		var adName = $("#adName").val().trim();
+		if(adName !=null && adName!="") {
+			a["adName"]=adName;
+		}
+		doSearch(a);
+	}
+
+	function doSearch(queryParams){
+		$("#list").datagrid('clearSelections');
+		$("#list").datagrid('options').queryParams=queryParams;
+		$("#list").datagrid('load');
+	}
+	function checkString(str,message,length){
+		if(str == "" || str == null){
+			alert("请输入"+message);
+			return false;
+		}
+		if(length != null &&length != 0){
+			if(str.length > length){
+				alert(message +"长度超过"+length);
+				return false;
+			}
+		}
+		return true;
+	}
+	function checkNum(num,message,length)
+	{
+		var re = /^[0-9]+.?[0-9]*$/;   //判断字符串是否为数字     //判断正整数 /^[1-9]+[0-9]*]*$/
+
+		if (!re.test(num))
+		{
+			alert(message+"请输入数字");
+			return false;
+		}
+		if(length !=null && length != 0){
+			if(num.length>length){
+				alert(message+"长度不能超过"+length);
+				return false;
+			}
+		}
+		return true;
+	}
+	</script>
+<body class="easyui-layout" style="background: #DFE8F6; margin-top: 4px; margin-left: 4px; margin-right: 4px; width: auto;">
+<div id="jqueryToolbar" style="padding:5px;height:auto">
+	<div style="padding:10px 0 10px 10px">
+		<table>
+			<tr style="Valign: center; text-decoration: none; line-heigth: 30px; height: 30px; margin-left: 10px;">
+				<td>图片名称：</td>
+				<td>
+				<input type="text" id="adName" style="width: 100px;" />
+				</td>
+			</tr>
+		</table>
+	</div>
+	<div style="margin-top:5px; margin-left:10px; padding-bottom:8px; border-bottom:1px solid #ccc;">
+		<a href="javascript:;" class="easyui-linkbutton" iconCls="icon-search" onclick="searchData()">查询</a>
+		<a href="javascript:;" class="easyui-linkbutton" iconCls="icon-add" onclick="toSave()">新增</a>
+		<a href="javascript:;" class="easyui-linkbutton" iconCls="icon-edit" onclick="toUpdate()">修改</a>
+		<a href="javascript:;" class="easyui-linkbutton" iconCls="icon-remove" onclick="removeData()">删除</a>
+	</div>
+</div>
+<div id="mainPanle" region="center" split="true" border="false">
+	<table id="list" title="轮播图列表"
+		>
+
+	</table>
+	<div id="dlg" class="easyui-dialog" title="添加"
+		data-options="iconCls:'icon-save',closed:true"
+		style="padding: 20px;">
+		<div id="div1" align="center">
+			<table align="center" cellspacing="0" width="375px">
+				<tr id="tr1" style="height: 35px;">
+					<td style="width: 100px; text-align: right;  background-color: #EDEDED;">图片名称：</td>
+					<td style="width: 200px; text-align: left;  border-left: 0px;"><input type="text" id="add_adName" style="width:200px; height:20px;" /></td>
+					<td style="width: 70px; text-align: left;  border-left: 0px;"><font color="red">&nbsp;*&nbsp;必填</font></td>
+				</tr>
+				<tr style="height: 35px;">
+					<td style="width: 100px; text-align: right;  background-color: #EDEDED;">图片：</td>
+					<td style="width: 200px; text-align: left;  border-left: 0px;">
+					<input  style="float:left;" type='file' id="add_origImageLinkUrl" onchange="validatePic('add_pic','add_origImageLinkUrl');"/>
+					<img style="display:none;" src="" width="50px" height="50px"  id="add_pic">
+					</td>
+					
+					<td style="width: 70px; text-align: left;  border-left: 0px;"><font color="red">&nbsp;*&nbsp;必填</font></td>
+				</tr>
+				<tr style="height: 35px;">
+					<td style="width: 100px; text-align: right;  background-color: #EDEDED;">图片外链接：</td>
+					<td style="width: 200px; text-align: left;  border-left: 0px;"><input type="text" id="add_targImageLinkUrl" style="width:200px; height:20px;" /></td>
+					<td style="width: 70px; text-align: left;  border-left: 0px;"><font color="red">&nbsp;*&nbsp;必填</font></td>
+				</tr>
+				<tr style="height: 35px;">
+					<td style="width: 100px; text-align: right;  background-color: #EDEDED;">排序：</td>
+					<td style="width: 200px; text-align: left;  border-left: 0px;"><input type="text" id="add_sortNum" style="width:200px; height:20px;" /></td>
+					<td style="width: 70px; text-align: left;  border-left: 0px;"><font color="red">&nbsp;*&nbsp;必填 数字越大越靠前</font></td>
+				</tr>
+				<tr style="height: 35px;">
+					<td  style="width: 100px; text-align: right; border: 1px solid #CCCCCC;  background-color: #EDEDED;">是否发布：</td>
+					<td style="width: 200px; text-align: left;  border-left: 0px;"><select id="add_status" style="width: 206px; height: 26px;"><option value="1">是</option>
+						<option value="0">否</option></select></td>
+					<td style="width: 70px; text-align: left; border: 1px solid #CCCCCC; border-left: 0px;"><font color="red">&nbsp;*&nbsp;选填</font></td>
+				</tr>
+			</table>
+			
+		</div>
+		<div align="center" style="margin-top:20px;">
+			<input type="button" value="添加" onclick="save()"  style="width:100px;background-color:#4691d1; border:1px solid #047adf; display:block; text-align:center; color:white; font-size:14px;line-height:30px;font-family:'微软雅黑';" />
+		</div>
+	</div>
+	<div id="edit-dialog" class="easyui-dialog" title="编辑"
+		data-options="iconCls:'icon-save',closed:true"
+		style="padding: 20px;">
+		<div id="div2" align="center" >
+			<table align="center" cellspacing="0" width="375px">
+				<tr style="height: 35px;">
+					<td style="width: 100px; text-align: right;  background-color: #EDEDED;">图片名称:</td>
+					<td style="width: 200px; text-align: left;  border-left: 0px;"><input type="text" id="edit_adName" style="width:200px; height:20px;" /></td></td>
+					<td style="width: 70px; text-align: left;  border-left: 0px;"><font color="red">&nbsp;*&nbsp;必填</font></td>
+				</tr>
+				<tr style="height: 35px;">
+					<td style="width: 100px; text-align: right;  background-color: #EDEDED;">图片：</td>
+					<td style="width: 200px; text-align: left;  border-left: 0px;">
+					<input  style="float:left;" type='file' id="edit_origImageLinkUrl" onchange="validatePic('edit_pic','edit_origImageLinkUrl');"/>
+					<img style="display:none;" src="" width="50px" height="50px"  id="edit_pic">
+					</td>
+					
+					<td style="width: 70px; text-align: left;  border-left: 0px;"><font color="red">&nbsp;*&nbsp;必填</font></td>
+				</tr>
+				<tr id="tr2" style="height: 35px;">
+					<td style="width: 100px; text-align: right;  background-color: #EDEDED;">图片外链:</td>
+					<td style="width: 200px; text-align: left;  border-left: 0px;"><input type="text" id="edit_targImageLinkUrl" style="width:200px; height:20px;" /></td></td>
+					<td style="width: 70px; text-align: left;  border-left: 0px;"><font color="red">&nbsp;*&nbsp;必填</font></td>
+				</tr>
+				<tr style="height: 35px;">
+					<td style="width: 100px; text-align: right;  background-color: #EDEDED;">排序：</td>
+					<td style="width: 200px; text-align: left;  border-left: 0px;"><input type="text" id="edit_sortNum" style="width:200px; height:20px;" /></td>
+					<td style="width: 70px; text-align: left;  border-left: 0px;"><font color="red">&nbsp;*&nbsp;必填 数字越大越靠前</font></td>
+				</tr>
+				<tr style="height: 35px;">
+					<td style="width: 100px; text-align: right;  background-color: #EDEDED;border: 1px solid #CCCCCC;">是否发布:</td>
+					<td style="width: 200px; text-align: left;  border-left: 0px;border: 1px solid #CCCCCC;"><select id="edit_status" style="width: 206px; height: 26px;"><option value="1">是</option>
+						<option value="0">否</option></select></td>
+					<td style="width: 70px; text-align: left;  border-left: 0px;border: 1px solid #CCCCCC;"><font color="red">&nbsp;*&nbsp;选填</font></td>
+				</tr>
+			</table>
+		</div>
+		<div align="center" style = "margin-top:10px;">
+			<input type="button" value="更新" onclick="update()" style="width:100px;background-color:#4691d1; border:1px solid #047adf; display:block; text-align:center; color:white; font-size:14px;line-height:30px;font-family:'微软雅黑';"/>
+		</div>
+	</div>	
+</div>
+<div region="south" split="true" border="false" style="background: #DFE8F6;"></div>
+</body>
+</html>

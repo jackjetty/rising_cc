@@ -1,0 +1,84 @@
+<#assign contextPath=springMacroRequestContext.getContextPath() />
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<html>
+<head>
+    <base href="" />
+
+    <title>report.html</title>
+
+    <meta name="keywords" content="keyword1,keyword2,keyword3">
+    <meta name="description" content="this is my page">
+    <meta name="content-type" content="text/html; charset=UTF-8">
+
+    <link rel="stylesheet" href="${contextPath}/resources/css/default.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="${contextPath}/resources/js/jquery-easyui-1.4.2/themes/default/easyui.css" />
+    <link rel="stylesheet" type="text/css" href="${contextPath}/resources/js/jquery-easyui-1.4.2/themes/icon.css" />
+    <script type="text/javascript" src="${contextPath}/resources/js/jquery-1.7.2.min.js"></script>
+    <script type="text/javascript" src="${contextPath}/resources/js/jquery-easyui-1.4.2/jquery.easyui.min.js"></script>
+    <script type="text/javascript" src="${contextPath}/resources/common/My97DatePicker/WdatePicker.js"></script>
+    <script type="text/javascript" src="${contextPath}/resources/js/date-expand.js"></script>
+</head>
+
+<body class="easyui-layout">
+<div id="careRoadContentDiv" region="center" title="权限列表" border="false" style="overflow:hidden;" >
+    <table id="list">
+    </table>
+</div>
+
+
+
+<script type="text/javascript">
+    $(function(){
+
+        $('#list').treegrid({
+            idField:'id',
+            url:'${contextPath}/perm/perm_list',
+            iconCls: 'icon-ok',
+            rownumbers: true,
+            animate: true,
+            collapsible: true,
+            height:document.body.scrollHeight-50,
+            fitColumns: true,
+            treeField: 'permName',
+            columns:[[
+                {field:'id',title:'',hidden:true},
+                {field:'permName',title:'权限名称', align:'center',width:200},
+                {field:'permLevel',title:'权限级别', align:'center',width:100},
+                {field:'permUrl',title:'权限链接', align:'center',width:200}
+            ]],
+        });
+    })
+
+
+    function formatter1(date){
+        if (!date){return '';}
+        return $.fn.datebox.defaults.formatter.call(this, date);
+    }
+    function parser1(s){
+        if (!s){return null;}
+        return $.fn.datebox.defaults.parser.call(this, s);
+    }
+    function formatter2(date){
+        if (!date){return '';}
+        var y = date.getFullYear();
+        var m = date.getMonth() + 1;
+        return y + '-' + (m<10?('0'+m):m);
+    }
+    function parser2(s){
+        if (!s){return null;}
+        var ss = s.split('-');
+        var y = parseInt(ss[0],10);
+        var m = parseInt(ss[1],10);
+        if (!isNaN(y) && !isNaN(m)){
+            return new Date(y,m-1,1);
+        } else {
+            return new Date();
+        }
+    }
+
+</script>
+
+</body>
+</html>
+

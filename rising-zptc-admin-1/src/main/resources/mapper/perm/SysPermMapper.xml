@@ -1,0 +1,190 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.bhyf.dao.perm.SysPermDao">
+	
+	<resultMap type="SysPermission" id="sysPermissionMap">
+		<id property="id" column="id" />
+		<result property="permName" column="permName" />
+		<result property="permLevel" column="permLevel" />
+		<result property="permUrl" column="permUrl" />
+		<result property="permRel" column="permRel" />
+		<result property="permType" column="permType" />
+		<result property="sortNum" column="sortNum" />
+		<result property="parentSysPerm.id" column="parentId" />
+		<result property="isEnable" column="isEnable" />
+		<result property="createTime" column="createTime" />
+		<result property="createUser" column="createUser" />
+	</resultMap>
+
+	<sql id="columnSysPermByAll">
+		p.id,
+		p.permName,
+		p.permLevel,
+		p.permUrl,
+		p.permRel,
+		p.permType,
+		p.sortNum,
+		p.parentId,
+		p.isEnable,
+		p.createTime,
+		p.createUser 
+	</sql>
+
+
+	<select id="findAllSysPerm" resultMap="sysPermissionMap">
+		select 
+			<include refid="columnSysPermByAll"/>
+			from  t_sys_permission p 
+			order by p.sortNum asc
+	</select>
+
+	<select id="findEnableSysPermByUserName"  resultMap="sysPermissionMap">
+		select distinct
+			<include refid="columnSysPermByAll"/>
+			from  t_sys_permission p 
+			inner join t_sys_role_permission rp on p.isEnable = 1 and p.id = rp.permId 
+			inner join t_sys_role r on r.status = 1 and r.id = rp.roleId 
+			inner join t_sys_user_role ur on ur.roleId = r.id 
+			inner join t_sys_user u on u.id = ur.userId 
+		where u.userName = #{userName,jdbcType=VARCHAR}
+		and r.status <![CDATA[<> 80]]> 
+
+		order by p.sortNum asc
+	</select>
+
+	<select id="findPermChildNodeByParentId"  parameterType="int" resultMap="sysPermissionMap">
+		select 
+			<include refid="columnSysPermByAll"/>
+			from  t_sys_permission p 
+		where 
+			p.parentId
+			<if test="parentId == null"> is  null</if><if test="parentId != null"> = #{parentId,jdbcType=INTEGER}</if>
+		order by p.sortNum asc
+	</select>
+
+	<select id="findPermById"  parameterType="int" resultMap="sysPermissionMap">
+		select 
+			<include refid="columnSysPermByAll"/>
+			from  t_sys_permission p 
+		<where>
+			<if test="id != null">and id = #{id,jdbcType=INTEGER}</if>
+		</where> 
+	</select>
+	
+	<update id="updateBatchPermPosition" parameterType="List">
+		<foreach collection="list" item="perm" index="index" open="" close="" separator=";">
+	        update t_sys_permission
+	        <set>
+	        	<if test="perm.sortNum != null">
+		            sortNum = #{perm.sortNum , jdbcType=INTEGER},
+	        	</if>
+	        	<if test="perm.parentSysPerm != null and perm.parentSysPerm.id != null">
+		            parentId = #{perm.parentSysPerm.id , jdbcType=INTEGER},
+	        	</if>
+	        	<if test="perm.parentSysPerm == null">
+		            parentId = null,
+	        	</if>
+	        </set>
+	        where id = #{perm.id , jdbcType=INTEGER}
+	    </foreach> 
+	</update>
+	
+	<update id="updatePerm" parameterType="SysPermission">
+        update t_sys_permission
+        <set>
+        	<if test="permName != null">
+	            permName = #{permName , jdbcType=VARCHAR},
+        	</if>
+        	<if test="permLevel != null">
+	            permLevel = #{permLevel , jdbcType=INTEGER},
+        	</if>
+        	<if test="permUrl != null">
+	            permUrl = #{permUrl , jdbcType=VARCHAR},
+        	</if>
+        	<if test="permRel != null">
+	            permRel = #{permRel , jdbcType=VARCHAR},
+        	</if>
+        	<if test="permType != null">
+	            permType = #{permType , jdbcType=INTEGER},
+        	</if>
+        	<if test="sortNum != null">
+	            sortNum = #{sortNum , jdbcType=INTEGER},
+        	</if>
+        	<if test="isEnable != null">
+	            isEnable = #{isEnable , jdbcType=INTEGER},
+        	</if>
+        	<if test="parentSysPerm != null and parentSysPerm.id != null">
+	            parentId = #{parentSysPerm.id , jdbcType=INTEGER},
+        	</if>
+        </set>
+        where id = #{id , jdbcType=INTEGER}
+	</update>
+	
+	<delete id="deletePerm" parameterType="SysPermission">
+		delete from t_sys_permission where id = #{id,jdbcType=INTEGER}
+	</delete>
+	
+	<insert id="insertPerm" parameterType="SysPermission">
+		insert into t_sys_permission(
+				permName,
+				permLevel,
+				permUrl,
+				permRel,
+				permType,
+				sortNum,
+				parentId,
+				isEnable,
+				createTime,
+				createUser
+		) values(
+			#{permName,jdbcType=VARCHAR},
+			#{permLevel,jdbcType=INTEGER},
+			#{permUrl,jdbcType=VARCHAR},
+			#{permRel,jdbcType=VARCHAR},
+			#{permType,jdbcType=INTEGER},
+			#{sortNum,jdbcType=INTEGER},
+			#{parentSysPerm.id,jdbcType=INTEGER},
+			#{isEnable,jdbcType=INTEGER},
+			#{createTime,jdbcType=TIMESTAMP},
+			#{createUser,jdbcType=VARCHAR}
+		)
+	</insert>
+	
+	<select id="findChildPermMaxSortNumByParentId" parameterType="int" resultType="int">
+		select max(sortNum) from t_sys_permission where 
+				parentId
+				<if test="parentId == null"> is null </if><if test="parentId != null"> = #{parentId,jdbcType=INTEGER}</if>
+	</select>
+
+	<select id="findAllSysPermByRoleId" parameterType="int" resultMap="sysPermissionMap">
+		select 
+			<include refid="columnSysPermByAll"/>
+			from  t_sys_permission p 
+		where p.id in(
+			select permId from t_sys_role_permission rp where rp.roleId = #{roleId,jdbcType=INTEGER}
+		)
+	</select>
+	
+	<select id="findAllParentPermByChildId" parameterType="int"  resultMap="sysPermissionMap">
+		select 
+			<include refid="columnSysPermByAll"/>
+			from  t_sys_permission p 
+		where FIND_IN_SET(id, func_get_all_parent_perm(#{id,jdbcType=INTEGER}));
+	</select>
+	
+	<select id="findAllChildPermByParentId" parameterType="int"  resultMap="sysPermissionMap">
+		select 
+			<include refid="columnSysPermByAll"/>
+			from  t_sys_permission p 
+		where FIND_IN_SET(id, func_get_all_child_perm(#{id,jdbcType=INTEGER}));
+	</select>
+	<select id="findPermIdByRoleId" parameterType="int"  resultType="Integer">
+		select
+			rp.permId
+			from  t_sys_role_permission rp,t_sys_permission p
+		where rp.roleId = #{id,jdbcType=INTEGER} and p.id = rp.permId and p.parentId is not null
+	</select>
+
+</mapper>

@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.bhyf.dao.app.AppVersionDao">
+
+	<sql id="columnAppVersionByAll">
+		a.id,
+		a.versionName,
+		a.category,
+		a.versionNo,
+		a.downUrl,
+		a.isUpgrade,
+		a.content,
+		a.status,
+		a.createTime,
+		a.createUser
+	</sql>
+	
+	<select id="getAppVersionList" resultType="com.bhyf.pojo.app.AppVersion" parameterType="java.util.HashMap">
+		SELECT <include refid="columnAppVersionByAll"></include> from t_app_version a
+
+		where status <![CDATA[<>]]> 80
+			<if test="versionName != null and versionName != ''">
+				and versionName = #{versionName}
+			</if>
+			<if test="category != null and category != ''">
+				and category = #{category}
+			</if>
+			<if test="status != null and status != ''">
+				and status = #{status}
+			</if>
+		ORDER BY a.createTime desc limit #{start},#{pageSize}
+	</select>
+	
+	<select id="getAppVersionListSize" resultType="java.lang.Integer" parameterType="java.util.HashMap">
+		SELECT count(*) from t_app_version
+		where status <![CDATA[<>]]> 80
+			<if test="versionName != null and versionName != ''">
+				and versionName = #{versionName}
+			</if>
+			<if test="category != null and category != ''">
+				and category = #{category}
+			</if>
+			<if test="status != null and status != ''">
+				and status = #{status}
+			</if>
+	</select>
+	
+	<select id="findAppVersionById" resultType="com.bhyf.pojo.app.AppVersion" parameterType="java.lang.Integer">
+		SELECT <include refid="columnAppVersionByAll"></include> from t_app_version a where a.id = #{id}
+	</select>
+	
+	<insert id="addAppVersion"  parameterType="com.bhyf.pojo.app.AppVersion">
+		Insert into t_app_version (versionName,category,versionNo,downUrl,isUpgrade,content,status,createTime,createUser) values(#{versionName},#{category},#{versionNo},#{downUrl},#{isUpgrade},#{content},#{status},#{createTime},#{createUser});
+	</insert>
+	
+	<select id="findAppVersionCheck" resultType="com.bhyf.pojo.app.AppVersion" parameterType="java.util.HashMap">
+		SELECT <include refid="columnAppVersionByAll"></include> from t_app_version a where a.category = #{category} and versionNo = #{versionNo} and status in ('1','0')
+	</select>
+	
+	<update id="updateAppVersion" parameterType="AppVersion">
+		update  t_app_version
+		<set>
+		<if test="isUpgrade != null ">
+			isUpgrade = #{isUpgrade,jdbcType=INTEGER},
+		</if>
+		<if test="status != null ">
+			status = #{status,jdbcType=INTEGER},
+		</if>
+		<if test="versionNo != null ">
+			versionNo = #{versionNo,jdbcType=INTEGER},
+		</if>
+		<if test="content != null and content !='' ">
+			content = #{content,jdbcType=VARCHAR},
+		</if>
+		<if test="versionName != null and versionName !='' ">
+			versionName = #{versionName,jdbcType=VARCHAR},
+		</if>
+		<if test="downUrl != null and downUrl !='' ">
+			downUrl = #{downUrl,jdbcType=VARCHAR},
+		</if>
+		</set>
+		 where id = #{id}
+	</update>
+	
+	<update id="deleteAppVersionByIds" parameterType="java.util.ArrayList">
+		update  t_app_version set status = '80' where id in
+		<foreach collection="list" item="model" open="(" separator=","
+			close=")">#{model}
+		</foreach>
+	</update>
+</mapper>

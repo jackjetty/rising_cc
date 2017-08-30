@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.bhyf.dao.article.ArticleCategoryDao">
+	
+
+	<sql id="columnArticleCategoryByAll">
+		id,
+		name,
+		level,
+		status,
+		parentId,
+		hasChildren,
+		hasArticle
+	</sql>
+
+
+	<select id="findAllArticleCategory" resultType="ArticleCategory">
+		select 
+			<include refid="columnArticleCategoryByAll"/>
+			from  t_article_category
+		where status <![CDATA[<>]]> 80
+	</select>
+	<select id="findChildrenByParentId" resultType="ArticleCategory" parameterType="Integer">
+		select
+			<include refid="columnArticleCategoryByAll"/>
+			from  t_article_category
+		where status <![CDATA[<>]]> 80 and parentId = ${parentId}
+	</select>
+
+	<insert id="saveArticleCategory" parameterType="ArticleCategory">
+		INSERT t_article_category(name,level,status,parentId,hasChildren,hasArticle)values(
+		#{name},
+		#{level},
+		#{status},
+		#{parentId},
+		#{hasChildren},
+		#{hasArticle}
+		)
+	</insert>
+
+	<update id="updateArticleCategory" parameterType="ArticleCategory">
+		UPDATE t_article_category
+		<set>
+			<if test="name != null and name != ''">
+				name=#{name},
+			</if>
+			<if test="level != null and level != ''">
+				level=#{level},
+			</if>
+			<if test="status != null">
+				status=#{status},
+			</if>
+			<if test="parentId != null">
+				parentId=#{parentId},
+			</if>
+			<if test="hasChildren != null">
+				hasChildren=#{hasChildren},
+			</if>
+			<if test="hasArticle != null ">
+				hasArticle=#{hasArticle},
+			</if>
+		</set>
+		where id=#{id}
+	</update>
+
+	<update id="removeArticleCategory" parameterType="ArticleCategory">
+		UPDATE t_article_category set status=80 where id = #{id}
+	</update>
+
+
+</mapper>

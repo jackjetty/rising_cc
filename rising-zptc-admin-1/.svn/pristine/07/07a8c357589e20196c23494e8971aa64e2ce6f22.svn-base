@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.bhyf.dao.vip.SuggestDao">
+
+
+	<sql id="columnSuggestByAll">
+		u.id,
+		u.content,
+		u.status,
+		u.contactWay,
+		u.createTime,
+		date_format(u.createTime, '%Y-%m-%d %H:%i:%s') as createTime1,
+		u.userId,
+		s.realName as userName
+	</sql>
+
+	<select id="getSuggestList" resultType="com.bhyf.pojo.vip.Suggest" parameterType="java.util.HashMap">
+		SELECT <include refid="columnSuggestByAll"/> from t_suggest u,t_user_info s
+		where u.userId = s.id
+    		<if test="contactWay != null and contactWay != ''">
+    			and u.contactWay = #{contactWay}
+    		</if>
+    		<if test="userName != null and userName != ''">
+    			and s.realName LIKE CONCAT('%',#{userName},'%')
+    		</if>
+    		<if test="startTime != null and startTime != ''">
+    			<![CDATA[
+    				and u.createTime >= str_to_date(concat(#{startTime},' 00:00:00'), '%Y-%m-%d %H:%i:%s')
+    			]]>
+    		</if>
+    		<if test="endTime != null and endTime != ''">
+    			<![CDATA[
+    				and u.createTime <= str_to_date(concat(#{endTime},' 23:59:59'), '%Y-%m-%d %H:%i:%s')
+    			]]>
+    		</if>
+   		ORDER BY u.createTime desc limit #{start},#{pageSize}
+	</select>
+	
+	<select id="getSuggestList1" resultType="com.bhyf.pojo.vip.Suggest" parameterType="java.util.HashMap">
+		SELECT <include refid="columnSuggestByAll"/> from t_suggest u,t_user_info s
+		where u.userId = s.id
+    		<if test="contactWay != null and contactWay != ''">
+    			and u.contactWay = #{contactWay}
+    		</if>
+    		<if test="userName != null and userName != ''">
+    			and s.realName LIKE CONCAT('%',#{userName},'%')
+    		</if>
+    		<if test="startTime != null and startTime != ''">
+    			<![CDATA[
+    				and u.createTime >= str_to_date(concat(#{startTime},' 00:00:00'), '%Y-%m-%d %H:%i:%s')
+    			]]>
+    		</if>
+    		<if test="endTime != null and endTime != ''">
+    			<![CDATA[
+    				and u.createTime <= str_to_date(concat(#{endTime},' 23:59:59'), '%Y-%m-%d %H:%i:%s')
+    			]]>
+    		</if>
+   		ORDER BY u.createTime desc
+	</select>
+	
+	<select id="getSuggestCount" resultType="java.lang.Integer" parameterType="java.util.HashMap">
+		select COUNT(*) from t_suggest u,t_user_info s
+		where u.userId = s.id
+    		<if test="contactWay != null and contactWay != ''">
+    			and u.contactWay = #{contactWay}
+    		</if>
+    		<if test="userName != null and userName != ''">
+    			and s.realName LIKE CONCAT('%',#{userName},'%')
+    		</if>
+    		<if test="startTime != null and startTime != ''">
+    			<![CDATA[
+    				and u.createTime >= str_to_date(concat(#{startTime},' 00:00:00'), '%Y-%m-%d %H:%i:%s')
+    			]]>
+    		</if>
+    		<if test="endTime != null and endTime != ''">
+    			<![CDATA[
+    				and u.createTime <= str_to_date(concat(#{endTime},' 23:59:59'), '%Y-%m-%d %H:%i:%s')
+    			]]>
+    		</if>
+	</select>
+	
+	<select id="findSuggestBySuggestId" parameterType="int" resultType="com.bhyf.pojo.vip.Suggest">
+		select 
+		<include refid="columnSuggestByAll"/>
+		from t_suggest u,t_user_info s where u.userId = s.id and u.id = #{suggestId,jdbcType=INTEGER}
+	</select>
+	
+	
+</mapper>

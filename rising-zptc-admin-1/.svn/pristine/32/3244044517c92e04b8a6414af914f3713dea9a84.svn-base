@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.bhyf.dao.ad.AdDao">
+
+	<select id="getRollManagerList" resultType="com.bhyf.model.ad.Ad" parameterType="Pagination">
+		SELECT * from t_ad WHERE
+		1=1
+		<if test="condition.adName != null and condition.adName != ''">
+		and adName like CONCAT('%',#{condition.adName},'%')
+		</if>
+		order by sortNum desc
+		 limit
+		<![CDATA[
+				#{startIndex} ,#{pageSize}
+			]]>
+	</select>
+	
+	<insert id="addRollImg" parameterType="com.bhyf.model.ad.Ad">
+		INSERT INTO t_ad(
+		<if test="origImageLinkUrl != null and origImageLinkUrl != ''">
+   			origImageLinkUrl
+   		</if>
+   		<if test="targImageLinkUrl != null and targImageLinkUrl != ''">
+   			,targImageLinkUrl
+   		</if>
+   		<if test="adName != null and adName != ''">
+   			,adName
+   		</if>
+   		<if test="status != null and status != ''">
+   			,status
+   		</if>
+   		<if test="sortNum != null ">
+   			,sortNum
+   		</if>
+		)
+		VALUES(
+		<if test="origImageLinkUrl != null and origImageLinkUrl != ''">
+   			#{origImageLinkUrl}
+   		</if>
+   		<if test="targImageLinkUrl != null and targImageLinkUrl != ''">
+   			,#{targImageLinkUrl}
+   		</if>
+   		<if test="adName != null and adName != ''">
+   			,#{adName}
+   		</if>
+   		<if test="status != null and status != ''">
+   			,#{status}
+   		</if>
+   		<if test="sortNum != null and sortNum != ''">
+   			,#{sortNum}
+   		</if>
+		)
+	</insert>
+	
+	<update id="editRollImg" parameterType="com.bhyf.model.ad.Ad">
+		UPDATE t_ad SET 
+		<if test="origImageLinkUrl != null and origImageLinkUrl != ''">
+   			origImageLinkUrl=#{origImageLinkUrl}
+   		</if>
+   		<if test="targImageLinkUrl != null and targImageLinkUrl != ''">
+   		    ,targImageLinkUrl=#{targImageLinkUrl}
+   		</if>
+   		<if test="adName != null and adName != ''">
+   			,adName=#{adName}
+   		</if>
+   		<if test="status != null and status != ''">
+   			,status=#{status}
+   		</if>
+   		<if test="sortNum != null">
+   			,sortNum=#{sortNum}
+   		</if>
+		where id=#{id}
+	</update>
+	
+	<delete id="deleteRollImg" parameterType="java.util.ArrayList" >
+		delete from t_ad where id in  
+		<foreach collection="list" item = "id" open="(" separator="," close=")">#{id}  
+    </foreach>
+	</delete>
+	
+	<update id="changeStatus"  parameterType="java.util.HashMap">
+		update t_ad set status=#{status} where id=#{id}
+	</update>
+	
+	<select id="getRollManagerListCount" resultType="java.lang.Integer" parameterType="Pagination">
+		select COUNT(*) from t_ad
+		<where>
+    		<if test="condition.adName != null and condition.adName != ''">
+    			and adName LIKE CONCAT('%',#{condition.adName},'%')
+    		</if>
+   		</where>
+	</select>
+	
+	<select id="getRollImgs" resultType="com.bhyf.model.ad.Ad">
+		SELECT * from t_ad WHERE status='1' order by sortNum desc
+	</select>
+	
+	<select id="getRollImgsCount" resultType="java.lang.Integer">
+		SELECT COUNT(*) from t_ad WHERE status='1'
+	</select>
+	
+	
+</mapper>

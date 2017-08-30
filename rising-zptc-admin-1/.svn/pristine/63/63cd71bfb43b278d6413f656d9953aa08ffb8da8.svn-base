@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:util="http://www.springframework.org/schema/util"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans 
+       http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+       http://www.springframework.org/schema/util 
+       http://www.springframework.org/schema/util/spring-util-3.0.xsd">
+
+	<description>Shiro安全配置</description>
+
+	<bean id="shiroFilter" class="org.apache.shiro.spring.web.ShiroFilterFactoryBean">
+		<property name="securityManager" ref="securityManager" />
+		<property name="loginUrl" value="/login" />
+		<property name="unauthorizedUrl" value="/login/not_perm" />
+		<property name="filterChainDefinitions">
+			<value>
+				/**=anon
+				<!--/task/exec=anon-->
+				<!--/resources/**=anon-->
+				<!--/images/kaptcha=anon-->
+				<!--/login/**=anon-->
+				<!--/logout=anon-->
+				<!--/isalive=anon-->
+				<!--/error/*=anon-->
+				<!--/read/prop=anon-->
+				<!--/captcha/check=anon-->
+				<!--/index=authc-->
+				<!--/user/to_update=authc-->
+				<!--/user/update_user_basic_info=authc-->
+				<!--/user/to_update_pwd=authc-->
+				<!--/user/update_pwd=authc-->
+				<!--/**=authc,perms-->
+			</value>
+		</property>
+ 		<property name="filters">
+			<util:map>
+				<entry key="perms" value-ref="urlPermissionsFilter" />
+			</util:map>
+		</property>
+	</bean>
+
+	<bean id="securityManager" class="org.apache.shiro.web.mgt.DefaultWebSecurityManager">
+		<property name="realm" ref="myShiroRealm" />
+	</bean>
+
+	<bean id="myShiroRealm" class="com.bhyf.auth.MyShiroRealm" />
+
+	<bean id="lifecycleBeanPostProcessor" class="org.apache.shiro.spring.LifecycleBeanPostProcessor" />
+	
+	<!-- 自定义鉴权拦截器 -->
+ 	<bean id="urlPermissionsFilter" class="com.bhyf.auth.URLPermissionsFilter" />
+ 	
+	<bean id="myFilterChainDefinitionsLoader" class="com.bhyf.auth.MyFilterChainDefinitionsLoader" init-method="init">
+		<property name="shiroFilter" ref="shiroFilter" />
+	</bean>
+
+</beans>

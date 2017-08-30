@@ -1,0 +1,346 @@
+<#assign contextPath=springMacroRequestContext.getContextPath() />
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<html>
+<head>
+    <base href="" />
+
+    <title>report.html</title>
+
+    <meta name="keywords" content="keyword1,keyword2,keyword3">
+    <meta name="description" content="this is my page">
+    <meta name="content-type" content="text/html; charset=UTF-8">
+
+    <link rel="stylesheet" href="${contextPath}/resources/css/default.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="${contextPath}/resources/js/jquery-easyui-1.4.2/themes/default/easyui.css" />
+    <link rel="stylesheet" type="text/css" href="${contextPath}/resources/js/jquery-easyui-1.4.2/themes/icon.css" />
+    <script type="text/javascript" src="${contextPath}/resources/js/jquery-1.7.2.min.js"></script>
+    <script type="text/javascript" src="${contextPath}/resources/js/jquery-easyui-1.4.2/jquery.easyui.min.js"></script>
+    <script type="text/javascript" src="${contextPath}/resources/common/My97DatePicker/WdatePicker.js"></script>
+    <script type="text/javascript" src="${contextPath}/resources/js/date-expand.js"></script>
+</head>
+
+<body class="easyui-layout">
+<div id="careRoadContentDiv" region="center" title="文章分类列表" border="false" style="overflow:hidden;" >
+    <table id="list" >
+    </table>
+</div>
+<div id="jqueryToolbar" style="padding:5px;height:auto">
+    <div style="margin-top:5px; margin-left:10px; padding-bottom:8px; border-bottom:1px solid #ccc;">
+        <a href="javascript:;" class="easyui-linkbutton" iconCls="icon-add" onclick="toSave()">新增</a>
+        <a href="javascript:;" class="easyui-linkbutton" iconCls="icon-edit" onclick="toUpdate()">修改</a>
+        <a href="javascript:;" class="easyui-linkbutton" iconCls="icon-remove" onclick="removeData()">删除</a>
+    </div>
+</div>
+<div id="add_dlg" class="easyui-dialog" title="添加"
+     data-options="iconCls:'icon-save',closed:true"
+     style="padding: 20px;">
+    <div id="div1" align="center">
+        <table align="center" cellspacing="0" >
+            <tr  style="height: 35px;">
+                <td style="width: 100px; text-align: right;  background-color: #EDEDED;">分类名称：</td>
+                <td style="width: 200px; text-align: left;  border-left: 0px;"><input type="text" id="add_name" style="width:200px; height:20px;" /></td>
+                <td style="width: 70px; text-align: left;  border-left: 0px;"><font color="red">&nbsp;*&nbsp;必填</font></td>
+            </tr>
+            <tr  style="height: 35px;">
+                <td style="width: 100px; text-align: right;  background-color: #EDEDED;">分类级别：</td>
+                <td style="width: 200px; text-align: left;  border-left: 0px;"><select id="a_level" disabled="disabled" style="width: 206px; height: 26px;">
+                    <option selected="selected" value="2">2</option>
+                    <option value="1">1</option>
+                </select></td>
+                <td style="width: 70px; text-align: left;  border-left: 0px;"><font color="red">&nbsp;*&nbsp;必填</font></td>
+            </tr>
+            <tr  style="height: 35px;">
+                <td style="width: 100px; text-align: right;  background-color: #EDEDED;">父级分类：</td>
+                <td style="width: 200px; text-align: left;  border-left: 0px;"><select  id="add_parentId" style="width:200px; height:20px;" >
+                    <option value="1">公告管理</option>
+                    <option value="2">新闻管理</option>
+                    <option value="3">招生管理</option>
+                    <option value="4">就业管理</option>
+                </select></td>
+                <td style="width: 70px; text-align: left;  border-left: 0px;"><font color="red">&nbsp;*&nbsp;必填</font></td>
+            </tr>
+            <tr style="height: 35px;" hidden="hidden">
+                <td  style="width: 100px; text-align: right; border: 1px solid #CCCCCC;  background-color: #EDEDED;">状态：</td>
+                <td style="width: 200px; text-align: left;  border-left: 0px;"><select id="add_status" style="width: 206px; height: 26px;"><option selected="selected" value="1">激活</option>
+                    <option value="0">失效</option></select></td>
+                <td style="width: 70px; text-align: left; border: 1px solid #CCCCCC; border-left: 0px;"><font color="red">&nbsp;*&nbsp;必填</font></td>
+            </tr>
+            <tr style="height: 35px;">
+                <td  style="width: 100px; text-align: right; border: 1px solid #CCCCCC;  background-color: #EDEDED;">是否有文章：</td>
+                <td style="width: 200px; text-align: left;  border-left: 0px;"><select id="add_hasArticle" style="width: 206px; height: 26px;"><option selected="selected" value="1">有</option>
+                    <option value="0">无</option></select></td>
+                <td style="width: 70px; text-align: left; border: 1px solid #CCCCCC; border-left: 0px;"><font color="red">&nbsp;*&nbsp;选填</font></td>
+            </tr>
+            <tr style="height: 35px;">
+                <td  style="width: 100px; text-align: right; border: 1px solid #CCCCCC;  background-color: #EDEDED;">是否有子类：</td>
+                <td style="width: 200px; text-align: left;  border-left: 0px;"><select id="add_hasChildren" disabled="disabled" style="width: 206px; height: 26px;">
+                    <option selected="selected" value="0">无</option>
+                    <option value="1">有</option>
+                    </select></td>
+                <td style="width: 70px; text-align: left; border: 1px solid #CCCCCC; border-left: 0px;"><font color="red">&nbsp;*&nbsp;选填</font></td>
+            </tr>
+        </table>
+
+    </div>
+    <div align="center" style="margin-top:20px;">
+        <input type="button" value="添加" onclick="save()"  style="width:100px;background-color:#4691d1; border:1px solid #047adf; display:block; text-align:center; color:white; font-size:14px;line-height:30px;font-family:'微软雅黑';" />
+    </div>
+</div>
+<div id="edit_dlg" class="easyui-dialog" title="编辑"
+     data-options="iconCls:'icon-save',closed:true"
+     style="padding: 20px;">
+    <div  align="center">
+        <table align="center" cellspacing="0" >
+            <tr  style="height: 35px;">
+                <td style="width: 100px; text-align: right;  background-color: #EDEDED;">分类名称：</td>
+                <td style="width: 200px; text-align: left;  border-left: 0px;"><input type="text" id="edit_name" style="width:200px; height:20px;" /></td>
+                <td style="width: 70px; text-align: left;  border-left: 0px;"><font color="red">&nbsp;*&nbsp;必填</font></td>
+            </tr>
+            <tr  style="height: 35px;">
+                <td style="width: 100px; text-align: right;  background-color: #EDEDED;">分类级别：</td>
+                <td style="width: 200px; text-align: left;  border-left: 0px;"><select id="edit_level" disabled="disabled" style="width: 206px; height: 26px;">
+                    <option  value="1">1</option>
+                    <option selected="selected" value="2">2</option>
+                </select></td>
+                <td style="width: 70px; text-align: left;  border-left: 0px;"><font color="red">&nbsp;*&nbsp;必填</font></td>
+            </tr>
+            <tr  style="height: 35px;">
+                <td style="width: 100px; text-align: right;  background-color: #EDEDED;">父级分类：</td>
+                <td style="width: 200px; text-align: left;  border-left: 0px;"><select  id="edit_parentId" style="width:200px; height:20px;" >
+                    <option value="1">公告管理</option>
+                    <option value="2">新闻管理</option>
+                    <option value="3">招生管理</option>
+                    <option value="4">就业管理</option>
+                </select></td>
+                <td style="width: 70px; text-align: left;  border-left: 0px;"><font color="red">&nbsp;*&nbsp;必填</font></td>
+            </tr>
+            <tr style="height: 35px;" hidden="hidden">
+                <td  style="width: 100px; text-align: right; border: 1px solid #CCCCCC;  background-color: #EDEDED;">状态：</td>
+                <td style="width: 200px; text-align: left;  border-left: 0px;"><select id="edit_status" style="width: 206px; height: 26px;"><option selected="selected" value="1">激活</option>
+                    <option value="0">失效</option></select></td>
+                <td style="width: 70px; text-align: left; border: 1px solid #CCCCCC; border-left: 0px;"><font color="red">&nbsp;*&nbsp;必填</font></td>
+            </tr>
+            <tr style="height: 35px;">
+                <td  style="width: 100px; text-align: right; border: 1px solid #CCCCCC;  background-color: #EDEDED;">是否有文章：</td>
+                <td style="width: 200px; text-align: left;  border-left: 0px;"><select id="edit_hasArticle" style="width: 206px; height: 26px;"><option selected="selected" value="1">有</option>
+                    <option value="0">无</option></select></td>
+                <td style="width: 70px; text-align: left; border: 1px solid #CCCCCC; border-left: 0px;"><font color="red">&nbsp;*&nbsp;选填</font></td>
+            </tr>
+            <tr style="height: 35px;">
+                <td  style="width: 100px; text-align: right; border: 1px solid #CCCCCC;  background-color: #EDEDED;">是否有子类：</td>
+                <td style="width: 200px; text-align: left;  border-left: 0px;"><select id="edit_hasChildren" disabled="disabled" style="width: 206px; height: 26px;">
+                    <option selected="selected" value="0">无</option>
+                    <option value="1">有</option>
+                </select></td>
+                <td style="width: 70px; text-align: left; border: 1px solid #CCCCCC; border-left: 0px;"><font color="red">&nbsp;*&nbsp;选填</font></td>
+            </tr>
+        </table>
+
+    </div>
+    <div align="center" style="margin-top:20px;">
+        <input type="button" value="修改" onclick="update()"  style="width:100px;background-color:#4691d1; border:1px solid #047adf; display:block; text-align:center; color:white; font-size:14px;line-height:30px;font-family:'微软雅黑';" />
+    </div>
+</div>
+
+<script type="text/javascript">
+    $(function(){
+        $('#list').treegrid({
+            idField:'id',
+            url:'${contextPath}/article_category/article_category_list',
+            iconCls: 'icon-ok',
+            rownumbers: true,
+            height:document.body.scrollHeight-50,
+            animate: true,
+            collapsible: true,
+            fitColumns: true,
+            treeField: 'name',
+            toolbar:'#jqueryToolbar',
+            columns:[[
+                {field:'id',title:'',hidden:true},
+                {field:'name',title:'分类名称', align:'center',width:200},
+                {field:'level',title:'分类级别', align:'center',width:100},
+                {field:'status',title:'分类状态',hidden:true, align:'center',width:200},
+                {field:'hasChildren',title:'是否有子节点', align:'center',width:200, formatter:function(value, rec, index){
+                    switch(value){
+                        case 1 : return "有";
+                            break;
+                        case 0 : return "无";
+                            break;
+                        default: return "";
+                    }
+                }},
+                {field:'hasArticle',title:'是否有文章', align:'center',width:200, formatter:function(value, rec, index){
+                    switch(value){
+                        case 1 : return "是";
+                            break;
+                        case 0 : return "否";
+                            break;
+                        default: return "";
+                    }
+                }}
+            ]],
+        });
+    })
+
+    function toSave(){
+        $("#add_name").val("");
+        $("#add_parentId").val("");
+        $("#save_level").val("");
+        $("#add_status").val("1");
+        $("#add_hasArticle").val("1");
+        $("#add_hasChildren").val("0");
+        $('#add_dlg').dialog('open');
+    }
+
+    function save(){
+       var add_name =  $("#add_name").val();
+        if(add_name == "" || add_name == null){
+            alert("请输入分类名称");
+            return ;
+        }else if(add_name.length > 3){
+            alert("分类名称小于3个字");
+            return ;
+        }
+       var add_level =  $("#a_level").val();
+        var add_parentId = $("#add_parentId").val();
+        var add_status = $("#add_status").val();
+        var add_hasArticle = $("#add_hasArticle").val();
+        var add_hasChildren = $("#add_hasChildren").val();
+        $.ajax({
+            url : "${contextPath}/article_category/save_article_category",
+            data : {name:add_name,level:add_level,parentId:add_parentId,status:add_status,hasArticle:add_hasArticle,hasChildren:add_hasChildren},
+            dataType : "json",
+            type : "post",
+            success : function(data) {
+                alert(data);
+                $('#list').treegrid('reload');
+            },
+            error : function(data) {
+                alert("error 后台出现错误！");
+            }
+        });
+        $('#add_dlg').dialog('close');
+    }
+    function toUpdate() {
+        var row = $("#list").datagrid('getSelected');
+        if (row == null) {
+            alert("请选择需要编辑的数据！");
+            return false;
+        }else if(row.level ==1){
+            alert("顶级菜单无法编辑");
+            return
+        }else {
+
+            $("#edit_name").val(row.name);
+            $("#edit_parentId").val(row.parentId);
+            $("#edit_level").val(row.level);
+            $("#edit_status").val(row.status);
+            $("#edit_hasArticle").val(row.hasArticle);
+            $("#edit_hasChildren").val(row.hasChildren);
+            $('#edit_dlg').dialog('open');
+        }
+    }
+    function update(){
+        var row = $("#list").datagrid('getSelected');
+        var edit_name =  $("#edit_name").val();
+        if(edit_name == "" || edit_name == null){
+            alert("请输入分类名称");
+            return
+        }else if(edit_name.length>3){
+            alert("分类名称不能大于3个字");
+            return
+        }
+        var edit_level =  $("#edit_level").val();
+        var edit_parentId = $("#edit_parentId").val();
+        var edit_status = $("#edit_status").val();
+        var edit_hasArticle = $("#edit_hasArticle").val();
+        var edit_hasChildren = $("#edit_hasChildren").val();
+        $.ajax({
+            url : "${contextPath}/article_category/update_article_category",
+            data : {id:row.id,name:edit_name,level:edit_level,parentId:edit_parentId,status:edit_status,hasArticle:edit_hasArticle,hasChildren:edit_hasChildren},
+            dataType : "json",
+            type : "post",
+            success : function(data) {
+                alert(data);
+                $('#list').treegrid('reload');
+            },
+            error : function(data) {
+                alert("error 后台出现错误！");
+            }
+        });
+        $('#add_dlg').dialog('close');
+    }
+    function removeData() {
+        var row = $('#list').datagrid('getSelected');
+        if (row == null) {
+            alert("请选择删除的数据！");
+            return false;
+        } else if(row.level == 1){
+            alert("顶级菜单无法删除");
+            return
+        }else {
+            if(confirm("删除分类会同时删除分类下的文章，确认删除？")){
+                $.ajax({
+                    url:"${contextPath}/article_category/remove_article_category",
+                    data:{
+                        "id":row.id
+                    },
+                    dataType:"json",
+                    type:"post",
+                    sync:false,
+                    success:function(ajax){
+                        alert(ajax);
+                        $('#list').treegrid('reload');
+                    },
+                    error:function(ajax){
+                        alert("后台错误");
+                    }
+                });
+            }
+        }
+
+    }
+    function formatter1(date){
+        if (!date){return '';}
+        return $.fn.datebox.defaults.formatter.call(this, date);
+    }
+    function parser1(s){
+        if (!s){return null;}
+        return $.fn.datebox.defaults.parser.call(this, s);
+    }
+    function formatter2(date){
+        if (!date){return '';}
+        var y = date.getFullYear();
+        var m = date.getMonth() + 1;
+        return y + '-' + (m<10?('0'+m):m);
+    }
+    function parser2(s){
+        if (!s){return null;}
+        var ss = s.split('-');
+        var y = parseInt(ss[0],10);
+        var m = parseInt(ss[1],10);
+        if (!isNaN(y) && !isNaN(m)){
+            return new Date(y,m-1,1);
+        } else {
+            return new Date();
+        }
+    }
+    function checkString(str,message,length){
+        if(str == "" || str == null){
+            alert("请输入"+message);
+            return false;
+        }
+        if(length != null &&length != 0){
+            if(str.length > length){
+                alert(message +"长度超过"+length);
+                return false;
+            }
+        }
+        return true;
+    }
+</script>
+
+</body>
+</html>
+

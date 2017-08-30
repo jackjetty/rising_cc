@@ -1,0 +1,564 @@
+<#assign contextPath=springMacroRequestContext.getContextPath() />
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<html>
+<head>
+    <base href="" />
+
+    <title>report.html</title>
+    <script>
+    </script>
+    <meta name="keywords" content="keyword1,keyword2,keyword3">
+    <meta name="description" content="this is my page">
+    <meta name="content-type" content="text/html; charset=UTF-8">
+
+    <link rel="stylesheet" href="${contextPath}/resources/css/default.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="${contextPath}/resources/js/jquery-easyui-1.4.2/themes/default/easyui.css" />
+    <link rel="stylesheet" type="text/css" href="${contextPath}/resources/js/jquery-easyui-1.4.2/themes/icon.css" />
+    <script type="text/javascript" src="${contextPath}/resources/js/jquery-1.7.2.min.js"></script>
+    <script type="text/javascript" src="${contextPath}/resources/js/jquery-easyui-1.4.2/jquery.easyui.min.js"></script>
+    <script type="text/javascript" src="${contextPath}/resources/common/My97DatePicker/WdatePicker.js"></script>
+    <script type="text/javascript" src="${contextPath}/resources/js/date-expand.js"></script>
+    <script type="text/javascript"  src='${contextPath}/resources/js/ajaxfileupload.js'></script>
+    <script type='text/javascript' charset='utf-8' src='${contextPath}/resources/ueditor/ueditor.config.js'></script>
+    <script type='text/javascript' charset='utf-8' src='${contextPath}/resources/ueditor/ueditor.all.min.js'></script>
+    <script type='text/javascript' charset='utf-8' src='${contextPath}/resources/ueditor/lang/zh-cn/zh-cn.js'></script>
+</head>
+
+<body class="easyui-layout">
+<div id="careRoadContentDiv" region="center" title="信息列表" border="false" style="overflow:hidden;">
+    <table id="list"></table>
+</div>
+<div id="info-dialog" class="easyui-dialog" title="详情"
+     data-options="iconCls:'icon-save',closed:true"
+     style="padding: 20px;">
+    <div id="div3" align="center">
+        <table align="center" cellspacing="0">
+            <tr style="height: 35px;">
+                <td style="width: 100px; text-align: right;  background-color: #EDEDED;">标题:</td>
+                <td style="width: 800px; text-align: left;  border-left: 0px;"><input type="text" disabled="true" id="info_title" style="width:800px; height:20px;" /></td></td>
+            </tr>
+            <tr style="height: 35px;">
+                <td style="width: 100px; text-align: right;  background-color: #EDEDED;">内容:</td>
+                <td style="width: 800px; text-align: left;  border-left: 0px;" >
+                    <div id = "info_content" style = "height:300px;weight:600px;overflow :auto"></div>
+                </td>
+            </tr>
+            <tr style="height: 35px;">
+                <td style="width: 100px; text-align: right;  background-color: #EDEDED;">发布人:</td>
+                <td style="width: 200px; text-align: left;  border-left: 0px;"><input type="text" disabled="true" id="info_issueUser" style="width:200px; height:20px;" /></td></td>
+            </tr>
+            <tr style="height: 35px;">
+                <td style="width: 100px; text-align: right;  background-color: #EDEDED;">发布时间:</td>
+                <td style="width: 200px; text-align: left;  border-left: 0px;"><input type="text" class="Wdate" id="info_issueTime" disabled="disabled" onfocus="WdatePicker({skin:'whyGreen',dateFmt:'yyyy-MM-dd'})"/></td></td>
+            </tr>
+            <tr style="height: 35px;">
+                <td style="width: 100px; text-align: right;  background-color: #EDEDED;border: 0px solid #CCCCCC;">是否激活:</td>
+                <td style="width: 200px; text-align: left;  border-left: 0px;border: 0px solid #CCCCCC;"><select disabled="true" id="info_status" style="width: 206px; height: 26px;"><option value="1">是</option>
+                    <option value="0">否</option></select></td>
+            </tr>
+            <tr style="height: 35px;">
+                <td style="width: 100px; text-align: right;  background-color: #EDEDED;border: 0px solid #CCCCCC;">文章外链:</td>
+                <td style="width: 200px; text-align: left;  border-left: 0px;border: 0px solid #CCCCCC;"><input  id="info_link" style="width: 206px; height: 26px;"></td>
+            </tr>
+        </table>
+
+    </div>
+    <div align="center" style="margin-top:20px;">
+        <input type="button" value="关闭" onclick="$('#info-dialog').dialog('close');"  style="width:100px;background-color:#4691d1; border:1px solid #047adf; display:block; text-align:center; color:white; font-size:14px;line-height:30px;font-family:'微软雅黑';" />
+    </div>
+</div>
+<div id="dlg" class="easyui-dialog" title="添加"
+     data-options="iconCls:'icon-save',closed:true"
+     style="padding: 20px;">
+    <div id="div1" align="center">
+        <table align="center" cellspacing="0" >
+            <tr  style="height: 35px;">
+                <td style="width: 100px; text-align: right;  background-color: #EDEDED;">标题：</td>
+                <td style="width: 800px; text-align: left;  border-left: 0px;"><input type="text" id="add_title" style="width:800px; height:20px;" /></td>
+                <td style="width: 70px; text-align: left;  border-left: 0px;"><font color="red">&nbsp;*&nbsp;必填</font></td>
+            </tr>
+            <tr style="height: 35px;">
+                <td style="width: 100px; text-align: right;  background-color: #EDEDED;">分类：</td>
+                <td style="width: 800px; text-align: left;  border-left: 0px;">
+                    <select class="easyui-combobox" id="add_category"  style="width: 100px;">
+                        <#list articleCategoryDtoList as articleCategory>
+                            <option value = "${articleCategory.id}">${articleCategory.name}</option>
+                        </#list>
+                    </select>
+                </td>
+            </tr>
+            <tr  style="height: 35px;">
+                <td style="width: 100px; text-align: right;  background-color: #EDEDED;">内容：</td>
+                <td style="width: 800px; text-align: left;  border-left: 0px;">
+                    <script type="text/plain" id="add_content" style="height:300px" ></script>
+                    <script>
+                        var ue_add = new UE.ui.Editor({
+                            initialFrameHeight: 200,
+                            initialContent: '',
+                            focus: true,
+                            scaleEnabled:true
+                        });
+                        ue_add.render('add_content');
+                    </script>
+                </td>
+                <td style="width: 70px; text-align: left;  border-left: 0px;"><font color="red">&nbsp;*&nbsp;必填</font></td>
+            </tr>
+            <tr  style="height: 35px;">
+                <td style="width: 100px; text-align: right;  background-color: #EDEDED;">发布人：</td>
+                <td style="width: 200px; text-align: left;  border-left: 0px;"><input type="text" id="add_issueUser" style="width:200px; height:20px;" /></td>
+                <td style="width: 70px; text-align: left;  border-left: 0px;"><font color="red">&nbsp;*&nbsp;必填</font></td>
+            </tr>
+            <tr style="height: 35px;">
+                <td  style="width: 100px; text-align: right; border: 1px solid #CCCCCC;  background-color: #EDEDED;">是否激活：</td>
+                <td style="width: 200px; text-align: left;  border-left: 0px;"><select id="add_status" style="width: 206px; height: 26px;"><option value="1">是</option>
+                    <option value="0">否</option></select></td>
+                <td style="width: 70px; text-align: left; border: 1px solid #CCCCCC; border-left: 0px;"><font color="red">&nbsp;*&nbsp;选填</font></td>
+            </tr>
+        </table>
+
+    </div>
+    <div align="center" style="margin-top:20px;">
+        <input type="button" value="添加" onclick="save()"  style="width:100px;background-color:#4691d1; border:1px solid #047adf; display:block; text-align:center; color:white; font-size:14px;line-height:30px;font-family:'微软雅黑';" />
+    </div>
+</div>
+<div id="edit-dialog" class="easyui-dialog" title="编辑"
+     data-options="iconCls:'icon-save',closed:true"
+     style="padding: 20px;">
+    <div id="div2" align="center" >
+        <table align="center" cellspacing="0" >
+            <tr style="height: 35px;">
+                <td style="width: 100px; text-align: right;  background-color: #EDEDED;">标题:</td>
+                <td style="width: 800px; text-align: left;  border-left: 0px;"><input type="text" id="edit_title" style="width:800px; height:20px;" /></td></td>
+                <td style="width: 70px; text-align: left;  border-left: 0px;"><font color="red">&nbsp;*&nbsp;必填</font></td>
+            </tr>
+            <tr style="height: 35px;">
+                <td style="width: 100px; text-align: right;  background-color: #EDEDED;">分类：</td>
+                <td style="width: 800px; text-align: left;  border-left: 0px;">
+                    <select  id="edit_category"  style="width: 100px;">
+                        <#list articleCategoryDtoList as articleCategory>
+                            <option value = "${articleCategory.id}">${articleCategory.name}</option>
+                        </#list>
+                    </select>
+                </td>
+            </tr>
+
+            <tr style="height: 35px;">
+                <td style="width: 100px; text-align: right;  background-color: #EDEDED;">内容:</td>
+                <td style="width: 800px; text-align: left;  border-left: 0px;">
+                    <script type="text/plain" id="edit_content" style="height:300px" ></script>
+                    <script>
+                        var ue_edit = new UE.ui.Editor({
+                            initialFrameHeight: 200,
+                            initialContent: '',
+                            focus: true,
+                            scaleEnabled:true
+                        });
+                        ue_edit.render('edit_content');
+                    </script>
+                </td>
+            </tr>
+            <tr style="height: 35px;">
+                <td style="width: 100px; text-align: right;  background-color: #EDEDED;">发布人:</td>
+                <td style="width: 200px; text-align: left;  border-left: 0px;"><input type="text" disabled="true" id="edit_issueUser" style="width:200px; height:20px;" /></td></td>
+                <td style="width: 70px; text-align: left;  border-left: 0px;"><font color="red">&nbsp;*&nbsp;必填</font></td>
+            </tr>
+        </table>
+    </div>
+    <div align="center" style = "margin-top:10px;">
+        <input type="button" value="更新" onclick="update()"  style="width:100px;background-color:#4691d1; border:1px solid #047adf; display:block; text-align:center; color:white; font-size:14px;line-height:30px;font-family:'微软雅黑';"/>
+    </div>
+</div>
+<div id="jqueryToolbar" style="padding:5px;height:auto">
+    <div style="padding:10px 0 10px 10px">
+        <table>
+            <tr style="Valign: center; text-decoration: none; line-heigth: 30px; height: 30px; margin-left: 10px;">
+                <td>标题：</td>
+                <td>
+                    <input type="text" id="title_qo" style="width: 100px;" />
+                </td>
+                <td>状态：</td>
+                <td>
+                    <select class="easyui-combobox" id="status_qo"  style="width: 100px;">
+                        <option value="1">激活</option>
+                        <option value="">全部</option>
+                        <option value="0">失效</option>
+                    </select>
+                </td>
+                <td>分类：</td>
+                <td>
+                    <select  id="category_qo"  style="width: 100px;">
+                        <option value="${totalCategory}">全部</option>
+                        <#list articleCategoryDtoList as articleCategory>
+                            <option value = "${articleCategory.id}">${articleCategory.name}</option>
+                        </#list>
+                    </select>
+                </td>
+            </tr>
+            <tr>
+                <td>起始时间:</td>
+                <td><input type="text" class="Wdate" id="beginTime_qo" onfocus="WdatePicker({skin:'whyGreen',dateFmt:'yyyy-MM-dd'})"/></td>
+                <td>结束时间:</td>
+                <td><input type="text" class="Wdate" id="endTime_qo" onfocus="WdatePicker({skin:'whyGreen',dateFmt:'yyyy-MM-dd'})"/></td>
+            </tr>
+        </table>
+    </div>
+    <div style="margin-top:5px; margin-left:10px; padding-bottom:8px; border-bottom:1px solid #ccc;">
+        <a href="javascript:;" class="easyui-linkbutton" iconCls="icon-search" onclick="searchData()">查询</a>
+        <a href="javascript:;" class="easyui-linkbutton" iconCls="icon-large-smartart" onclick="findDetail()">详情</a>
+        <a href="javascript:;" class="easyui-linkbutton" iconCls="icon-add" onclick="toSave()">新增</a>
+        <a href="javascript:;" class="easyui-linkbutton" iconCls="icon-edit" onclick="toUpdate()">修改</a>
+        <a href="javascript:;" class="easyui-linkbutton" iconCls="icon-edit" onclick="changeStatus(0)">激活</a>
+        <a href="javascript:;" class="easyui-linkbutton" iconCls="icon-edit" onclick="changeStatus(1)">失效</a>
+        <a href="javascript:;" class="easyui-linkbutton" iconCls="icon-edit" onclick="changeTop(0)">置顶</a>
+        <a href="javascript:;" class="easyui-linkbutton" iconCls="icon-edit" onclick="changeTop(1)">未置顶</a>
+        <a href="javascript:;" class="easyui-linkbutton" iconCls="icon-remove" onclick="removeData()">删除</a>
+    </div>
+</div>
+<script type="text/javascript">
+    $(function(){
+        $('#list').datagrid({
+            nowrap: false,
+            striped: true,
+            fit: true,
+            singleSelect:true,
+            fitColumns:true,
+            idField:'id',
+            url:'${contextPath}/article_list',
+            queryParams:{category:"${totalCategory}"},
+            columns:[[
+                {field:'id',title:'',hidden:true},
+                {field:'index',title:'序号', align:'center',width:50,formatter:function(value, rec, index){
+                    return index+1;
+                }},
+                {field:'title',title:'标题', align:'center',width:60},
+                {field:'issueUser',title:'发布人', align:'center',width:100},
+                {field:'issueTime',title:'发布时间', align:'center',width:100,formatter:function (value, rec, index) {
+                    if(value !=null){
+                        return new Date(value).Format("yyyy-MM-dd");
+                    }
+                    return "";}},
+                {field:'status',title:'状态', align:'center',width:100, formatter:function(value, rec, index){
+                    switch(value){
+                        case 1 : return "激活";
+                            break;
+                        case 0 : return "失效";
+                            break;
+                        default: return "";
+                    }}},
+                {field:'top',title:'是否置顶', align:'center',width:100, formatter:function(value, rec, index){
+                    switch(value){
+                        case 1 : return "置顶";
+                            break;
+                        case 0 : return "未置顶";
+                            break;
+                        default: return "";
+                    }}}
+            ]],
+            toolbar:'#jqueryToolbar',
+            pagination:true,
+            pageSize: 50,//每页显示的记录条数，默认为
+            pageList: [10,20,30,40,50],//可以设置每页记录条数的列表
+            onLoadSuccess:function(data){
+                $('#list').datagrid('clearSelections'); //清除掉列表选中记录
+                if(data.total==0){
+                    $('.datagrid-body-inner').eq(0).addClass("l_elist");
+                    //$('.datagrid-body').eq(1).append('<div class="r_elist">无数据</div>');
+                }else{
+                    $('.datagrid-body-inner').eq(0).removeClass("l_elist");
+                }
+            }
+        });
+
+        //设置分页控件
+        var p = $('#list').datagrid('getPager');
+        $(p).pagination({
+            beforePageText: '第',//页数文本框前显示的汉字
+            afterPageText: '页    共 {pages} 页',
+            displayMsg: '当前显示第 {from} 到 {to} 条记录   共 {total} 条记录'/*,
+             onBeforeRefresh:function(){
+             $(this).pagination('loading');
+             alert('before refresh');
+             $(this).pagination('loaded');
+             }*/
+        });
+
+
+    })
+    function changeStatus(status) {
+        var row = $("#list").datagrid('getSelected');
+        if(row == null){
+            alert("请选择一条记录");
+            return
+        }
+        if(confirm("确定修改该状态？")){
+            $.ajax({
+                url:"${contextPath}/changeStatus",
+                type:"post",
+                dataType:"json",
+                data : "id="+row.id + "&status=" + status,
+                success:function(data){
+                    alert(data);
+                    $('#list').datagrid('reload');
+                },
+                error:function(){}
+            });
+        }
+    }
+    function toSave(){
+        if("${articleCategoryDtoList?size}" == 0){
+            alert("请添加一个子分类");
+            return
+        }
+        var add_issueUser = $("#add_issueUser").val("");
+        var add_title = $("#add_title").val("");
+        ue_add.setContent("");
+        $("#dlg").dialog('open');
+    }
+
+    function save(){
+            var title = $("#add_title").val().trim();
+            if (title == '') {
+                alert('请填写标题！');
+                return false;
+            }else if(title.length>40){
+                alert("标题长度不要超过40个字");
+                return ;
+            }
+            var content = UE.getEditor('add_content').getContent();
+            if (content == '') {
+                alert('请填写内容！');
+                return false;
+            }
+            var createUser = $("#add_issueUser").val().trim();
+            if(!checkString(createUser,"发布人",10)){
+                return
+            }
+            var status=$("#add_status").val();
+            var add_category=$("#add_category").val();
+            $.ajax({
+                url : "${contextPath}/add_article",
+                data : "title=" + title +"&content=" + content + "&createUser=" + createUser + "&status=" + status+ "&category="+add_category,
+                dataType : "json",
+                type : "post",
+                success : function(data) {
+                    alert(data);
+                    $('#list').datagrid('reload');
+                },
+                error : function(data) {
+                    alert("error 后台出现错误！");
+                }
+            });
+        $('#dlg').dialog('close');
+    }
+    function toUpdate(){
+        var row = $('#list').datagrid('getSelected');
+        if(row == null){
+            alert("请选择一条记录");
+            return
+        }
+        $.ajax({
+            url:"${contextPath}/find_article_by_id",
+            type:"post",
+            dataType:"json",
+            data : "id="+row.id,
+            sync:false,
+            success:function(row){
+                $("#edit_title").val(row.title);
+                $("#edit_issueUser").val(row.issueUser);
+                $("#edit_issueTime").val(new Date(row.issueTime).Format("yyyy-MM-dd"));
+                ue_edit.setContent(row.content);
+            },
+            error:function(){}
+        });
+        $("#edit-dialog").dialog('open');
+    }
+    function update(){
+        var row = $('#list').datagrid('getSelected');
+        var title = $("#edit_title").val().trim();
+        if (title == '') {
+            alert('请填写标题！');
+            return false;
+        }
+        var content = UE.getEditor('edit_content').getContent();
+        if (content == '') {
+            alert('请填写内容！');
+            return false;
+        }
+        var edit_category = $("#edit_category").val();
+        $.ajax({
+            url : "${contextPath}/edit_article",
+            data : "id=" + row.id + "&title=" + title + "&content=" + content + "&category="+edit_category,
+            dataType : "json",
+            type : "post",
+            success : function(data) {
+                    alert(data);
+                    $('#edit-dialog').dialog('close');
+                    $('#list').datagrid('reload');
+            },
+            error : function(data) {
+                alert("error 后台出现错误！");
+            }
+        });
+
+    }
+    function removeData(){
+        var row = $('#list').datagrid('getSelected');
+        if(window.confirm("确认删除这条记录？")){
+            $.ajax({
+                url : "${contextPath}/delete_article",
+                data : "id="+ row.id,
+                dataType : "json",
+                type : "post",
+                success : function(data) {
+                        alert(data);
+                    $('#list').datagrid('reload');
+                },
+                error : function(data) {
+                    alert("error 后台出现错误！");
+                }
+            });
+        }
+    }
+
+    function changeTop(top){
+        var row = $("#list").datagrid('getSelected');
+        if(row == null){
+            alert("请选择一条记录");
+            return
+        }
+        if(confirm("确定修改该状态？")){
+            $.ajax({
+                url:"${contextPath}/changeTop",
+                type:"post",
+                dataType:"json",
+                data : "id="+row.id + "&top=" + top,
+                success:function(data){
+                        alert("修改成功");
+                    $('#list').datagrid('reload');
+                },
+                error:function(){}
+            });
+        }
+    }
+
+    function searchData() {
+        var a = new Array();
+        var title = $("#title_qo").val().trim();
+        var category = $("#category_qo").val();
+        var status = $("#status_qo").combobox("getValue").trim();
+        var beginTime = $("#beginTime_qo").val();
+        var endTime = $("#endTime_qo").val();
+        if(title !=null && title!="") {
+            a["title"]=title;
+        }
+        if(category !=null && category!="") {
+            a["category"]=category;
+        }
+        a["status"]=status;
+        if(beginTime !=null && beginTime!="") {
+            a["beginTime"]=new Date(beginTime.split("-")[0],beginTime.split("-")[1]-1,beginTime.split("-")[2]);
+        }
+        if(endTime !=null && endTime!="") {
+            a["endTime"]=new Date(endTime.split("-")[0],endTime.split("-")[1]-1,endTime.split("-")[2]);
+        }
+        doSearch(a);
+    }
+
+    function doSearch(queryParams){
+        $("#list").datagrid('clearSelections');
+        $("#list").datagrid('options').queryParams=queryParams;
+        $("#list").datagrid('load');
+    }
+
+
+    function findDetail(){
+        var row = $("#list").datagrid('getSelected');
+        if(row == null){
+            alert("请选择一条记录");
+            return
+        }
+        $.ajax({
+            url:"${contextPath}/find_article_by_id",
+            type:"post",
+            dataType:"json",
+            data : "id="+row.id,
+            success:function(row){
+                $("#info_title").val(row.title);
+                $("#info_content").html(row.content);
+                $("#info_issueUser").val(row.issueUser == null?"":row.issueUser);
+                $("#info_issueTime").val(new Date(row.issueTime).Format("yyyy-MM-dd"));
+                $("#info_status").html("");
+                if(row.status == '1'){
+                    $("#info_status").append("<option value=\"1\" selected >激活</option>");
+                    $("#info_status").append("<option value=\"0\">失效</option>");
+                }else if(row.status == '0'){
+                    $("#info_status").append("<option value=\"0\" selected >失效</option>");
+                    $("#info_status").append("<option value=\"1\">激活</option>");
+                }else{
+                    $("#edit_status").append("<option value=\"1\" selected >激活</option>");
+                    $("#edit_status").append("<option value=\"0\">失效</option>");
+                }
+                $("info_link").val("${article_link}/ignore/article_view_"+row.id+".html");
+                $('#info-dialog').dialog('open');
+            },
+            error:function(){}
+        });
+    }
+    function formatter1(date){
+        if (!date){return '';}
+        return $.fn.datebox.defaults.formatter.call(this, date);
+    }
+    function parser1(s){
+        if (!s){return null;}
+        return $.fn.datebox.defaults.parser.call(this, s);
+    }
+    function formatter2(date){
+        if (!date){return '';}
+        var y = date.getFullYear();
+        var m = date.getMonth()+1;
+        var d = date.getDate();
+        var h = date.getHours();
+        var i = date.getMinutes();
+        var s = date.getSeconds();
+        return  y+'-'+(m<10?('0'+m):m)+'-'+(d<10?('0'+d):d)+' '+(h<10?('0'+h):h)+':'+(i<10?('0'+i):i)+':'+(s<10?('0'+s):s);
+    }
+    function parser2(s){
+        var y = s.substring(0,4);
+        var m =s.substring(5,7);
+        var d = s.substring(8,10);
+        var h = s.substring(11,13);
+        var min = s.substring(14,16);
+        var sec = s.substring(17,20);
+        return new Date(y,m-1,d,h,min,sec);
+    }
+    function checkString(str,message,length){
+        if(str == "" || str == null){
+            alert("请输入"+message);
+            return false;
+        }
+        if(length != null &&length != 0){
+            if(str.length > length){
+                alert(message +"长度超过"+length);
+                return false;
+            }
+        }
+        return true;
+    }
+    function checkRate(input)
+    {
+        var re = /^[0-9]+.?[0-9]*$/;   //判断字符串是否为数字     //判断正整数 /^[1-9]+[0-9]*]*$/
+        var nubmer = document.getElementById(input).value;
+
+        if (!re.test(nubmer))
+        {
+            alert("请输入数字");
+            document.getElementById(input).value = "";
+            return false;
+        }
+    }
+</script>
+
+</body>
+</html>
+

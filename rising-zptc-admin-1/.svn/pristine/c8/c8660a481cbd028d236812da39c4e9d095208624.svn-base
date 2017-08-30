@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.bhyf.dao.enter.BestPayRecordDao">
+
+
+	<sql id="columnBestPayRecordByAll">
+		r.id,
+		r.tradeNo,
+		r.tranSeq,
+		r.money,
+		r.tranDate
+	</sql>
+
+	<sql id = "whereConditionPagination">
+		<if test ="condition !=null">
+			<if test ="condition.tradeNo !=null and condition.tradeNo !=''">
+				and tradeNo = #{condition.tradeNo,jdbcType=VARCHAR}
+			</if>
+			<if test ="condition.cardNo !=null and condition.cardNo !=''">
+				and r.tradeNo = o.tradeNo
+				and cardNo = #{condition.cardNo,jdbcType=VARCHAR}
+			</if>
+			<if test ="condition.beginTime !=null and condition.beginTime !=''">
+				and tranDate <![CDATA[>=]]> #{condition.beginTime,jdbcType=TIMESTAMP}
+			</if>
+			<if test ="condition.endTime !=null and condition.endTime !=''">
+				and tranDate <![CDATA[<=]]> #{condition.endTime,jdbcType=TIMESTAMP}
+			</if>
+		</if>
+	</sql>
+	<sql id = "whereConditionQo">
+			<if test ="tradeNo !=null and tradeNo !=''">
+				and r.tradeNo = #{tradeNo,jdbcType=VARCHAR}
+			</if>
+			<if test ="cardNo !=null and cardNo !=''">
+				and r.tradeNo = o.tradeNo
+				and o.cardNo = #{cardNo,jdbcType=VARCHAR}
+			</if>
+			<if test ="beginTime !=null and beginTime !=''">
+				and r.tranDate <![CDATA[>=]]> #{beginTime,jdbcType=TIMESTAMP}
+			</if>
+			<if test ="endTime !=null and endTime !=''">
+				and r.tranDate <![CDATA[<=]]> #{endTime,jdbcType=TIMESTAMP}
+			</if>
+	</sql>
+
+	<select id="findBestPayRecordByQo" parameterType="com.bhyf.pojo.qo.enter.BestPayRecordQo" resultType="BestPayRecord">
+		select
+		<include refid="columnBestPayRecordByAll"/>
+		from t_best_pay_record r
+		<if test ="cardNo !=null and cardNo !=''">
+			,t_one_card_recharge_record o
+		</if>
+		where 1=1
+		<include refid="whereConditionQo"/>
+	</select>
+	<select id="findBestPayRecordByPagination" parameterType="Pagination" resultType="BestPayRecord">
+		select
+		<include refid="columnBestPayRecordByAll"/>
+		from t_best_pay_record r
+		<if test ="condition.cardNo !=null and condition.cardNo !=''">
+			,t_one_card_recharge_record o
+		</if>
+		where 1=1
+		<include refid="whereConditionPagination"/>
+	</select>
+	<select id="countBestPayRecordByPagination" parameterType="Pagination" resultType="Integer">
+		select
+		count(1)
+		from t_best_pay_record r
+		<if test ="condition.cardNo !=null and condition.cardNo !=''">
+			,t_one_card_recharge_record o
+		</if>
+		where 1=1
+		<include refid="whereConditionPagination"/>
+	</select>
+
+	<insert id = "saveBestPayRecordBatch" parameterType="java.util.List">
+		insert into t_best_pay_record(tradeNo, tranSeq,status, money,tranDate)
+		values
+		<foreach collection="list" item="bestPayRecord" index="index" separator="," >
+			(
+			#{bestPayRecord.tradeNo},
+			#{bestPayRecord.tranSeq},
+			#{bestPayRecord.status},
+			#{bestPayRecord.money},
+			#{bestPayRecord.tranDate}
+			)
+		</foreach>
+	</insert>
+
+</mapper>

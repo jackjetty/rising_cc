@@ -1,0 +1,620 @@
+<#assign contextPath=springMacroRequestContext.getContextPath() />
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>版本管理</title>
+<link rel="stylesheet" type="text/css" href="${contextPath}/resources/themes/default/easyui.css">
+<link rel="stylesheet" type="text/css" href="${contextPath}/resources/themes/icon.css">
+<script type="text/javascript" src="${contextPath}/resources/js/jquery-1.7.2.js"></script>
+<script type="text/javascript" src="${contextPath}/resources/js/jquery.easyui.min.js"></script>
+<script type="text/javascript" src="${contextPath}/resources/js/easyui-lang-zh_CN.js"></script>
+<script type="text/javascript" src="${contextPath}/resources/js/baseUtil.js"></script>
+<script type="text/javascript" src="${contextPath}/resources/js/jquery.form.js"></script>
+<style type="text/css">
+<!--
+.panel-margin-buttom {
+	margin-bottom: 20px;
+}
+
+#searchpanel a.pushBtn {
+	-moz-user-select: none;
+	background: url("${contextPath}/resources/image/button/btnout_bg_left.gif") no-repeat scroll left
+		top transparent;
+	float: left;
+	height: 24px;
+	margin: 2px 5px 0 0;
+	outline: medium none;
+	text-decoration: none;
+}
+
+#searchpanel a.pushBtn img {
+	float: left;
+	margin: 2px 0 4px 6px;
+	border: 0;
+}
+
+#searchpanel a.pushBtn b {
+	background: url("${contextPath}/resources/image/button/btnout_bg_right.gif") no-repeat scroll
+		right top transparent;
+	color: #666666;
+	cursor: pointer;
+	display: inline-block;
+	font-size: 12px;
+	font-weight: normal;
+	height: 24px;
+	line-height: 24px;
+	padding: 0 7px 0 5px;
+	white-space: nowrap;
+}
+
+#searchpanel a.pushBtn:hover {
+	background: url("${contextPath}/resources/image/button/btnover_bg_left.gif") no-repeat scroll
+		left top transparent;
+	text-decoration: none;
+}
+
+#searchpanel a.pushBtn:hover b {
+	background: url("${contextPath}/resources/image/button/btnover_bg_right.gif") no-repeat scroll
+		right top transparent;
+	color: #114477;
+	font-size: 12px;
+}
+
+li {
+	list-style: none;
+}
+
+.clearfix:after {
+	content: ".";
+	display: block;
+	height: 0;
+	clear: both;
+	visibility: hidden;
+}
+
+
+.clearfix {
+	zoom: 1;
+}
+#dlg td{
+	border : 1px solid #CCCCCC;
+	border-bottom : 0px;
+}
+#detail_dialog td{
+	border : 1px solid #CCCCCC;
+	border-bottom : 0px;
+}
+
+#edit-dialog td{
+	border : 1px solid #CCCCCC;
+	border-bottom : 0px;
+}
+-->
+</style>
+
+</head>
+<script type="text/javascript">
+String.prototype.trim = function() {
+	  return this.replace(/^\s\s*/, '').replace(/\s\s*$/, '');
+	};
+	function toSave() {
+			$("#app").val('');
+			$("#add_versionName").val('');
+			$("#add_content").val('');
+			$("#add_versionNo").val('');
+			$('#add-dialog').dialog('open');
+		}
+	function toUpdate() {
+			var rows = $('#dg').datagrid('getSelections');
+			if (rows.length == 0) {
+				alert("请选择需要编辑的数据！");
+				return false;
+			} else if (rows.length > 1) {
+				alert("一次只能编辑一行！");
+			} else {
+				var row = $("#dg").datagrid('getSelected');
+				$("#edit_app").val('');
+				$("#edit_id").val(row.id);
+				$("#edit_versionName").val(row.versionName);
+				$("#edit_category").val(row.category);
+				$("#edit_versionNo").val(row.versionNo);
+				$("#edit_isUpgrade").val(row.isUpgrade);
+				$("#edit_content").val(row.content);
+				$("#edit_status").val(row.status);
+				$('#edit-dialog').dialog('open');
+			}
+		}
+	function removeData() {
+			var rows = $('#dg').datagrid('getSelections');
+			if (rows.length == 0) {
+				alert("请选择删除编辑的数据！");
+				return false;
+			} else {
+				var ids = "";
+				for(var i = 0; i<rows.length; i++){
+					ids += rows[i].id+",";
+				}
+				ids = ids.substring(0,ids.length-1);
+				if(confirm("确认删除这"+rows.length+"条数据？")){
+					$.ajax({
+						url:"${contextPath}/appVersion/deleteAppversionsByIds",
+						data:{
+							"ids":ids
+						},
+						dataType:"json",
+						type:"post",
+						sync:false,
+						success:function(ajax){
+							if(ajax.backCode){
+								alert(ajax.success);
+								loading();
+							}else{
+								alert(ajax.error);
+								loading();
+							}
+						},
+						error:function(ajax){
+							alert("后台错误");
+						}
+					});
+				}
+			}
+
+		}
+
+	function pagerFilter(data) {
+		var dg = $("#dg");
+		var opts = dg.datagrid('options');
+		var pager = dg.datagrid('getPager');
+		if(typeof data.originalRows== 'undefined'){
+			data = {
+					total : data.listSize,
+					rows : data.rows
+				};
+				pager.pagination({
+					onSelectPage : function(pageNum, pageSize) {
+						opts.pageNumber = pageNum;
+						opts.pageSize = pageSize;
+						pager.pagination('refresh', {
+							pageNumber : pageNum,
+							pageSize : pageSize
+						});
+						dg.datagrid('loadData', data);
+					}
+				});
+				data.originalRows = (data.rows);
+				return data;
+		}else{
+			var versionName = $("#versionName").val().trim();
+			var category = $("#category").val().trim();
+			var status = $("#status").val().trim();
+			var newData = getData(userName,contactWay,startTime,endTime);
+			data.total = newData.listSize;
+			data.rows = newData.rows;
+			pager.pagination({
+				onSelectPage : function(pageNum, pageSize) {
+					opts.pageNumber = pageNum;
+					opts.pageSize = pageSize;
+					pager.pagination('refresh', {
+						pageNumber : pageNum,
+						pageSize : pageSize
+					});
+					dg.datagrid('loadData', data);
+				}
+			});
+			data.originalRows = (data.rows);
+			return data;
+		}	
+	}
+	function getData(versionName,category,status) {
+		var rows = null;
+		var dg = $("#dg");
+		var opts = dg.datagrid('options');
+		var pageSize = opts.pageSize;
+		var pageIndex = opts.pageNumber;
+		$.ajax({
+			url : "${contextPath}/appVersion/getAppVersionList",
+			async : false,
+			data : {
+				"pageSize" : pageSize,
+				"pageIndex" : pageIndex,
+				"versionName" : versionName,
+				"category" : category,
+				"status" : status
+			},
+			dataType : "json",
+			type : "post",
+			success : function(data) {
+				rows = data;
+			},
+			error : function(data) {
+				alert("error 后台出现错误！");
+			}
+		});
+		return rows;
+	}
+	$(function() {
+		loading();
+	
+		$("#search").click(function() {
+			loading();
+		});
+		
+		$("#addMenu").click(function() {
+
+			if(!checkString($("#add_versionName").val(),"app名称",20)){
+				return
+			}
+			if($("#app").val() == ""){
+				alert("请选择文件");
+				return ;
+			}
+
+			if(!checkNum($("#add_versionNo").val(),"版本号",4)){
+				return
+			}
+			if(!checkString($("#add_content").val(),"更新信息",250)){
+				return
+			}
+			var options = {
+				dataType : "json",
+				error : function() {
+					alert("后台错误！");
+				},
+				success : function(data) {
+					if(data.backCode){
+						alert(data.success);
+						$('#add-dialog').dialog('close');
+						loading();
+					}else{
+						alert(data.error);
+					}
+				}
+			};
+			$("#formId").ajaxSubmit(options);
+			$('#dg').datagrid('reload');
+		});
+		$("#editMenu").click(function() {
+			if(!checkString($("#edit_versionName").val(),"app名称",20)){
+				return
+			}
+
+			if(!checkNum($("#edit_versionNo").val(),"版本号",4)){
+				return
+			}
+			if(!checkString($("#edit_content").val(),"更新信息",250)){
+				return
+			}
+
+			var options = {
+				dataType : "json",
+				error : function() {
+					alert("后台错误！");
+				},
+				success : function(data) {
+					if(data.backCode){
+						alert("修改成功");
+						$('#edit-dialog').dialog('close');
+						loading();
+					}else{
+						alert(data.error);
+					}
+				}
+			};
+			$("#edit_form").ajaxSubmit(options);
+			$('#dg').datagrid('reload');
+		});
+
+//		$("#editMenu").click(function(){
+//			var content = $("#edit_content").val();
+//			var isUpgrade = $("#edit_isUpgrade").val();
+//
+//			var status = $("#edit_status").val();
+//			var id = $("#edit_id").val();
+//			$.ajax({
+//				url:"${contextPath}/appVersion/updateAppVersion",
+//				data:{
+//					"content":content,
+//					"isUpgrade":isUpgrade,
+//					"status":status,
+//					"id":id
+//				},
+//				dataType:"json",
+//				type:"post",
+//				success:function(ajax){
+//					if(ajax.backCode){
+//						alert(ajax.success);
+//						loading();
+//						$('#edit-dialog').dialog('close');
+//					}else{
+//						alert(ajax.error);
+//					}
+//				},
+//				error:function(ajax){
+//					alert("后台错误");
+//				}
+//			});
+//		});
+		
+		
+		$("#clear").click(function(){
+			$("#versionName").val('');
+			$("#category").val('');
+			$("#status").val('');
+		});
+		
+		
+		$("#infoMenu").click(
+			function(){
+				$('#info-dialog').dialog('close');
+			}
+		);
+	});
+	
+	
+	function loading(){
+		var versionName = $("#versionName").val().trim();
+		var category = $("#category").val().trim();
+		var status = $("#status").val().trim();
+		$('#dg').datagrid({
+			loadFilter : pagerFilter,
+			pageNumber : 1
+		}).datagrid('loadData', getData(versionName,category,status));
+	}
+	
+	function check(value,row,index){
+		if(value == 0){
+			return "禁用";
+		}else if(value == 1){
+			return "启用";
+		}else if(value == 80){
+			return "删除";
+		}		
+	}
+	
+	function type(value,row,index){
+		if(value == 1){
+			return "android";
+		}else if(value == 2){
+			return "ios";
+		}
+	}
+	
+	function upload(value,row,index){
+		if(value == 0){
+			return "不强制升级";
+		}else if(value == 1){
+			return "强制升级";
+		}
+	}
+	
+	function time(value,row,index){
+		return new Date(value).toCommonCase();
+	}
+	
+	function downApp(value,row,index){
+		return "<a href=\""+value+"\">下载</a>";
+	}
+
+function checkString(str,message,length){
+	if(str == "" || str == null){
+		alert("请输入"+message);
+		return false;
+	}
+	if(length != null &&length != 0){
+		if(str.length > length){
+			alert(message +"长度超过"+length);
+			return false;
+		}
+	}
+	return true;
+}
+function checkNum(num,message,length)
+{
+	var re = /^[0-9]+.?[0-9]*$/;   //判断字符串是否为数字     //判断正整数 /^[1-9]+[0-9]*]*$/
+
+	if (!re.test(num))
+	{
+		alert(message+"请输入数字");
+		return false;
+	}
+	if(length !=null && length != 0){
+		if(num.length>length){
+			alert(message+"长度不能超过"+length);
+			return false;
+		}
+	}
+	return true;
+}
+
+</script>
+<body class="easyui-layout" style="background: #DFE8F6; margin-top: 4px; margin-left: 4px; margin-right: 4px; width: auto;">
+<div id="jqueryToolbar" style="padding:5px;height:auto">
+	<div style="padding:10px 0 10px 10px">
+		<table>
+			<tr style="Valign: center; text-decoration: none; line-heigth: 30px; height: 30px; margin-left: 10px;">
+				<td>app名称：</td>
+				<td>
+				<input type="text" id="versionName" style="width: 100px;" />
+				</td>
+				<td>手机系统：</td>
+				<td>
+				<select id="category" style="width: 100px;" >
+					<option value="">全部</option>
+					<option value="1">android</option>
+					<option value="2">ios</option>
+				</select>
+				</td>
+				<td>状态：</td>
+				<td>
+				<select id="status" style="width: 100px;" >
+					<option value="">全部</option>
+					<option value="0">禁用</option>
+					<option value="1">启用</option>
+				</select>
+				</td>
+			</tr>
+		</table>
+	</div>
+	<div style="margin-top:5px; margin-left:10px; padding-bottom:8px; border-bottom:1px solid #ccc;">
+		<a href="javascript:;" class="easyui-linkbutton" iconCls="icon-search" id="search">查询</a>
+		<a href="javascript:;" class="easyui-linkbutton" iconCls="icon-add" onclick="toSave()">新增</a>
+		<a href="javascript:;" class="easyui-linkbutton" iconCls="icon-edit" onclick="toUpdate()">修改</a>
+		<a href="javascript:;" class="easyui-linkbutton" iconCls="icon-remove" onclick="removeData()">删除</a>
+	</div>
+</div>
+<div id="mainPanle" region="center" split="true" border="false">
+	<table id="dg" class="easyui-datagrid" title="版本列表"
+		data-options="rownumbers:true,singleSelect:true,toolbar:jqueryToolbar,pagination:true,
+				pageSize:50,remoteSort:false,fitColumns:true,fit:true,
+				multiSort:true">
+		<thead>
+			<tr>
+				<th data-options="field:'versionName',width:150, align:'center',sortable:true">app名称</th>
+				<th data-options="field:'versionNo',width:75, align:'center',sortable:true">版本号</th>
+				<th data-options="field:'category',width:150, align:'center',sortable:true,formatter:type">分类</th>
+				<th data-options="field:'isUpgrade',width:75, align:'center',sortable:true,formatter:upload">升级</th>
+				<th data-options="field:'content',width:250, align:'center',sortable:true">更新内容</th>
+				<th data-options="field:'status',width:100, align:'center',sortable:true,formatter:check">状态</th>
+				<th data-options="field:'createTime',width:100, align:'center',sortable:true,formatter:time">创建时间</th>
+				<th data-options="field:'createUser',width:100, align:'center',sortable:true">创建人</th>
+				<th data-options="field:'downUrl',width:100, align:'center',sortable:true,formatter:downApp">下载</th>
+			</tr>
+		</thead>
+	</table>
+	<div id="add-dialog" class="easyui-dialog" title="添加版本"
+		data-options="iconCls:'icon-save',closed:true"
+		style="padding: 20px;">
+		<div id="div3" align="center">
+		<form action="${contextPath}/appVersion/addAppVersion" method ="post" enctype="multipart/form-data" id="formId">
+			<table align="center" cellspacing="0" width="375px">
+				<tr style="height: 35px;">
+					<td style="width: 100px; text-align: right; border: 1px solid #CCCCCC;  background-color: #EDEDED;">app名称:</td>
+					<td style="width: 200px; text-align: left; border: 1px solid #CCCCCC;  border-left: 0px;">
+						<input type="text" id="add_versionName" name = "versionName" style="width:200px; height:20px;"/>
+					</td>
+				</tr>
+				<tr style="height: 35px;">
+					<td style="width: 100px; text-align: right; border: 1px solid #CCCCCC;  background-color: #EDEDED;">app:</td>
+					<td style="width: 200px; text-align: left; border: 1px solid #CCCCCC;  border-left: 0px;">
+						<input type="file" id="app" name = "app" style="width:200px; height:20px;"/>
+					</td>
+				</tr>
+
+				<tr style="height: 35px;">
+					<td style="width: 100px; text-align: right; border: 1px solid #CCCCCC;  background-color: #EDEDED;">分类:</td>
+					<td style="width: 200px; text-align: left; border: 1px solid #CCCCCC;  border-left: 0px;">
+						<select id="add_category" name="category" style="width:200px; height:20px;">
+							<option value="1">android</option>
+							<option value="2">ios</option>
+						</select>
+					</td>
+				</tr>
+				<tr style="height: 35px;">
+					<td style="width: 100px; text-align: right; border: 1px solid #CCCCCC;  background-color: #EDEDED;">版本号:</td>
+					<td style="width: 200px; text-align: left; border: 1px solid #CCCCCC;  border-left: 0px;">
+						<input type="text" id="add_versionNo" name="versionNo" style="width:200px; height:20px;"/>
+					</td>
+				</tr>
+				<tr style="height: 35px;">
+					<td style="width: 100px; text-align: right; border: 1px solid #CCCCCC;  background-color: #EDEDED;">升级:</td>
+					<td style="width: 200px; text-align: left;  border: 1px solid #CCCCCC; border-left: 0px;" >
+						<select id="add_isUpgrade" name="isUpgrade" style="width:200px; height:20px;">
+							<option value="0">不强制升级</option>
+							<option value="1">强制升级</option>
+						</select>
+					</td>
+				</tr>
+				<tr style="height: 35px;">
+					<td style="width: 100px; text-align: right; border: 1px solid #CCCCCC;  background-color: #EDEDED;">更新内容:</td>
+					<td style="width: 200px; text-align: left;  border: 1px solid #CCCCCC; border-left: 0px;" >
+						<textarea id="add_content" name='content' rows="4" cols="80" style="width:200px; height:100px;"></textarea>
+					</td>
+				</tr>
+				<tr style="height: 35px;">
+					<td style="width: 100px; text-align: right; border: 1px solid #CCCCCC;  background-color: #EDEDED;">状态:</td>
+					<td style="width: 200px; text-align: left;  border: 1px solid #CCCCCC; border-left: 0px;" >
+						<select id="add_status" name="status" style="width:200px; height:20px;">
+							<option value="1">启用</option>
+							<option value="0">禁用</option>
+						</select>
+					</td>
+				</tr>
+			</table>
+		</form>
+		</div>
+		<div align="center" style="margin-top:20px;">
+			<input type="button" value="提交" id="addMenu"  style="width:100px;background-color:#4691d1; border:1px solid #047adf; display:block; text-align:center; color:white; font-size:14px;line-height:30px;font-family:'微软雅黑';" />
+		</div>
+	</div>
+	
+	<div id="edit-dialog" class="easyui-dialog" title="编辑版本"
+		data-options="iconCls:'icon-save',closed:true"
+		style="padding: 20px;">
+		<div id="div4" align="center">
+			<form action="${contextPath}/appVersion/updateAppVersion" method ="post" enctype="multipart/form-data" id="edit_form">
+		<input type="hidden" id="edit_id" name = "id">
+			<table align="center" cellspacing="0" width="375px">
+				<tr style="height: 35px;">
+					<td style="width: 100px; text-align: right; border: 1px solid #CCCCCC;  background-color: #EDEDED;">app名称:</td>
+					<td style="width: 200px; text-align: left; border: 1px solid #CCCCCC;  border-left: 0px;">
+						<input type="text" id="edit_versionName" name = "versionName" style="width:200px; height:20px;"/>
+					</td>
+					</tr><tr>
+				<td style="width: 100px; text-align: right; border: 1px solid #CCCCCC;  background-color: #EDEDED;">app:</td>
+					<td style="width: 200px; text-align: left; border: 1px solid #CCCCCC;  border-left: 0px;">
+						<input type="file" id="edit_app" name = "app" style="width:200px; height:20px;"/>
+					</td>
+				</tr>
+				<tr style="height: 35px;">
+					<td style="width: 100px; text-align: right; border: 1px solid #CCCCCC;  background-color: #EDEDED;">分类:</td>
+					<td style="width: 200px; text-align: left; border: 1px solid #CCCCCC;  border-left: 0px;">
+						<select id="edit_category" name="category" style="width:200px; height:20px;">
+							<option value="1">android</option>
+							<option value="2">ios</option>
+						</select>
+					</td>
+				</tr>
+				<tr style="height: 35px;">
+					<td style="width: 100px; text-align: right; border: 1px solid #CCCCCC;  background-color: #EDEDED;">版本号:</td>
+					<td style="width: 200px; text-align: left; border: 1px solid #CCCCCC;  border-left: 0px;">
+						<input type="text" id="edit_versionNo" name="versionNo" style="width:200px; height:20px;"/>
+					</td>
+				</tr>
+				<tr style="height: 35px;">
+					<td style="width: 100px; text-align: right; border: 1px solid #CCCCCC;  background-color: #EDEDED;">升级:</td>
+					<td style="width: 200px; text-align: left;  border: 1px solid #CCCCCC; border-left: 0px;" >
+						<select id="edit_isUpgrade" name="isUpgrade" style="width:200px; height:20px;">
+							<option value="0">不强制升级</option>
+							<option value="1">强制升级</option>
+						</select>
+					</td>
+				</tr>
+				<tr style="height: 35px;">
+					<td style="width: 100px; text-align: right; border: 1px solid #CCCCCC;  background-color: #EDEDED;">更新内容:</td>
+					<td style="width: 200px; text-align: left;  border: 1px solid #CCCCCC; border-left: 0px;" >
+						<textarea id="edit_content" name='content' rows="4" cols="80" style="width:200px; height:100px;"></textarea>
+					</td>
+				</tr>
+				<tr style="height: 35px;">
+					<td style="width: 100px; text-align: right; border: 1px solid #CCCCCC;  background-color: #EDEDED;">状态:</td>
+					<td style="width: 200px; text-align: left;  border: 1px solid #CCCCCC; border-left: 0px;" >
+						<select id="edit_status" name="status" style="width:200px; height:20px;">
+							<option value="1">启用</option>
+							<option value="0">禁用</option>
+						</select>
+					</td>
+				</tr>
+			</table>
+		</div>
+		<div align="center" style="margin-top:20px;">
+			<input type="button" value="更新" id="editMenu"  style="width:100px;background-color:#4691d1; border:1px solid #047adf; display:block; text-align:center; color:white; font-size:14px;line-height:30px;font-family:'微软雅黑';" />
+		</div>
+		</form>
+	</div>
+</div>
+<div region="south" split="true" border="false" style="background: #DFE8F6;"></div>
+</body>
+</html>

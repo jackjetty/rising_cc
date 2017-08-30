@@ -1,0 +1,305 @@
+<#assign contextPath=springMacroRequestContext.getContextPath() />
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<html>
+<head>
+    <base href="" />
+
+    <title>report.html</title>
+
+    <meta name="keywords" content="keyword1,keyword2,keyword3">
+    <meta name="description" content="this is my page">
+    <meta name="content-type" content="text/html; charset=UTF-8">
+
+    <link rel="stylesheet" href="${contextPath}/resources/css/default.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="${contextPath}/resources/js/jquery-easyui-1.4.2/themes/default/easyui.css" />
+    <link rel="stylesheet" type="text/css" href="${contextPath}/resources/js/jquery-easyui-1.4.2/themes/icon.css" />
+    <script type="text/javascript" src="${contextPath}/resources/js/jquery-1.7.2.min.js"></script>
+    <script type="text/javascript" src="${contextPath}/resources/js/jquery-easyui-1.4.2/jquery.easyui.min.js"></script>
+    <script type="text/javascript" src="${contextPath}/resources/common/My97DatePicker/WdatePicker.js"></script>
+    <script type="text/javascript" src="${contextPath}/resources/js/date-expand.js"></script>
+</head>
+
+<body class="easyui-layout">
+<div id="careRoadContentDiv" region="center" title="角色管理列表" border="false" style="overflow:hidden;">
+    <table id="list"></table>
+</div>
+
+<div id="jqueryToolbar" style="padding:5px;height:auto">
+    <div style="margin-top:5px; margin-left:10px; padding-bottom:8px; border-bottom:1px solid #ccc;">
+        <a href="javascript:;" class="easyui-linkbutton" iconCls="icon-add" onclick="toAdd()">新增</a>
+        <a href="javascript:;" class="easyui-linkbutton" iconCls="icon-edit" onclick="toUpdate()">修改</a>
+        <a href="javascript:;" class="easyui-linkbutton" iconCls="icon-edit" onclick="removeData()">删除</a>
+    </div>
+</div>
+<div id="dlg" class="easyui-dialog" title="编辑角色" closed="true" style="width:400px;height:200px;padding:10px"
+     data-options="
+                iconCls: 'icon-save',
+                buttons: '#dlg-buttons'
+            ">
+    <table>
+        <tr>
+            <td>角色名:</td>
+            <td><input class="easyui-validatebox" type="text" id="roleName" data-options=""></input></td>
+        </tr>
+        <tr>
+            <td>权限：</td>
+            <td> <select id="rolePerm" class="easyui-combotree" data-options="url:'${contextPath}/perm/perm_role',method:'get'" multiple style="width:200px;"></select></td>
+        </tr>
+    </table>
+</div>
+<div id="dlg-buttons">
+    <a href="javascript:void(0)" class="easyui-linkbutton" onclick="javascript:saveOrUpdate()">Save</a>
+    <a href="javascript:void(0)" class="easyui-linkbutton" onclick="javascript:$('#dlg').dialog('close')">Close</a>
+</div>
+
+<script type="text/javascript">
+    var roleId ="";
+    $(function(){
+        $('#list').datagrid({
+            nowrap: false,
+            striped: true,
+            fit: true,
+            fitColumns:true,
+            idField:'id',
+            singleSelect: true,
+            url:'${contextPath}/role/role_list',
+            columns:[[
+                {field:'id',title:'',hidden:true},
+                {field:'index',title:'序号', align:'center',width:50,formatter:function(value, rec, index){
+                    return index+1;
+                }},
+                {field:'roleName',title:'角色名', align:'center',width:60},
+
+            ]],
+            toolbar:'#jqueryToolbar',
+            pagination:true,
+            pageSize: 50,//每页显示的记录条数，默认为
+            pageList: [10,20,30,40,50],//可以设置每页记录条数的列表
+            onLoadSuccess:function(data){
+                $('#list').datagrid('clearSelections'); //清除掉列表选中记录
+                if(data.total==0){
+                    $('.datagrid-body-inner').eq(0).addClass("l_elist");
+                    //$('.datagrid-body').eq(1).append('<div class="r_elist">无数据</div>');
+                }else{
+                    $('.datagrid-body-inner').eq(0).removeClass("l_elist");
+                }
+            }
+        });
+
+        //设置分页控件
+        var p = $('#list').datagrid('getPager');
+        $(p).pagination({
+            beforePageText: '第',//页数文本框前显示的汉字
+            afterPageText: '页    共 {pages} 页',
+            displayMsg: '当前显示第 {from} 到 {to} 条记录   共 {total} 条记录'/*,
+             onBeforeRefresh:function(){
+             $(this).pagination('loading');
+             alert('before refresh');
+             $(this).pagination('loaded');
+             }*/
+        });
+
+
+    })
+
+    function saveOrUpdate(){
+        if(roleId != ""){
+            update();
+        }else{
+            add();
+        }
+    }
+
+    function toAdd(){
+        $("#roleName").val("");
+        $('#rolePerm').combotree('setValues', "");
+        $("#status").val("");
+        roleId = "";
+        $("#dlg").dialog('open');
+    }
+
+    function toUpdate(){
+        $("#roleName").val("");
+        $('#rolePerm').combotree('setValues', "");
+        $("#status").val("");
+
+        var row = $('#list').datagrid('getSelected');
+        if(row == null){
+            alert("请选择一条记录");
+            return
+        }
+        roleId = row.id;
+        var permIds;
+        $.ajax({
+            type: "post",
+            url: "${contextPath}/perm/find_role_perm",
+            dataType: "json",
+            data:{id:roleId},
+            async: false,
+            success: function(data){
+                permIds = data;
+            }
+        });
+        $('#rolePerm').combotree('setValues', permIds);
+        $("#roleName").val(row.roleName);
+        $("#status").val(row.status);
+        $("#dlg").dialog('open');
+    }
+    function update(){
+        var roleName  = $("#roleName").val();
+        if(!checkString(roleName,"角色名称",10)){
+            return
+        }
+        var status = $("#status").val();
+        $.ajax({
+            type: "post",
+            url: "${contextPath}/role/update_role",
+            dataType: "json",
+            contentType:"application/x-www-form-urlencoded; charset=utf-8",
+            data:{id:roleId,roleName:roleName},
+            async: false
+        });
+        var permIds = $('#rolePerm').combotree('getValues');
+        var permIdList = {};
+        for(var i=0;i<permIds.length;i++){
+            permIdList[i] = permIds[i];
+        }
+        $.ajax({
+            type: "post",
+            url: "${contextPath}/role/set_perm",
+            dataType: "json",
+            data:{permIds:permIds,roleId:roleId},
+            traditional: true,
+            async: false,
+            success: function(data){
+                alert(data);
+            }
+        });
+        $('#list').datagrid('reload');
+        $('#dlg').dialog('close');
+    }
+    function removeData(){
+        var row = $('#list').datagrid('getSelected');
+        if(row == null){
+            alert("请选择一条记录");
+            return
+        }
+        roleId = row.id;
+        $.messager.confirm('用户角色', '你确定要删除角色吗?', function(r){
+            if (r){
+                $.ajax({
+                    type: "post",
+                    url: "${contextPath}/role/remove_role",
+                    dataType: "json",
+                    data:{id:roleId},
+                    async: false
+                });
+                $('#list').datagrid('reload');
+            }
+        });
+
+    }
+
+    function add(){
+        var roleName  = $("#roleName").val();
+        if(!checkString(roleName,"角色名称",10)){
+            return
+        }
+        $.ajax({
+            type: "post",
+            url: "${contextPath}/role/save_role",
+            dataType: "json",
+            data:{roleName:roleName},
+            async: false,
+            success: function(data){
+                roleId = data;
+            }
+        });
+        var permIds = $('#rolePerm').combotree('getValues');
+        var permIdList = {};
+        for(var i=0;i<permIds.length;i++){
+            permIdList[i] = permIds[i];
+        }
+        $.ajax({
+            type: "post",
+            url: "${contextPath}/role/set_perm",
+            dataType: "json",
+            contentType:"application/x-www-form-urlencoded; charset=utf-8",
+            data:{permIds:permIds,roleId:roleId},
+            traditional: true,
+            async: false,
+            success: function(data){
+            }
+        });
+        roleId="";
+        $('#list').datagrid('reload');
+        $('#dlg').dialog('close');
+    }
+
+
+    function formatter1(date){
+        if (!date){return '';}
+        return $.fn.datebox.defaults.formatter.call(this, date);
+    }
+    function parser1(s){
+        if (!s){return null;}
+        return $.fn.datebox.defaults.parser.call(this, s);
+    }
+    function formatter2(date){
+        if (!date){return '';}
+        var y = date.getFullYear();
+        var m = date.getMonth() + 1;
+        return y + '-' + (m<10?('0'+m):m);
+    }
+    function parser2(s){
+        if (!s){return null;}
+        var ss = s.split('-');
+        var y = parseInt(ss[0],10);
+        var m = parseInt(ss[1],10);
+        if (!isNaN(y) && !isNaN(m)){
+            return new Date(y,m-1,1);
+        } else {
+            return new Date();
+        }
+    }
+    function checkString(str,message,length){
+        if(str == "" || str == null){
+            alert("请输入"+message);
+            return false;
+        }
+        if(length != null &&length != 0){
+            if(str.length > length){
+                alert(message +"长度超过"+length);
+                return false;
+            }
+        }
+        return true;
+    }
+    function checkNum(num,isNull,message,length)
+    {
+        if(isNull){
+            if(num == null || num == "undefined" || num == ''){
+                return true
+            }
+        }
+        var re = /^[0-9]+.?[0-9]*$/;   //判断字符串是否为数字     //判断正整数 /^[1-9]+[0-9]*]*$/
+
+        if (!re.test(num))
+        {
+            alert(message+"请输入数字");
+            return false;
+        }
+        if(length !=null && length != 0){
+            if(num.length>length){
+                alert(message+"长度不能超过"+length);
+                return false;
+            }
+        }
+        return true;
+    }
+</script>
+
+</body>
+</html>
+

@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.bhyf.dao.recharge.OneCardRecordDao">
+
+
+	<sql id="columnOneCardRecordByAll">
+		r.id,
+		r.staSID,
+		r.monDeal,
+		r.perCode,
+		r.dealTime
+	</sql>
+
+	<sql id = "whereConditionPagination">
+		<if test ="condition !=null">
+			<if test ="condition.tradeNo !=null and condition.tradeNo !=''">
+				and o.tradeNo = #{condition.tradeNo,jdbcType=VARCHAR}
+			</if>
+			<if test ="condition.cardNo !=null and condition.cardNo !=''">
+				and o.cardNo = #{condition.cardNo,jdbcType=VARCHAR}
+			</if>
+			<if test ="condition.beginTime !=null and condition.beginTime !=''">
+				and r.dealTime <![CDATA[>=]]> #{condition.beginTime,jdbcType=TIMESTAMP}
+			</if>
+			<if test ="condition.endTime !=null and condition.endTime !=''">
+				and r.dealTime <![CDATA[<=]]> #{condition.endTime,jdbcType=TIMESTAMP}
+			</if>
+		</if>
+	</sql>
+	<sql id = "whereConditionQo">
+			<if test ="tradeNo !=null and tradeNo !=''">
+				and o.tradeNo = #{tradeNo,jdbcType=VARCHAR}
+			</if>
+			<if test ="cardNo !=null and cardNo !=''">
+
+				and o.cardNo = #{cardNo,jdbcType=VARCHAR}
+			</if>
+			<if test ="beginTime !=null and beginTime !=''">
+				and r.dealTime <![CDATA[>=]]> #{beginTime,jdbcType=TIMESTAMP}
+			</if>
+			<if test ="endTime !=null and endTime !=''">
+				and r.dealTime <![CDATA[<=]]> #{endTime,jdbcType=TIMESTAMP}
+			</if>
+	</sql>
+
+	<select id="findOneCardRecordBystaSID" parameterType="String" resultType="OneCardRecord">
+		select
+		<include refid="columnOneCardRecordByAll"/>
+		from t_one_card_record r
+		where r.staSID = #{staSID,jdbcType=VARCHAR}
+	</select>
+	<select id="findOneCardRecordByQo" parameterType="com.bhyf.pojo.qo.recharge.OneCardRecordQo" resultType="OneCardRecord">
+		select
+		<include refid="columnOneCardRecordByAll"/>
+		from t_one_card_record r
+			,t_one_card_recharge_record o
+		where r.staSID = o.serialNo
+		<include refid="whereConditionQo"/>
+	</select>
+	<select id="findOneCardRecordByPagination" parameterType="Pagination" resultType="OneCardRecord">
+		select
+		<include refid="columnOneCardRecordByAll"/>
+		from t_one_card_record r
+			,t_one_card_recharge_record o
+		where r.staSID = o.serialNo
+		<include refid="whereConditionPagination"/>
+	</select>
+	<select id="countOneCardRecordByPagination" parameterType="Pagination" resultType="Integer">
+		select
+		count(1)
+		from t_one_card_record r
+		,t_one_card_recharge_record o
+		where  r.staSID = o.serialNo
+		<include refid="whereConditionPagination"/>
+	</select>
+
+	<insert id = "saveOneCardRecordBatch" parameterType="java.util.List">
+		insert into t_one_card_record(staSID, monDeal, perCode,dealTime)
+		values
+		<foreach collection="list" item="OneCardRecord" index="index" separator="," >
+			(
+			#{OneCardRecord.staSID},
+			#{OneCardRecord.monDeal},
+			#{OneCardRecord.perCode},
+			#{OneCardRecord.dealTime}
+			)
+		</foreach>
+	</insert>
+	<insert id = "saveOneCardRecord" parameterType="OneCardRecord">
+		insert into t_one_card_record(staSID, monDeal, perCode,dealTime)
+		values
+			(
+			#{staSID},
+			#{monDeal},
+			#{perCode},
+			#{dealTime}
+			)
+	</insert>
+
+</mapper>

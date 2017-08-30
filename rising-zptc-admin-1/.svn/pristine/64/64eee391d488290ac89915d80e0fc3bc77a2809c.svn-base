@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.bhyf.dao.enter.EnterRecordDao">
+
+	<resultMap type="EnterRecord" id="enterRecordMap">
+		<result property="enter.id" column="enterId"/>
+		<result property="enter.enterExamName" column="enterExamName"/>
+		<result property="enter.enterExamNum" column="enterExamNum"/>
+		<result property="enter.enterCategory" column="enterCategory"/>
+		<result property="enter.userCategory" column="userCategory"/>
+		<result property="enter.beginTime" column="beginTime"/>
+		<result property="enter.endTime" column="endTime"/>
+		<result property="enter.decscription" column="decscription"/>
+		<result property="enter.enterNum" column="enterNum"/>
+		<result property="enter.enterSumNum" column="enterSumNum"/>
+		<result property="enter.enterPlace" column="enterPlace"/>
+		<result property="enter.enterMoney" column="enterMoney"/>
+		<result property="enter.status" column="enterStatus"/>
+
+		<result property="tradeNo" column="tradeNo"/>
+		<result property="id" column="id"/>
+		<result property="userName" column="userName"/>
+		<result property="enterExamName" column="examName"/>
+		<result property="idNum" column="idNum"/>
+		<result property="mobile" column="mobile"/>
+		<result property="studNo" column="studNo"/>
+		<result property="other1" column="other1"/>
+		<result property="other2" column="other2"/>
+		<result property="remark" column="remark"/>
+		<result property="sex" column="sex"/>
+		<result property="status" column="status"/>
+		<result property="enterTime" column="enterTime"/>
+		<result property="userId" column="userId"/>
+	</resultMap>
+
+	<sql id="columnEnterRecordAndEnterByAll">
+		e.id as enterId,
+		e.enterExamName,
+		e.enterExamNum,
+		e.enterCategory,
+		e.userCategory,
+		e.beginTime,
+		e.endTime,
+		e.decscription,
+		e.enterNum,
+		e.enterSumNum,
+		e.enterPlace,
+		e.enterMoney,
+		e.status as enterStatus,
+		er.id,
+		er.tradeNo,
+		er.enterExamName as examName,
+		er.userName,
+		er.idNum,
+		er.mobile,
+		er.studNo,
+		er.other1,
+		er.other2,
+		er.remark,
+		er.sex,
+		er.status,
+		er.enterTime,
+		er.userId
+	</sql>
+
+	<sql id = "whereConditionPagination">
+		<if test ="condition !=null">
+			<if test ="condition.enterExamName !=null and condition.enterExamName !=''">
+				and enterExamName = #{condition.enterExamName,jdbcType=VARCHAR}
+			</if>
+			<if test ="condition.userName !=null and condition.userName !=''">
+				and userName = #{condition.userName,jdbcType=VARCHAR}
+			</if>
+			<if test ="condition.idNum !=null and condition.idNum !=''">
+				and idNum = #{condition.idNum,jdbcType=VARCHAR}
+			</if>
+			<if test ="condition.beginTime !=null and condition.beginTime !=''">
+				and enterTime <![CDATA[>=]]> #{condition.beginTime,jdbcType=TIMESTAMP}
+			</if>
+			<if test ="condition.endTime !=null and condition.endTime !=''">
+				and enterTime <![CDATA[<=]]> #{condition.endTime,jdbcType=TIMESTAMP}
+			</if>
+		</if>
+	</sql>
+	<sql id = "whereConditionQo">
+			<if test ="enterExamName !=null and enterExamName !=''">
+				and enterExamName = #{enterExamName,jdbcType=VARCHAR}
+			</if>
+			<if test ="enterId !=null ">
+				and enterId = #{enterId,jdbcType=INTEGER}
+			</if>
+			<if test ="userName !=null and userName !=''">
+				and userName = #{userName,jdbcType=VARCHAR}
+			</if>
+			<if test ="idNum !=null and idNum !=''">
+				and idNum = #{idNum,jdbcType=VARCHAR}
+			</if>
+			<if test ="beginTime !=null and beginTime !=''">
+				and enterTime <![CDATA[>=]]> #{beginTime,jdbcType=TIMESTAMP}
+			</if>
+			<if test ="endTime !=null and endTime !=''">
+				and enterTime <![CDATA[<=]]> #{endTime,jdbcType=TIMESTAMP}
+			</if>
+	</sql>
+
+	<select id="findEnterRecordByPagination" parameterType="Pagination" resultMap="enterRecordMap">
+		select * from (
+		select 
+		<include refid="columnEnterRecordAndEnterByAll"/>
+		from t_enter e,t_enter_record er
+		where e.id = er.enterId
+		<include refid="whereConditionPagination"/>
+		) t limit
+		<![CDATA[
+				#{startIndex} ,#{pageSize}
+			]]>
+	</select>
+	<select id="findEnterRecordByQo" parameterType="com.bhyf.pojo.qo.enter.EnterRecordQo" resultMap="enterRecordMap">
+		select
+		<include refid="columnEnterRecordAndEnterByAll"/>
+		from t_enter e,t_enter_record er
+		where e.id = er.enterId
+		<include refid="whereConditionQo"/>
+	</select>
+	<select id="findEnterRecordById" parameterType="Integer" resultMap="enterRecordMap">
+		select
+		<include refid="columnEnterRecordAndEnterByAll"/>
+		from t_enter e,t_enter_record er
+		where e.id = er.enterId
+		and er.id = #{id,jdbcType=INTEGER}
+	</select>
+	<select id="countEnterRecordByPagination" parameterType="Pagination" resultType="Integer">
+		select
+		count(1)
+		from t_enter e,t_enter_record er
+		where e.id = er.enterId
+		<include refid="whereConditionPagination"/>
+	</select>
+
+
+</mapper>

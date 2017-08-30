@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+	   xmlns:task="http://www.springframework.org/schema/task"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+			http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+			http://www.springframework.org/schema/context
+			http://www.springframework.org/schema/context/spring-context-3.0.xsd
+			http://www.springframework.org/schema/task
+			http://www.springframework.org/schema/task/spring-task-3.0.xsd">
+
+	<!-- 读取properties文件读远程 -->
+	<bean id="propertyConfigurer" class="com.rising.common.component.RemotePropertyConfigurer" >
+		<!--
+			1	开发环境	ENV_TYPE_DEVELOP
+			2	开发测试环境	ENV_TYPE_DEVELOP_TEST
+			3	测试环境	ENV_TYPE_TEST
+			4	预生产环境	ENV_TYPE_PREVIEW
+			5	生产环境	ENV_TYPE_FORMAL
+			6	扩展环境	ENV_TYPE_OTHER
+		 -->
+		<property name="remoteUrl" value="http://121.40.149.140:9999/rising-cc/read/prop" />
+		<property name="envirCode" value="ENV_TYPE_DEVELOP" />
+		<property name="projectCode" value="RISING_ZPTC_PLATFORM" />
+		<property name="enginCode" value="RISING_ZPTC_ADMIN" />
+		<property name="loadConfigTimeOut" value="10000" />
+	</bean>
+
+	<task:executor id="executor" pool-size="5" />
+	<task:scheduler id="scheduler" pool-size="10" />
+	<task:annotation-driven executor="executor" scheduler="scheduler" />
+
+	<!-- 扫描注解配置 -->
+	<context:component-scan base-package="com.bhyf" >
+		<context:exclude-filter type="annotation" expression="org.springframework.stereotype.Controller"/>
+	</context:component-scan> 
+	
+	<import resource="classpath:spring-shiro-config.xml"/>
+	<import resource="classpath:spring-mybatis.xml"/>
+	<!-- <import resource="classpath:spring-mail.xml"/>   -->
+
+</beans>

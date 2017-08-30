@@ -1,0 +1,164 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.bhyf.dao.vip.UserInfoDao">
+
+
+	<sql id="columnUserInfoByAll">
+		u.id,
+		u.userName,
+		u.userPwd,
+		u.userType,
+		u.userSex,
+		u.realName,
+		u.idNum,
+		u.mobile,
+		u.jobNo,
+		u.registerTime,
+		date_format(u.registerTime, '%Y-%m-%d %H:%i:%s') as registerTime1,
+		u.updateTime,
+		date_format(u.updateTime, '%Y-%m-%d %H:%i:%s') as updateTime1
+	</sql>
+
+	<select id="getUserInfoList" resultType="com.bhyf.pojo.vip.UserInfo" parameterType="java.util.HashMap">
+		SELECT <include refid="columnUserInfoByAll"/> from t_user_info u
+		<where>
+    		<if test="mobile != null and mobile != ''">
+    			and u.mobile = #{mobile}
+    		</if>
+    		<if test="userName != null and userName != ''">
+    			and u.realName LIKE CONCAT('%',#{userName},'%')
+    		</if>
+    		<if test="userType != null and userType != ''">
+    			and u.userType = #{userType}
+    		</if>
+    		<if test="startTime != null and startTime != ''">
+    			<![CDATA[
+    				and u.registerTime >= str_to_date(concat(#{startTime},' 00:00:00'), '%Y-%m-%d %H:%i:%s')
+    			]]>
+    		</if>
+    		<if test="endTime != null and endTime != ''">
+    			<![CDATA[
+    				and u.registerTime <= str_to_date(concat(#{endTime},' 23:59:59'), '%Y-%m-%d %H:%i:%s')
+    			]]>
+    		</if>
+    		<if test="jobNo != null and jobNo != ''">
+    			and u.jobNo = #{jobNo}
+    		</if>
+   		</where>
+   		ORDER BY u.registerTime desc limit #{start},#{pageSize}
+	</select>
+	
+	<select id="getUserInfoList1" resultType="com.bhyf.pojo.vip.UserInfo" parameterType="java.util.HashMap">
+		SELECT <include refid="columnUserInfoByAll"/> from t_user_info u
+		<where>
+    		<if test="mobile != null and mobile != ''">
+    			and u.mobile = #{mobile}
+    		</if>
+    		<if test="userName != null and userName != ''">
+    			and u.realName LIKE CONCAT('%',#{userName},'%')
+    		</if>
+    		<if test="userType != null and userType != ''">
+    			and u.userType = #{userType}
+    		</if>
+    		<if test="startTime != null and startTime != ''">
+    			<![CDATA[
+    				and u.registerTime >= str_to_date(concat(#{startTime},' 00:00:00'), '%Y-%m-%d %H:%i:%s')
+    			]]>
+    		</if>
+    		<if test="endTime != null and endTime != ''">
+    			<![CDATA[
+    				and u.registerTime <= str_to_date(concat(#{endTime},' 23:59:59'), '%Y-%m-%d %H:%i:%s')
+    			]]>
+    		</if>
+    		<if test="jobNo != null and jobNo != ''">
+    			and u.jobNo = #{jobNo}
+    		</if>
+   		</where>
+   		ORDER BY u.registerTime desc
+	</select>
+	
+	<select id="getUserInfoCount" resultType="java.lang.Integer" parameterType="java.util.HashMap">
+		select COUNT(*) from t_user_info u
+		<where>
+    		<if test="mobile != null and mobile != ''">
+    			and u.mobile = #{mobile}
+    		</if>
+    		<if test="userName != null and userName != ''">
+    			and u.realName LIKE CONCAT('%',#{userName},'%')
+    		</if>
+    		<if test="userType != null and userType != ''">
+    			and u.userType = #{userType}
+    		</if>
+    		<if test="startTime != null and startTime != ''">
+    			<![CDATA[
+    				and u.registerTime >= str_to_date(concat(#{startTime},' 00:00:00'), '%Y-%m-%d %H:%i:%s')
+    			]]>
+    		</if>
+    		<if test="endTime != null and endTime != ''">
+    			<![CDATA[
+    				and u.registerTime <= str_to_date(concat(#{endTime},' 23:59:59'), '%Y-%m-%d %H:%i:%s')
+    			]]>
+    		</if>
+    		<if test="jobNo != null and jobNo != ''">
+    			and u.jobNo = #{jobNo}
+    		</if>
+   		</where>
+	</select>
+	
+	<select id="findUserInfoByUserId" parameterType="int" resultType="com.bhyf.pojo.vip.UserInfo">
+		select 
+		<include refid="columnUserInfoByAll"/>
+		from t_user_info u where u.id = #{userId,jdbcType=INTEGER}
+	</select>
+	
+	<update id="updateUserInfoById" parameterType="UserInfo">
+		update t_user_info 
+		<set>
+			<if test="userName != null and userName !='' ">
+				userName = #{userName,jdbcType=VARCHAR},
+			</if>
+			<if test="userPwd != null and userPwd !='' ">
+				userPwd = #{userPwd,jdbcType=VARCHAR},
+			</if>
+			<if test="userType != null">
+				userType = #{userType,jdbcType=INTEGER},
+			</if>
+			<if test="userSex != null">
+				userSex = #{userSex,jdbcType=INTEGER},
+			</if>
+			<if test="realName != null and realName !='' ">
+				realName = #{realName,jdbcType=VARCHAR},
+			</if>
+			<if test="idNum != null and idNum !='' ">
+				idNum = #{idNum,jdbcType=VARCHAR},
+			</if>
+			<if test="mobile != null and mobile !='' ">
+				mobile = #{mobile,jdbcType=VARCHAR},
+			</if>
+			<if test="jobNo != null and jobNo !='' ">
+				jobNo = #{jobNo,jdbcType=VARCHAR},
+			</if>
+			<if test="updateTime != null">
+				updateTime = #{updateTime,jdbcType=TIMESTAMP},
+			</if>
+		</set>
+		where id = #{id,jdbcType=INTEGER}
+	</update>
+	
+	<update id="updateBatchUserPwd" parameterType="List">
+		update t_user_info 
+		<set>
+			userPwd = case id 
+			<foreach collection="list" item="item" index="index" open="" separator=""  close="">
+		        when  #{item.id,jdbcType=INTEGER} THEN  #{item.userPwd,jdbcType=VARCHAR}
+		    </foreach> else null end
+        </set>
+		where id in 
+		<foreach collection="list" item="item" index="index" open="(" separator=","  close=")">
+	        #{item.id,jdbcType=INTEGER}
+	    </foreach>  
+	</update>
+	
+</mapper>

@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.bhyf.dao.recharge.RechargeOneCardRecordDao">
+
+
+	<sql id="columnRechargeOneCardRecordByAll">
+		id,
+		tradeNo,
+		payMobile,
+		cardNo,
+		rechMoney,
+		payMoney,
+		status,
+		rechTime,
+		rechUserId,
+		tranSeq,
+		cardHolder,
+		tranDate
+	</sql>
+
+	<sql id = "whereConditionPagination">
+		<if test ="condition !=null">
+			<if test ="condition.tradeNo !=null and condition.tradeNo !=''">
+				and tradeNo = #{condition.tradeNo,jdbcType=VARCHAR}
+			</if>
+			<if test ="condition.payMobile !=null and condition.payMobile !=''">
+				and payMobile = #{condition.payMobile,jdbcType=VARCHAR}
+			</if>
+			<if test ="condition.cardNo !=null and condition.cardNo !=''">
+				and cardNo = #{condition.cardNo,jdbcType=VARCHAR}
+			</if>
+			<if test ="condition.status !=null">
+				and status = #{condition.status,jdbcType=INTEGER}
+			</if>
+			<if test ="condition.rechUserId !=null">
+				and rechUserId = #{condition.rechUserId,jdbcType=INTEGER}
+			</if>
+			<if test ="condition.cardHolder !=null and condition.cardHolder !=''">
+				and cardHolder = #{condition.cardHolder,jdbcType=INTEGER}
+			</if>
+			<if test ="condition.rechMoney !=null">
+				and rechMoney = #{condition.rechMoney,jdbcType=DOUBLE}
+			</if>
+			<if test ="condition.beginTime !=null and condition.beginTime !=''">
+				and rechTime <![CDATA[>=]]> #{condition.beginTime,jdbcType=TIMESTAMP}
+			</if>
+			<if test ="condition.endTime !=null and condition.endTime !=''">
+				and rechTime <![CDATA[<=]]> #{condition.endTime,jdbcType=TIMESTAMP}
+			</if>
+		</if>
+	</sql>
+	<sql id = "whereConditionQo">
+		<if test =" id !=null ">
+			and id = #{ id,jdbcType=INTEGER}
+		</if>
+		<if test =" tradeNo !=null and  tradeNo !=''">
+			and tradeNo = #{ tradeNo,jdbcType=VARCHAR}
+		</if>
+		<if test ="payMobile !=null and payMobile !=''">
+			and payMobile = #{payMobile,jdbcType=VARCHAR}
+		</if>
+		<if test ="cardNo !=null and cardNo !=''">
+			and cardNo = #{cardNo,jdbcType=VARCHAR}
+		</if>
+		<if test ="status !=null">
+			and status = #{status,jdbcType=INTEGER}
+		</if>
+		<if test ="rechUserId !=null">
+			and rechUserId = #{rechUserId,jdbcType=INTEGER}
+		</if>
+		<if test ="cardHolder !=null and cardHolder !=''">
+			and cardHolder = #{cardHolder,jdbcType=INTEGER}
+		</if>
+		<if test ="rechMoney !=null">
+			and rechMoney = #{rechMoney,jdbcType=DOUBLE}
+		</if>
+		<if test ="beginTime !=null and beginTime !=''">
+			and rechTime <![CDATA[>=]]> #{beginTime,jdbcType=TIMESTAMP}
+		</if>
+		<if test ="endTime !=null and endTime !=''">
+			and rechTime <![CDATA[<=]]> #{endTime,jdbcType=TIMESTAMP}
+		</if>
+	</sql>
+
+
+	<select id="findRechargeOneCardRecordByPagination" parameterType="Pagination" resultType="RechargeOneCardRecord">
+		select * from (
+		select
+		<include refid="columnRechargeOneCardRecordByAll"/>
+		from t_one_card_recharge_record r
+		where 1=1
+		<include refid="whereConditionPagination"/>
+		) t limit
+		<![CDATA[
+				#{startIndex} ,#{pageSize}
+			]]>
+	</select>
+	<select id="countRechargeOneCardRecordByPagination" parameterType="Pagination" resultType="Integer">
+		select count(1)
+		from t_one_card_recharge_record r
+		where 1=1
+		<include refid="whereConditionPagination"/>
+	</select>
+	<select id="findRechargeOneCardRecordByQo" parameterType="com.bhyf.pojo.qo.recharge.RechargeOneCardRecordQo" resultType="RechargeOneCardRecord">
+		select
+		<include refid="columnRechargeOneCardRecordByAll"/>
+		from t_one_card_recharge_record r
+		where 1=1
+		<include refid="whereConditionQo"/>
+	</select>
+
+</mapper>

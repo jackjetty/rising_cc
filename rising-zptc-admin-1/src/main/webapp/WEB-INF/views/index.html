@@ -1,0 +1,178 @@
+<#assign contextPath=springMacroRequestContext.getContextPath() />
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head id="Head1">
+	<base href="${basePath}" />
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>浙江邮电职业技术学院管理平台</title>
+    <link href="${contextPath}/resources/css/default.css" rel="stylesheet" type="text/css" />
+
+    <link rel="stylesheet" type="text/css" href="${contextPath}/resources/js/jquery-easyui-1.4.2/themes/default/easyui.css" />
+    <link rel="stylesheet" type="text/css" href="${contextPath}/resources/js/jquery-easyui-1.4.2/themes/icon.css" />
+	<script>
+		var contextPath = "${contextPath}";
+	</script>
+    <script type="text/javascript" src="${contextPath}/resources/js/jquery-1.7.2.min.js"></script>
+    <script type="text/javascript" src="${contextPath}/resources/js/jquery-easyui-1.4.2/jquery.easyui.min.js"></script>
+	<script type="text/javascript" src='${contextPath}/resources/js/menu.js'> </script>
+	<script src="${contextPath}/resources/js/encrypt/md5/md5-min.js" type="text/javascript"></script>
+</head>
+<body class="easyui-layout" style="overflow-y: hidden"  fit="true"   scroll="no">
+	<noscript>
+		<div style=" position:absolute; z-index:100000; height:2046px;top:0px;left:0px; width:100%; background:white; text-align:center;">
+		    <img src="${contextPath}/resources/images/noscript.gif" alt='抱歉，请开启脚本支持！' />
+		</div>
+	</noscript>
+
+	<div id="loading-mask" style="position:absolute;top:0px; left:0px; width:100%; height:100%; background:#D2E0F2; z-index:20000">
+	<div id="pageloading" style="position:absolute; top:50%; left:50%; margin:-120px 0px 0px -120px; text-align:center;  border:2px solid #8DB2E3; width:200px; height:40px;  font-size:14px;padding:10px; font-weight:bold; background:#fff; color:#15428B;"> 
+    	<img src="${contextPath}/resources/images/loading.gif" align="absmiddle" /> 正在加载中,请稍候...</div>
+	</div>
+
+	<!-- 头部修改密码begin -->
+    <div region="north" split="true" border="false" style="overflow: hidden; height: 30px;
+        background: url(${contextPath}/resources/images/layout-browser-hd-bg.gif) #7f99be repeat-x center 50%;
+        line-height: 20px;color: #fff; font-family: Verdana, 微软雅黑,黑体">
+        <span style="float:right; padding-right:20px;" class="head">欢迎 ${(_SESSION_USER_.userName)!'您'}
+         	&nbsp;<!--  <a href="#" id="editpass">修改密码</a>  -->
+         	<input id="_user_name" type="hidden" value="${(_SESSION_USER_.userName)!''}" />
+        <a href="javascript:void(0)" onclick="toUpdatePwd()" >修改密码</a>
+        <a href="${contextPath}/logout" >安全退出</a></span>
+        <span style="padding-left:10px; font-size: 16px; "><img src="${contextPath}/resources/images/blocks.gif" width="20" height="20" align="absmiddle" />浙江邮电职业技术学院管理平台服务</span>
+    </div>
+    <!-- 头部修改密码end -->
+    
+    <!-- 底部 begin-->
+    <!-- 
+    <div region="south" split="true" style="height: 30px; background: #D2E0F2; ">
+        <div class="footer">By dzl</div>
+    </div>
+     -->
+    <!-- 底部 end-->
+    <!--  导航内容 begin-->
+    <div region="west" split="true"  title="管理平台服务" style="width:180px;" id="west">
+		<div id="nav"></div>
+    </div>
+    <!--  导航内容 end-->
+    
+    <!-- 主页 -->
+    <div id="mainPanle" region="center" style="background: #eee; overflow-y:hidden">
+        <div id="tabs" class="easyui-tabs"  fit="true" border="false" >
+			<div title="欢迎使用" style="padding:20px;overflow:hidden;" >
+				欢迎使用!
+				<!--
+				<iframe scrolling="auto" frameborder="0"  src="http://localhost:8888/bhyf-manage/test/showTestInfo/1.htmls" style="width:100%;height:100%;"></iframe>
+				-->
+				 <!--
+				 <table id="tt" class="easyui-datagrid" style="width:600px;height:250px"
+					url="resource/datagrid_data.json"
+					title="Load Data" iconCls="icon-save" fitColumns="true">
+					<thead>
+						<tr>
+							<th field="itemid" width="80">Item ID</th>
+							<th field="productid" width="80">Product ID</th>
+							<th field="listprice" width="80" align="right">List Price</th>
+							<th field="unitcost" width="80" align="right">Unit Cost</th>
+							<th field="attr1" width="150">Attribute</th>
+							<th field="status" width="60" align="center">Stauts</th>
+						</tr>
+					</thead>
+				</table>
+				 -->
+			</div>
+		</div>
+    </div>
+
+
+
+	<div id="mm" class="easyui-menu" style="width:150px;">
+		<div id="refresh">刷新</div>
+		<div class="menu-sep"></div>
+		<div id="close">关闭</div>
+		<div id="closeall">全部关闭</div>
+		<div id="closeother">除此之外全部关闭</div>
+		<div id="closeright">当前页右侧全部关闭</div>
+		<div id="closeleft">当前页左侧全部关闭</div>
+		<div class="menu-sep"></div>
+		<div id="exit">退出</div>
+	</div>
+
+	<div id="edit-dialog" class="easyui-dialog" title="修改密码"
+		 data-options="iconCls:'icon-save',closed:true"
+		 style="padding: 20px;">
+		<div id="div2" align="center" >
+			<table align="center" cellspacing="0" >
+				<tr style="height: 35px;">
+					<td style="width: 100px; text-align: right;  background-color: #EDEDED;">原密码:</td>
+					<td style="width: 100px; text-align: left;  border-left: 0px;"><input type="password" id="oldPwd" style="width:100px; height:20px;" /></td></td>
+					<td style="width: 70px; text-align: left;  border-left: 0px;"><font color="red">&nbsp;*&nbsp;必填</font></td>
+				</tr>
+				<tr style="height: 35px;">
+					<td style="width: 100px; text-align: right;  background-color: #EDEDED;">新密码:</td>
+					<td style="width: 100px; text-align: left;  border-left: 0px;"><input type="password" id="newPwd" style="width:100px; height:20px;" /></td></td>
+					<td style="width: 70px; text-align: left;  border-left: 0px;"><font color="red">&nbsp;*&nbsp;必填</font></td>
+				</tr>
+				<tr style="height: 35px;">
+					<td style="width: 100px; text-align: right;  background-color: #EDEDED;">重复新密码:</td>
+					<td style="width: 100px; text-align: left;  border-left: 0px;"><input type="password" id="test" style="width:100px; height:20px;" /></td></td>
+					<td style="width: 70px; text-align: left;  border-left: 0px;"><font color="red">&nbsp;*&nbsp;必填</font></td>
+				</tr>
+			</table>
+		</div>
+		<div align="center" style = "margin-top:10px;">
+			<input type="button" value="修改" onclick="updatePwd()"  style="width:100px;background-color:#4691d1; border:1px solid #047adf; display:block; text-align:center; color:white; font-size:14px;line-height:30px;font-family:'微软雅黑';"/>
+		</div>
+	</div>
+</body>
+<script>
+	function checkString(str,message,length){
+		if(str == "" || str == null){
+			alert("请输入"+message);
+			return false;
+		}
+		if(length != null &&length != 0){
+			if(str.length > length){
+				alert(message +"长度超过"+length);
+				return false;
+			}
+		}
+		return true;
+	}
+
+	function toUpdatePwd(){
+		$("#oldPwd").val("");
+		$("#newPwd").val("");
+		$("#test").val("");
+		$("#edit-dialog").dialog("open");
+	}
+	function updatePwd(){
+		var oldPwd =$("#oldPwd").val();
+		if(!checkString(oldPwd,"原密码",36)){
+			return
+		}
+		var newPwd =$("#newPwd").val();
+		if(!checkString(newPwd,"新密码",36)){
+			return
+		}
+		var test =$("#test").val();
+		if(test != newPwd){
+			alert("重复密码错误");
+			return
+		}
+		$.ajax({
+			url : "${contextPath}/user/update_pwd",
+			data : {userId:"${(_SESSION_USER_.id)!''}",oldPwd:hex_md5(oldPwd),newPwd:hex_md5(newPwd)},
+			dataType : "json",
+			type : "post",
+			success : function(data) {
+				alert(data);
+				$("#edit-dialog").dialog("close");
+			},
+			error : function(data) {
+				alert("error 后台出现错误！");
+			}
+		});
+	}
+
+</script>
+</html>

@@ -1,0 +1,390 @@
+<#assign contextPath=springMacroRequestContext.getContextPath() />
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<html>
+<head>
+    <base href="" />
+
+    <title>report.html</title>
+
+    <meta name="keywords" content="keyword1,keyword2,keyword3">
+    <meta name="description" content="this is my page">
+    <meta name="content-type" content="text/html; charset=UTF-8">
+
+    <link rel="stylesheet" href="${contextPath}/resources/css/default.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="${contextPath}/resources/js/jquery-easyui-1.4.2/themes/default/easyui.css" />
+    <link rel="stylesheet" type="text/css" href="${contextPath}/resources/js/jquery-easyui-1.4.2/themes/icon.css" />
+    <script type="text/javascript" src="${contextPath}/resources/js/jquery-1.7.2.min.js"></script>
+    <script type="text/javascript" src="${contextPath}/resources/js/jquery-easyui-1.4.2/jquery.easyui.min.js"></script>
+    <script type="text/javascript" src="${contextPath}/resources/common/My97DatePicker/WdatePicker.js"></script>
+    <script type="text/javascript" src="${contextPath}/resources/js/date-expand.js"></script>
+</head>
+
+<body class="easyui-layout">
+<div id="careRoadContentDiv" region="center" title="用户列表" border="false" style="overflow:hidden;">
+    <table id="list"></table>
+</div>
+
+<div id="jqueryToolbar" style="padding:5px;height:auto">
+    <div style="margin-top:5px; margin-left:10px; padding-bottom:8px; border-bottom:1px solid #ccc;">
+        <a href="javascript:;" class="easyui-linkbutton" iconCls="icon-add" onclick="toSave()">新增</a>
+        <a href="javascript:;" class="easyui-linkbutton" iconCls="icon-edit" onclick="toUpdate()">修改</a>
+        <a href="javascript:;" class="easyui-linkbutton" iconCls="icon-edit" onclick="removeData()">删除</a>
+        <a href="javascript:;" class="easyui-linkbutton" iconCls="icon-edit" onclick="toUpdateRole()">修改角色</a>
+        <a href="javascript:;" class="easyui-linkbutton" iconCls="icon-edit" onclick="initPwd()">初始化密码</a>
+    </div>
+</div>
+<div id="dlg" class="easyui-dialog" title="编辑用户" closed="true" style="width:400px;height:400px;padding:10px"
+     data-options="
+                iconCls: 'icon-save',
+                buttons: '#dlg-buttons'
+            ">
+    <table>
+        <tr>
+            <td>用户名:</td>
+            <td><input class="easyui-validatebox" type="text" id="userName" data-options=""></input></td>
+        </tr>
+        <tr>
+            <td>真实姓名:</td>
+            <td><input class="easyui-validatebox" type="text" id="realName" data-options=""></input></td>
+        </tr>
+        <tr>
+            <td>邮箱:</td>
+            <td><input class="easyui-validatebox" type="text" id="email" data-options=""></input></td>
+        </tr>
+        <tr>
+            <td>电话:</td>
+            <td><input class="easyui-validatebox" type="text" id="telephone" data-options=""></input></td>
+        </tr>
+        <tr>
+            <td>状态:</td>
+            <td>
+                <select class="easyui-combobox" id="status" style="width:142px;" panelHeight="80">
+                    <option selected="selected" value="1">启用</option>
+                    <option value="0">禁用</option>
+                </select>
+            </td>
+        </tr>
+    </table>
+</div>
+<div id="dlg-buttons">
+    <a href="javascript:void(0)" class="easyui-linkbutton" onclick="javascript:saveOrUpdate()">Save</a>
+    <a href="javascript:void(0)" class="easyui-linkbutton" onclick="javascript:$('#dlg').dialog('close')">Close</a>
+</div>
+<div id="dlg_role" class="easyui-dialog" title="设置角色" closed="true" style="width:200px;height:300px;padding:10px"
+     data-options="
+                iconCls: 'icon-save',
+                buttons: '#dlg_role_buttons'
+            ">
+    <table>
+        <#list roleList as role>
+            <tr>
+            <input type="checkbox" name="roles" id="roleId_${role.id}"  value = '${role.id}'>${role.roleName}</div>
+            </tr>
+        </#list>
+    </table>
+</div>
+<div id="dlg_role_buttons">
+    <a href="javascript:void(0)" class="easyui-linkbutton" onclick="javascript:updateRole()">Save</a>
+    <a href="javascript:void(0)" class="easyui-linkbutton" onclick="javascript:$('#dlg_role').dialog('close')">Close</a>
+</div>
+<script type="text/javascript">
+    var userId = "";
+    $(function(){
+
+        $('#list').datagrid({
+            nowrap: false,
+            striped: true,
+            fit: true,
+            fitColumns:true,
+            idField:'id',
+            singleSelect: true,
+            url:'${contextPath}/user/user_list',
+            columns:[[
+                {field:'id',title:'',hidden:true},
+                {field:'index',title:'序号', align:'center',width:50,formatter:function(value, rec, index){
+                    return index+1;
+                }},
+                {field:'userName',title:'用户名', align:'center',width:60},
+                {field:'realName',title:'姓名', align:'center',width:100},
+                {field:'email',title:'邮箱', align:'center',width:200},
+                {field:'telephone',title:'手机号码', align:'center',width:100},
+                {field:'status',title:'用户状态', align:'center',width:100, formatter:function(value, rec, index){
+                    switch(value){
+                        case 1 : return "启用";
+                            break;
+                        case 0 : return "禁用";
+                            break;
+                        default: return "";
+                    }
+                }},
+
+                {field:'rolesStr',title:'角色', align:'center',width:150}
+
+            ]],
+            toolbar:'#jqueryToolbar',
+            pagination:true,
+            pageSize: 50,//每页显示的记录条数，默认为
+            pageList: [10,20,30,40,50],//可以设置每页记录条数的列表
+            onLoadSuccess:function(data){
+                $('#list').datagrid('clearSelections'); //清除掉列表选中记录
+                if(data.total==0){
+                    $('.datagrid-body-inner').eq(0).addClass("l_elist");
+                    //$('.datagrid-body').eq(1).append('<div class="r_elist">无数据</div>');
+                }else{
+                    $('.datagrid-body-inner').eq(0).removeClass("l_elist");
+                }
+            }
+        });
+
+        //设置分页控件
+        var p = $('#list').datagrid('getPager');
+        $(p).pagination({
+            beforePageText: '第',//页数文本框前显示的汉字
+            afterPageText: '页    共 {pages} 页',
+            displayMsg: '当前显示第 {from} 到 {to} 条记录   共 {total} 条记录'/*,
+             onBeforeRefresh:function(){
+             $(this).pagination('loading');
+             alert('before refresh');
+             $(this).pagination('loaded');
+             }*/
+        });
+
+
+    })
+
+    function initPwd() {
+        var row = $('#list').datagrid('getSelected');
+        if(row == null){
+            alert("请选择一条记录");
+            return
+        }
+        else{
+            if(window.confirm("确认初始化密码？")){
+                $.ajax({
+                    url : "${contextPath}/user/reset_pwd",
+                    data : "id="+ row.id,
+                    dataType : "json",
+                    type : "post",
+                    success : function(data) {
+                        alert(data);
+                    },
+                    error : function(data) {
+                        alert("error 后台出现错误！");
+                    }
+                });
+            }else{
+                return false;
+            }
+        }
+    }
+    function toUpdateRole(){
+        var row = $('#list').datagrid('getSelected');
+        if(row == null){
+            alert("请选择一条记录");
+            return
+        }
+        $("input[name='roles']:checkbox").each(function(){
+            $(this).removeAttr('checked','checked');
+        })
+        userId = row.id;
+        $.ajax({
+            type: "post",
+            url: "${contextPath}/user/find_user_role",
+            traditional:true,
+            dataType: "json",
+            contentType:"application/x-www-form-urlencoded; charset=utf-8",
+            data:{userId:userId},
+            async: false,
+            success: function(data){
+                for(var i=0;i<data.length;i++){
+                    $("#roleId_"+data[i].id).attr("checked",'true');
+                }
+            }
+        });
+        $("#dlg_role").dialog('open');
+    }
+    function updateRole(){
+        var roles="";
+        $("input[name='roles']:checkbox").each(function(){
+            if($(this).attr("checked")){
+                roles += $(this).val()+","
+            }
+        })
+        roles = roles.substring(0,roles.length-1);
+        var roleIds = roles.split(",");
+        $.ajax({
+            type: "post",
+            url: "${contextPath}/user/set_role",
+            traditional:true,
+            dataType: "json",
+            contentType:"application/x-www-form-urlencoded; charset=utf-8",
+            data:{userId:userId,roleIds:roleIds},
+            async: false,
+            success: function(data){
+            }
+        });
+        userId = "";
+        $("#dlg_role").dialog('close');
+        $('#list').datagrid('reload');
+    }
+    function saveOrUpdate(){
+        if(userId != ""){
+            update();
+        }else{
+            save();
+        }
+    }
+    function toSave(){
+        var userName  = $("#userName").val("");
+        var realName  = $("#realName").val("");
+        var email  = $("#email").val("");
+        var telephone  = $("#telephone").val("");
+        var status = $("#status").combobox("setValue","");
+        $("#dlg").dialog('open');
+    }
+
+    function save(){
+        var userName  = $("#userName").val();
+        if(!checkString(userName,"用户名",20)){
+            return
+        }
+        var realName  = $("#realName").val();
+        var email  = $("#email").val();
+        var telephone  = $("#telephone").val();
+        var status = $("#status").combobox("getValue").trim();
+        $.ajax({
+            type: "post",
+            url: "${contextPath}/user/save_userinfo",
+            dataType: "json",
+            contentType:"application/x-www-form-urlencoded; charset=utf-8",
+            data:{userName:userName,realName:realName,email:email,telephone:telephone,status:status},
+            async: false,
+            success: function(data){
+            }
+        });
+        $('#list').datagrid('reload');
+        $('#dlg').dialog('close');
+    }
+    function toUpdate(){
+        var row = $('#list').datagrid('getSelected');
+        if(row == null){
+            alert("请选择一条记录");
+            return
+        }
+        userId = row.id;
+        var userName  = $("#userName").val(row.userName);
+        var realName  = $("#realName").val(row.realName);
+        var email  = $("#email").val(row.email);
+        var telephone  = $("#telephone").val(row.telephone);
+        var status = $("#status").combobox("setValue",row.status);
+        $("#dlg").dialog('open');
+    }
+    function update(){
+        var userName  = $("#userName").val();
+        if(!checkString(userName,"用户名",20)){
+            return
+        }
+        var realName  = $("#realName").val();
+        var email  = $("#email").val();
+        var telephone  = $("#telephone").val();
+        var status = $("#status").combobox("getValue").trim();
+        $.ajax({
+            type: "post",
+            url: "${contextPath}/user/update_userinfo",
+            dataType: "json",
+            contentType:"application/x-www-form-urlencoded; charset=utf-8",
+            data:{userId:userId,userName:userName,realName:realName,email:email,telephone:telephone,status:status},
+            async: false,
+            success: function(data){
+            }
+        });
+        userId = "";
+        $('#list').datagrid('reload');
+        $('#dlg').dialog('close');
+    }
+    function removeData(){
+        var row = $('#list').datagrid('getSelected');
+        if(row == null){
+            alert("请选择一条记录");
+            return
+        }
+        $.messager.confirm('用户记录', '你确定要删除吗?', function(r){
+            if (r){
+                $.ajax({
+                    type: "post",
+                    url: "${contextPath}/user/remove_user",
+                    dataType: "json",
+                    data:{ids:row.id},
+                    async: false
+                });
+                $('#list').datagrid('reload');
+            }
+        });
+    }
+
+    function formatter1(date){
+        if (!date){return '';}
+        return $.fn.datebox.defaults.formatter.call(this, date);
+    }
+    function parser1(s){
+        if (!s){return null;}
+        return $.fn.datebox.defaults.parser.call(this, s);
+    }
+    function formatter2(date){
+        if (!date){return '';}
+        var y = date.getFullYear();
+        var m = date.getMonth() + 1;
+        return y + '-' + (m<10?('0'+m):m);
+    }
+    function parser2(s){
+        if (!s){return null;}
+        var ss = s.split('-');
+        var y = parseInt(ss[0],10);
+        var m = parseInt(ss[1],10);
+        if (!isNaN(y) && !isNaN(m)){
+            return new Date(y,m-1,1);
+        } else {
+            return new Date();
+        }
+    }
+    function checkString(str,message,length){
+        if(str == "" || str == null){
+            alert("请输入"+message);
+            return false;
+        }
+        if(length != null &&length != 0){
+            if(str.length > length){
+                alert(message +"长度超过"+length);
+                return false;
+            }
+        }
+        return true;
+    }
+    function checkNum(num,isNull,message,length)
+    {
+        if(isNull){
+            if(num == null || num == "undefined" || num == ''){
+                return true
+            }
+        }
+        var re = /^[0-9]+.?[0-9]*$/;   //判断字符串是否为数字     //判断正整数 /^[1-9]+[0-9]*]*$/
+
+        if (!re.test(num))
+        {
+            alert(message+"请输入数字");
+            return false;
+        }
+        if(length !=null && length != 0){
+            if(num.length>length){
+                alert(message+"长度不能超过"+length);
+                return false;
+            }
+        }
+        return true;
+    }
+</script>
+
+</body>
+</html>
+

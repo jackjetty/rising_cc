@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE configuration PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-config.dtd">
+<configuration>
+	<settings>
+		<setting name="lazyLoadingEnabled" value="false" />
+	</settings>
+
+	<typeAliases>
+		<typeAlias type="com.bhyf.common.page.Pagination" alias="Pagination" />
+		<typeAlias type="com.bhyf.common.component.BaseQo" alias="BaseQo" />
+		<typeAlias type="com.bhyf.common.component.BaseModel" alias="BaseModel" />
+		
+		<typeAlias type="com.bhyf.model.user.SysUser" alias="SysUser" />
+		<typeAlias type="com.bhyf.model.user.SysUserBasicInfo" alias="SysUserBasicInfo" />
+		<typeAlias type="com.bhyf.model.role.SysRole" alias="SysRole" />
+		<typeAlias type="com.bhyf.model.perm.SysPermission" alias="SysPermission" />
+		<typeAlias type="com.bhyf.model.role.SysRolePermission" alias="SysRolePermission" />
+		<typeAlias type="com.bhyf.model.user.SysUserRole" alias="SysUserRole" />
+
+		<typeAlias type="com.bhyf.model.enter.Enter" alias="Enter" />
+		<typeAlias type="com.bhyf.model.enter.EnterBestPayRecord" alias="EnterBestPayRecord" />
+		<typeAlias type="com.bhyf.model.enter.EnterRecord" alias="EnterRecord" />
+		<typeAlias type="com.bhyf.model.enter.EnterStatistics" alias="EnterStatistics" />
+		<typeAlias type="com.bhyf.model.enter.BestPayRecord" alias="BestPayRecord" />
+
+
+
+		<typeAlias type="com.bhyf.model.recharge.RechargeMoney" alias="RechargeMoney" />
+		<typeAlias type="com.bhyf.model.recharge.RechargeComment" alias="RechargeComment" />
+		<typeAlias type="com.bhyf.model.recharge.RechargeOneCardRecord" alias="RechargeOneCardRecord" />
+		<typeAlias type="com.bhyf.model.recharge.OneCardRecord" alias="OneCardRecord" />
+		<typeAlias type="com.bhyf.model.recharge.OneCardBestPayStatistics" alias="OneCardBestPayStatistics" />
+
+
+		<typeAlias type="com.bhyf.pojo.vip.UserInfo" alias="UserInfo" />
+		<typeAlias type="com.bhyf.pojo.vip.Suggest" alias="Suggest" />
+
+		<typeAlias type="com.bhyf.model.article.Article" alias="Article" />
+		<typeAlias type="com.bhyf.model.article.ArticleCategory" alias="ArticleCategory" />
+
+
+
+		<typeAlias type="com.bhyf.pojo.app.AppVersion" alias="AppVersion" />
+		<typeAlias type="com.bhyf.model.app.Help" alias="Help" />
+	</typeAliases>
+
+	<mappers>
+		
+		<mapper resource="mapper/Common.xml" />
+		
+		<!-- 用户相关 -->
+		<mapper resource="mapper/user/SysUserMapper.xml" />
+		<mapper resource="mapper/perm/SysPermMapper.xml" />
+		<mapper resource="mapper/role/SysRoleMapper.xml" />
+		<mapper resource="mapper/user/SysUserBasicInfoMapper.xml" />
+
+		<!-- 报名管理 -->
+		<mapper resource="mapper/enter/EnterMapper.xml" />
+		<mapper resource="mapper/enter/EnterRecordMapper.xml" />
+		<mapper resource="mapper/enter/EnterBestPayRecordMapper.xml" />
+		<mapper resource="mapper/enter/BestPayRecordMapper.xml" />
+		<mapper resource="mapper/enter/EnterStatisticsMapper.xml" />
+
+		<!-- 信息管理 -->
+		<mapper resource="mapper/article/ArticleMapper.xml" />
+		<mapper resource="mapper/article/ArticleCategoryMapper.xml" />
+		<mapper resource="mapper/ad/AdMapper.xml" />
+
+		<!-- 用户管理 -->
+		<mapper resource="mapper/vip/UserInfoMapper.xml" />
+		<mapper resource="mapper/vip/SuggestMapper.xml" />
+
+		<!-- 版本管理 -->
+		<mapper resource="mapper/app/AppVersionMapper.xml" />
+		<mapper resource="mapper/app/HelpMapper.xml" />
+
+		<!-- 一卡通管理 -->
+		<mapper resource="mapper/recharge/RechargeMoneyMapper.xml" />
+		<mapper resource="mapper/recharge/RechargeCommentMapper.xml" />
+		<mapper resource="mapper/recharge/RechargeOneCardRecordMapper.xml" />
+		<mapper resource="mapper/recharge/OneCardRecordMapper.xml" />
+		<mapper resource="mapper/recharge/OneCardBestPayStatisticsMapper.xml" />
+	</mappers>
+
+</configuration>

@@ -1,0 +1,166 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.bhyf.dao.article.ArticleDao">
+
+	<sql id="columnArticleByAll">
+		id,
+		title,
+		content,
+		category,
+		top,
+		status,
+		issueTime,
+		issueUser
+	</sql>
+
+
+	<sql id = "whereConditionPagination">
+		<if test ="condition !=null">
+			<if test ="condition.title !=null and condition.title !=''">
+				and title LIKE CONCAT('%',#{condition.title},'%')
+			</if>
+			<if test ="condition.status !=null">
+				and status = #{condition.status,jdbcType=INTEGER}
+			</if>
+			<if test ="condition.beginTime !=null and condition.beginTime !=''">
+				and issueTime <![CDATA[>=]]> #{condition.beginTime,jdbcType=TIMESTAMP}
+			</if>
+			<if test ="condition.endTime !=null and condition.endTime !=''">
+				and issueTime <![CDATA[<=]]> #{condition.endTime,jdbcType=TIMESTAMP}
+			</if>
+			<if test ="condition.category !=null ">
+				and category in (
+					#{condition.category}
+				)
+			</if>
+		</if>
+	</sql>
+	<select id="findArticleByPagination" parameterType="Pagination" resultType="Article">
+		select * from (
+		select
+		<include refid="columnArticleByAll"/>
+		from t_article
+		where  status <![CDATA[<>]]> 80
+		<include refid="whereConditionPagination"/>
+		order by issueTime desc
+		) t limit
+		<![CDATA[
+				#{startIndex} ,#{pageSize}
+			]]>
+	</select>
+	<select id="countArticleByPagination" parameterType="Pagination" resultType="Integer">
+		select
+		count(1)
+		from t_article
+		where status <![CDATA[<>]]> 80
+		<include refid="whereConditionPagination"/>
+	</select>
+
+	<select id="getArticleList" resultType="Article" parameterType="java.util.HashMap">
+		SELECT * from t_article
+		<where>
+			category = #{category}
+    		<if test="content != null and content != ''">
+    			and content LIKE CONCAT('%',#{content},'%')
+    		</if>
+    		<if test="status != null and status != ''">
+    			and status = #{status}
+    		</if>
+   		</where>
+   		ORDER BY issueTime desc 
+	</select>
+	
+	<insert id="addArticle" parameterType="Article">
+		INSERT INTO t_article(
+   			title
+   			,content
+   			,status
+   			,top
+   			,issueTime
+   			,issueUser
+   			,createTime
+   			,createUser
+   			,category
+		)
+		VALUES(
+   			#{title}
+   			,#{content}
+   			,#{status}
+   			,#{top}
+   			,#{issueTime}
+   			,#{issueUser}
+   			,#{createTime}
+   			,#{createUser}
+   			,#{category}
+		)
+	</insert>
+	
+	<update id="editArticle" parameterType="Article">
+		UPDATE t_article SET 
+		<if test="title != null and title != ''">
+   			title=#{title}
+   		</if>
+   		<if test="content != null and content != ''">
+   		    ,content=#{content}
+   		</if>
+   		<if test="issueUser != null and issueUser != ''">
+   			,issueUser=#{issueUser}
+   		</if>
+   		<if test="status != null and status != ''">
+   			,status=#{status}
+   		</if>
+   		<if test="top != null and top != ''">
+   			,top=#{top}
+   		</if>
+   		<if test="issueTime != null and issueTime != ''">
+   			,issueTime=#{issueTime}
+   		</if>
+   		<if test="category != null and category != ''">
+   			,category=#{category} 
+   		</if>
+		where id=#{id}
+	</update>
+	
+	<update id="removeArticle" parameterType="Integer" >
+		update t_article set status = 80 where id = #{id}
+	</update>
+	<update id="removeArticleByCategory" parameterType="Integer" >
+		update t_article set status = 80 where category = #{category}
+	</update>
+
+	<update id="changeStatus" parameterType="java.util.HashMap">
+		update t_article set status=#{status} where id=#{id}
+	</update>
+	
+	<update id="changeTop" parameterType="java.util.HashMap">
+		update t_article set top=#{top} where id=#{id}
+	</update>
+	
+	<select id="getArticleListCount" resultType="java.lang.Integer" parameterType="java.util.HashMap">
+		select COUNT(*) from t_article
+		<where>
+			category = #{category}
+    		<if test="content != null and content != ''">
+    			and content LIKE CONCAT('%',#{content},'%')
+    		</if>
+    		<if test="status != null and status != ''">
+    			and status = #{status}
+    		</if>
+   		</where>
+	</select>
+	
+	<select id="getClassifies" resultType="Article" >
+		SELECT * from t_article WHERE status='1'
+	</select>
+	
+	<select id="getArticleById" resultType="Article" parameterType="java.util.HashMap">
+		SELECT * from t_article WHERE id=#{id}
+	</select>
+	
+	<select id="getClassifiesCount" resultType="java.lang.Integer">
+		SELECT count(*) from t_article WHERE status='1'
+	</select>
+	
+	
+	
+</mapper>

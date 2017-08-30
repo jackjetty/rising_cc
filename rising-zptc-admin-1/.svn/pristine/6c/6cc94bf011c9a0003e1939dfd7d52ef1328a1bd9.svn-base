@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.bhyf.dao.recharge.OneCardBestPayStatisticsDao">
+
+
+	<sql id="columnOneCardBestPayStatisticsByAll">
+		id,
+		sumOneCardMoney,
+		sumBestPayMoney,
+		sumOurMoney,
+		reconciliation,
+		createTime
+	</sql>
+
+	<sql id = "whereConditionPagination">
+		<if test ="condition !=null">
+			<if test ="condition.beginTime !=null and condition.beginTime !=''">
+				and createTime <![CDATA[>=]]> #{condition.beginTime,jdbcType=TIMESTAMP}
+			</if>
+			<if test ="condition.endTime !=null and condition.endTime !=''">
+				and createTime <![CDATA[<=]]> #{condition.endTime,jdbcType=TIMESTAMP}
+			</if>
+		</if>
+	</sql>
+
+	<select id="findOneCardBestPayStatisticsById" parameterType="Integer" resultType="OneCardBestPayStatistics">
+		select
+		<include refid="columnOneCardBestPayStatisticsByAll"/>
+		from t_one_card_best_pay_statistics
+		where id =#{id}
+	</select>
+	<select id="findOneCardBestPayStatisticsByPagination" parameterType="Pagination" resultType="OneCardBestPayStatistics">
+		select * from (
+		select
+		<include refid="columnOneCardBestPayStatisticsByAll"/>
+		from t_one_card_best_pay_statistics
+		where 1=1
+		<include refid="whereConditionPagination"/>
+		) t limit
+		<![CDATA[
+				#{startIndex} ,#{pageSize}
+			]]>
+	</select>
+	<select id="countOneCardBestPayStatisticsByPagination" parameterType="Pagination" resultType="Integer">
+		select count(1)
+		from t_one_card_best_pay_statistics
+		where 1=1
+		<include refid="whereConditionPagination"/>
+	</select>
+
+	<select id="findSumOneCardMoney" parameterType="com.bhyf.pojo.qo.recharge.RechargeStatisticsQo" resultType="Double">
+		select sum(monDeal) from t_one_card_record
+		where createTime <![CDATA[>=]]> #{beginTime,jdbcType=TIMESTAMP}
+				and createTime <![CDATA[<=]]> #{endTime,jdbcType=TIMESTAMP}
+	</select>
+	<select id="findSumBestPayMoney" parameterType="com.bhyf.pojo.qo.recharge.RechargeStatisticsQo" resultType="Double">
+		select sum(money) from t_best_pay_record
+		where tranData <![CDATA[>=]]> #{beginTime,jdbcType=TIMESTAMP}
+				and tranData <![CDATA[<=]]> #{endTime,jdbcType=TIMESTAMP}
+				and status  =1
+	</select>
+	<select id="findSumOurMoney" parameterType="com.bhyf.pojo.qo.recharge.RechargeStatisticsQo" resultType="Double">
+		select sum(rechMoney) from t_one_card_recharge_record
+		where createTime <![CDATA[>=]]> #{beginTime,jdbcType=TIMESTAMP}
+		and createTime <![CDATA[<=]]> #{endTime,jdbcType=TIMESTAMP}
+		and status =1
+	</select>
+	<insert id="saveOneCardBestPayStatistics" parameterType="OneCardBestPayStatistics">
+		insert into t_one_card_best_pay_statistics(
+		sumOneCardMoney,
+		sumBestPayMoney,
+		sumOurMoney,
+		createTime)
+		values(#{sumOneCardMoney,jdbcType=DOUBLE},
+		#{sumBestPayMoney,jdbcType=DOUBLE},
+		#{sumOurMoney,jdbcType=DOUBLE},
+		#{createTime,jdbcType=TIMESTAMP})
+		<selectKey resultType="java.lang.Integer" order="AFTER" keyProperty="id">
+			SELECT LAST_INSERT_ID() AS id
+		</selectKey>
+	</insert>
+
+	<update id="updateOneCardBestPayStatistics" parameterType="OneCardBestPayStatistics">
+		update t_one_card_best_pay_statistics
+		<set>
+			<if test="sumOneCardMoney != null">
+				sumOneCardMoney = #{sumOneCardMoney,jdbcType=DOUBLE},
+			</if>
+			<if test="sumBestPayMoney != null">
+				sumBestPayMoney = #{sumBestPayMoney,jdbcType=DOUBLE},
+			</if>
+			<if test="sumOurMoney != null">
+				sumOurMoney = #{sumOurMoney,jdbcType=DOUBLE},
+			</if>
+			<if test="reconciliation != null and reconciliation != ''">
+				reconciliation = #{reconciliation,jdbcType=VARCHAR},
+			</if>
+		</set>
+		where id = #{id,jdbcType=INTEGER}
+	</update>
+</mapper>
